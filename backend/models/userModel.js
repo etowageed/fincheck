@@ -1,5 +1,6 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const mongoose = require('mongoose');
+const validator = require('validator');
+const Expenses = require('./expensesModel');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -12,17 +13,27 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     lowercase: true,
-    validate: [validator.isEmail, "Please provide a valid email"],
+    validate: [validator.isEmail, 'Please provide a valid email'],
   },
 
   password: {
     type: String, // must be hashed
-    required: [true, "Please provide a password"],
-    minLength: [8, "Password must have atleast 8 characters"],
+    required: [true, 'Please provide a password'],
+    minLength: [8, 'Password must have atleast 8 characters'],
     select: false,
   },
+
+  income: {
+    type: Number,
+  },
+  expenses: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Expenses',
+    },
+  ],
 });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;
