@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const User = require('./userModel');
 
-const expenseSchema = new mongoose.Schema({
+const expensesSchema = new mongoose.Schema({
   name: String, // e.g. rent
   amount: Number,
   category: String,
@@ -17,5 +17,5 @@ const expenseSchema = new mongoose.Schema({
   },
 });
 
-const Expenses = mongoose.model('Expenses', expenseSchema);
+const Expenses = mongoose.model('Expenses', expensesSchema);
 module.exports = Expenses;

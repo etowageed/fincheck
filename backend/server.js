@@ -1,18 +1,13 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const User = require("./models/userModel");
-const cors = require("cors");
-require("dotenv").config();
+const mongoose = require('mongoose');
+require('dotenv').config();
 
-// setup app instance
-const app = express();
-app.use(cors());
-app.use(express.json());
+const app = require('./app');
+
 const PORT = process.env.PORT || 5000;
 
 // Routes
-app.get("/", (req, res) => {
-  res.send("Fincheck API running...");
+app.get('/', (req, res) => {
+  res.send('Fincheck API running...');
 });
 
 // MongoDB connection
@@ -22,11 +17,11 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("DB connection successful");
+    console.log('DB connection successful');
     app.listen(PORT, () => {
       console.log(`...Server is running on port ${PORT}...`);
     });
   })
   .catch((err) => {
-    console.error("DB connection error:", err);
+    console.error('DB connection error:', err);
   });
