@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const Expenses = require('./expensesModel');
+const Expense = require('./expenseModel');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   expenses: [
     {
       type: mongoose.Schema.ObjectId,
-      ref: 'Expenses',
+      ref: 'Expense',
     },
   ],
 });
