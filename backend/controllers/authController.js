@@ -1,16 +1,54 @@
+const bcrypt = require('bcryptjs');
 const User = require('../models/userModel');
+const jwt = require('jsonwebtoken');
+
+// creating the jwt token
+const createToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
 
 exports.signUp = async (req, res) => {
   try {
-    const newUser = await User.create(req.body);
-    // const newUser = await User.create({
-    //   name: req.body.name,
-    //   email: req.body.email,
-    //   password: req.body.password,
-    // });
+    const { name, email, password } = req.body;
+
+    // 1) basic validation
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Please provide a name, email and password',
+      });
+    }
+
+    // 2) Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User with email already exists',
+      });
+    }
+    // 3) Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    //  4) finally create new user
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      income: req.body.income || 0,
+      expenses: [],
+    });
+    // 5) create and send JWT
+    const token = createToken(newUser._id);
+    // 6) hide password in response
+    newUser.password = undefined;
 
     res.status(201).json({
       status: 'success',
+      token,
       data: {
         user: newUser,
       },
