@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const Expense = require('./expenseModel');
+const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, 'Please provide your name'],
     },
 
     email: {
@@ -35,11 +35,33 @@ const userSchema = new mongoose.Schema(
       },
     ],
     passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true,
   }
 );
+
+// instance method that creates a password reset token
+userSchema.methods.createPasswordResetToken = function () {
+  // 1) generate random token
+
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  // 2) hash the token and store in the database
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // 3) set expiration for 10minutes
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  // 4) Return the unhashed token to user // TODO:via email
+
+  return resetToken;
+};
 
 // Instance method to check if password was changed after JWT was issued
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
@@ -65,6 +87,7 @@ userSchema.pre('save', function (next) {
   this.passwordChangedAt = Date.now() - 1000;
   next();
 });
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

@@ -1,6 +1,7 @@
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+const User = require('../models/userModel');
 
 // creating the jwt token
 const createToken = (id) => {
@@ -178,27 +179,56 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-exports.getMe = async (req, res) => {
+exports.forgotPassword = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    // 1) get user based on POSTed email
+    const user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(404).json({
         status: 'error',
-        message: 'User not found',
+        message: 'There is no user with that email address',
       });
     }
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        user,
-      },
-    });
+    // 2) generate the random reset token
+    const resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false }); // this helps to turn
+    // of the validation from the model since we're using only the email
+
+    // 3) send the token to the user's email
+    const resetURL = `${req.protocol}://${req.get(
+      'host'
+    )}/api/v1/auth/resetPassword/${resetToken}`;
+
+    try {
+      // TODO: create email service functionality like that from natours project
+      // await sendEmail({
+      //   email: user.email,
+      //   subject: 'Your password reset token (valid for 10min)',
+      //   message,
+      //   html: message,
+      // });
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Token sent to email',
+        resetURL, //TODO: we don't send this in productiomn
+      });
+    } catch (err) {
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return res.status(500).json({
+        status: 'error',
+        message: 'Error sending email. Try again later',
+      });
+    }
   } catch (err) {
-    console.error('Get user error:', err);
+    console.error('Forgot password error:', err);
     res.status(500).json({
       status: 'error',
-      message: 'Server error',
+      message: 'Error processing password reset request',
     });
   }
 };
