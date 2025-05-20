@@ -5,7 +5,7 @@ exports.createExpense = async (req, res) => {
   try {
     const { name, amount, category, frequency } = req.body;
 
-    const userId = req.user.id; // from auth
+    const userId = req.user.id; // from auth middleware
 
     // creating the expense
     const newExpense = new Expense({

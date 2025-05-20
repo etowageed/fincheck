@@ -14,3 +14,6 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/expenses', expenseRouter);
 
 module.exports = app;
+
+// TODO: add rate limiting for brute force attacks
+// TODO: add https

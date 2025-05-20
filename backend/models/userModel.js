@@ -34,12 +34,37 @@ const userSchema = new mongoose.Schema(
         ref: 'Expense',
       },
     ],
+    passwordChangedAt: Date,
   },
   {
     timestamps: true,
   }
 );
 
+// Instance method to check if password was changed after JWT was issued
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+
+    return JWTTimestamp < changedTimestamp;
+  }
+
+  // False means password was not changed
+  return false;
+};
+
+// Pre-save middleware to set passwordChangedAt
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  // Set passwordChangedAt to current time minus 1 second
+  // (to ensure the token is always created after password change)
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
