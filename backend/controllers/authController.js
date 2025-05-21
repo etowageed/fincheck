@@ -12,13 +12,20 @@ const createToken = (id) => {
 
 exports.signUp = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, confirmPassword } = req.body;
 
     // 1) basic validation
     if (!name || !email || !password) {
       return res.status(400).json({
         status: 'error',
         message: 'Please provide a name, email and password',
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Passwords do not match',
       });
     }
 
@@ -30,15 +37,14 @@ exports.signUp = async (req, res) => {
         message: 'User with email already exists',
       });
     }
-    // 3) Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // 3) Hash the password (actually happens in the presave hook)
 
     //  4) finally create new user
     const newUser = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password,
+      confirmPassword,
       income: req.body.income || 0,
       expenses: [],
     });
@@ -56,7 +62,10 @@ exports.signUp = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: 'Server error' });
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error during signup',
+    });
   }
 };
 
@@ -229,6 +238,64 @@ exports.forgotPassword = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Error processing password reset request',
+    });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    // 1) get user based on the token created during forgot password
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex');
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+
+    // 2) if token has not expired and there's a user, then set new password
+    if (!user) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Token is invalid or has expired',
+      });
+    }
+    // 3) update password and remove reset token fields
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Please provide a new password',
+      });
+    }
+
+    (user.password = req.body.password),
+      (user.confirmPassword = req.body.confirmPassword);
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    user.passwordChangedAt = Date.now();
+    await user.save();
+
+    // 4) log the user in and send jwt
+    const token = createToken(user._id);
+
+    res.status(200).json({
+      status: 'success',
+      token,
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      },
+    });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error resetting password',
     });
   }
 };

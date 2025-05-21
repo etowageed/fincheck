@@ -9,7 +9,7 @@ const expenseRouter = require('./routes/expenseRoutes');
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
 // mounting the routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);

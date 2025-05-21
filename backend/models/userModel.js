@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema(
   {
@@ -22,6 +23,18 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Please provide a password'],
       minLength: [8, 'Password must have atleast 8 characters'],
       select: false,
+    },
+    confirmPassword: {
+      type: String,
+      required: [true, 'Please confirm your password'],
+      validate: {
+        // this only works on create() and save()
+        validator: function (el) {
+          // the .this only refers to the current document being created/saved
+          return el === this.password;
+        },
+        message: 'Passwords do not match',
+      },
     },
 
     income: {
@@ -62,6 +75,19 @@ userSchema.methods.createPasswordResetToken = function () {
 
   return resetToken;
 };
+
+// Password management and encryption
+userSchema.pre('save', async function (next) {
+  //  Only hash if password was modified
+  if (!this.isModified('password')) return next();
+
+  // now hash the password
+  this.password = await bcrypt.hash(this.password, 12);
+
+  // remove confirmPassword after validation
+  this.confirmPassword = undefined;
+  next();
+});
 
 // Instance method to check if password was changed after JWT was issued
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
