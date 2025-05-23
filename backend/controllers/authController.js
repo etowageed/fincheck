@@ -124,6 +124,70 @@ exports.login = async (req, res, next) => {
   }
   next();
 };
+
+exports.isLoggedIn = async (req, res, next) => {
+  try {
+    // TODO: make this into a function so it can be reused b/w protect and isLoggedIn
+    let token;
+
+    //  1) get token if it still exists
+    if (req.cookies.jwt) {
+      token = req.cookies.jwt;
+    } else if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token || token === 'loggedout') {
+      return res.status(200).json({
+        status: 'success',
+        isLoggedIn: false,
+      });
+    }
+
+    // 2) verifying if token is valid
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 3) check if user still exists
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(200).json({
+        status: 'success',
+        isLoggedIn: false,
+      });
+    }
+    // 4) check if user changed password after the token was issued
+    if (user.changedPasswordAfter(decoded.iat)) {
+      return res.status(200).json({
+        status: 'success',
+        isLoggedIn: false,
+      });
+    }
+
+    // 5) if user is logged in
+    res.status(200).json({
+      status: 'success',
+      isLoggedIn: true,
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          income: user.income,
+        },
+      },
+    });
+  } catch (err) {
+    // we don't show errors for this route, we just say user is not logged in
+    res.status(200).json({
+      status: 'success',
+      isLoggedIn: false,
+    });
+  }
+};
+
 exports.protect = async (req, res, next) => {
   try {
     // 1) get the token and see if it still exists
@@ -149,15 +213,15 @@ exports.protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // 3) check if user still exists
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
+    const user = await User.findById(decoded.id);
+    if (!user) {
       return res.status(401).json({
         status: 'error',
         message: 'The user belonging to this token no longer exists',
       });
     }
     // 4) check if user changed password after the token was issued
-    if (currentUser.changedPasswordAfter(decoded.iat)) {
+    if (user.changedPasswordAfter(decoded.iat)) {
       return res.status(401).json({
         status: 'error',
         message: 'User recently changed password! Please login again',
@@ -165,7 +229,7 @@ exports.protect = async (req, res, next) => {
     }
 
     // 5) now grant access to the protected route
-    req.user = currentUser;
+    req.user = user;
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
@@ -296,6 +360,27 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Error resetting password',
+    });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    // clear Jwt
+    res.cookie('jwt', 'loggedout', {
+      expires: new Date(0), // jwt token expires immediately
+      httpOnly: true,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Successfully logged out',
+    });
+  } catch (err) {
+    console.error('Logout error:', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Error during logout',
     });
   }
 };
