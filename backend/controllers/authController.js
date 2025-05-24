@@ -10,6 +10,7 @@ const createToken = (id) => {
   });
 };
 
+// sign up
 exports.signUp = async (req, res) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
@@ -69,6 +70,7 @@ exports.signUp = async (req, res) => {
   }
 };
 
+// login
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -125,6 +127,7 @@ exports.login = async (req, res, next) => {
   next();
 };
 
+// check login status
 exports.isLoggedIn = async (req, res, next) => {
   try {
     // TODO: make this into a function so it can be reused b/w protect and isLoggedIn
@@ -188,6 +191,7 @@ exports.isLoggedIn = async (req, res, next) => {
   }
 };
 
+// protect routes
 exports.protect = async (req, res, next) => {
   try {
     // 1) get the token and see if it still exists
@@ -252,6 +256,7 @@ exports.protect = async (req, res, next) => {
   }
 };
 
+// forgot password
 exports.forgotPassword = async (req, res) => {
   try {
     // 1) get user based on POSTed email
@@ -306,6 +311,7 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+// reset password
 exports.resetPassword = async (req, res) => {
   try {
     // 1) get user based on the token created during forgot password
@@ -364,6 +370,57 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+// Update user password
+exports.updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password and new password are required',
+      });
+    }
+
+    const user = await User.findById(req.params.id).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password is incorrect',
+      });
+    }
+
+    // Update password (pre-save middleware will handle hashing)
+    user.password = newPassword;
+    user.confirmPassword = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password updated successfully',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server Error',
+      error: error.message,
+    });
+  }
+};
+
+// logout
 exports.logout = async (req, res) => {
   try {
     // clear Jwt
