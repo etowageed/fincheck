@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
+const Expense = require('../models/expenseModel');
 
 // creating the jwt token
 const createToken = (id) => {
@@ -168,6 +169,32 @@ exports.isLoggedIn = async (req, res, next) => {
         isLoggedIn: false,
       });
     }
+    // Auto-initialize monthly expense document if missing // TODO modularize this part
+    // and import so as to keep this
+    // isLoggedIn function generalized
+
+    // Inside isLoggedIn, after verifying token and fetching user
+    // const today = new Date();
+    // const currentMonth = today.getMonth(); // 0-indexed
+    // const currentYear = today.getFullYear();
+
+    // const existingDoc = await Expense.findOne({
+    //   user: user._id,
+    //   month: currentMonth,
+    //   year: currentYear,
+    // });
+
+    // if (!existingDoc) {
+    //   console.log('Creating new monthly expense doc for user:', user._id); // ✅ Add this log
+    //   await Expense.create({
+    //     user: user._id,
+    //     month: currentMonth,
+    //     year: currentYear,
+    //     income: user.income || 0,
+    //     fixedExpenses: [],
+    //     transactions: [],
+    //   });
+    // }
 
     // 5) if user is logged in
     res.status(200).json({

@@ -1,34 +1,101 @@
 const User = require('../models/userModel');
 const Expense = require('../models/expenseModel');
 
-exports.createExpense = async (req, res) => {
+// Create or update monthly expense document
+exports.upsertMonthlyExpense = async (req, res) => {
   try {
-    const { name, amount, category, frequency } = req.body;
+    const { month, year, income, fixedExpenses } = req.body;
 
-    const userId = req.user.id; // from auth middleware
+    let expenseDoc = await Expense.findOneAndUpdate(
+      { user: req.user.id, month, year },
+      { income, fixedExpenses },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
 
-    // creating the expense
-    const newExpense = new Expense({
-      user: userId,
-      name,
-      amount,
-      category,
-      frequency: frequency || 'monthly',
+    res.status(200).json({
+      status: 'success',
+      data: expenseDoc,
     });
-
-    const savedExpense = await newExpense.save();
-
-    // adding expense reference to user document
-    await User.findByIdAndUpdate(userId, {
-      $push: { expenses: savedExpense._id },
-    });
-
-    res.status(201).json(savedExpense);
   } catch (err) {
-    console.error(err);
+    console.error('Error in upsertMonthlyExpense:', err);
     res.status(500).json({
       status: 'error',
-      message: 'Could not create expense... make sure you are logged in',
+      message: 'Failed to create or update expense data',
+    });
+  }
+};
+
+// add a transaction
+
+exports.addTransaction = async (req, res) => {
+  try {
+    const { month, year } = req.params;
+    const { description, amount, category, type } = req.body;
+
+    let expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+
+    // If no document exists, create one with default income = 0 and empty fixedExpenses
+    if (!expenseDoc) {
+      expenseDoc = await Expense.create({
+        user: req.user.id,
+        month,
+        year,
+        income: 0,
+        fixedExpenses: [],
+        transactions: [],
+      });
+    }
+
+    // Push the new transaction
+    expenseDoc.transactions.push({
+      description,
+      amount,
+      category,
+      type: type || 'actual',
+    });
+
+    await expenseDoc.save();
+
+    res.status(201).json({
+      status: 'success',
+      data: expenseDoc,
+    });
+  } catch (err) {
+    console.error('Error in addTransaction:', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to add transaction',
+    });
+  }
+};
+
+// Get full monthly expense
+exports.getMonthlyExpense = async (req, res) => {
+  try {
+    const { month, year } = req.params;
+
+    const expenseDoc = await Expense.findOne({
+      user: req.user.id,
+      month,
+      year,
+    });
+
+    if (!expenseDoc) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'No budget found for this month',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: expenseDoc,
+    });
+  } catch (err) {
+    console.error('Error in getMonthlyExpense:', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Could not retrieve budget data',
     });
   }
 };
