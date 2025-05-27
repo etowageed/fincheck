@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const User = require('./userModel');
 
 // subdocument schema for fixed recurring expenses (e.g. rent)
 
@@ -49,21 +48,37 @@ expenseSchema.virtual('totalFixedExpenses').get(function () {
 });
 
 // actualSpend - calculates the 'actual' expenses and ignores the 'excluded'
-
 expenseSchema.virtual('actualSpend').get(function () {
   return this.transactions
     .filter((t) => t.type === 'actual')
     .reduce((sum, tx) => sum + tx.amount, 0);
 });
 
-// safeToSpend calculates all the money left to spend for the month
-
-expenseSchema.virtual('safeToSpend').get(function () {
-  return this.income - this.totalFixedExpenses - this.actualSpend;
+// excludedTotal calculates the sum of excluded transactions e.g savings/investments
+expenseSchema.virtual('excludedTotal').get(function () {
+  return this.transactions
+    .filter((t) => t.type === 'excluded')
+    .reduce((sum, tx) => sum + tx.amount, 0);
 });
 
-// index to prevent duplication of monthly budgets
+// safeToSpend calculates all the money left to spend for the month
+expenseSchema.virtual('safeToSpend').get(function () {
+  return (
+    this.income -
+    this.totalFixedExpenses -
+    this.actualSpend -
+    this.excludedTotal
+  );
+});
 
+// netSpend calculates the actual + excluded expenses
+
+expenseSchema.virtual('netSpend').get(function () {
+  return this.actualSpend + this.excludedTotal;
+});
+
+// index to prevent duplication of monthly budgets and This ensures
+// only one document per user per month can exist
 expenseSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
 
 const Expense = mongoose.model('Expense', expenseSchema);

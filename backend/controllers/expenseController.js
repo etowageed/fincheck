@@ -1,7 +1,7 @@
 const User = require('../models/userModel');
 const Expense = require('../models/expenseModel');
 
-// Create or update monthly expense document
+// Create or update monthly budget document
 exports.upsertMonthlyExpense = async (req, res) => {
   try {
     const { month, year, income, fixedExpenses } = req.body;
@@ -22,6 +22,64 @@ exports.upsertMonthlyExpense = async (req, res) => {
       status: 'error',
       message: 'Failed to create or update expense data',
     });
+  }
+};
+
+// Get full monthly expense
+exports.getMonthlyExpense = async (req, res) => {
+  try {
+    const { month, year } = req.params;
+
+    const expenseDoc = await Expense.findOne({
+      user: req.user.id,
+      month,
+      year,
+    });
+
+    if (!expenseDoc) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'No budget found for this month',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: expenseDoc,
+    });
+  } catch (err) {
+    console.error('Error in getMonthlyExpense:', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Could not retrieve budget data',
+    });
+  }
+};
+
+// Delete a monthly budget
+exports.deleteMonthlyExpense = async (req, res) => {
+  try {
+    const { month, year } = req.params;
+    const deleted = await Expense.findOneAndDelete({
+      user: req.user.id,
+      month,
+      year,
+    });
+
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ status: 'error', message: 'No budget to delete' });
+    }
+
+    res
+      .status(200)
+      .json({ status: 'success', message: 'Budget deleted successfully' });
+  } catch (err) {
+    console.error('Error in deleteMonthlyExpense:', err);
+    res
+      .status(500)
+      .json({ status: 'error', message: 'Failed to delete budget' });
   }
 };
 
@@ -69,33 +127,85 @@ exports.addTransaction = async (req, res) => {
   }
 };
 
-// Get full monthly expense
-exports.getMonthlyExpense = async (req, res) => {
+// Update a transaction
+exports.updateTransaction = async (req, res) => {
   try {
-    const { month, year } = req.params;
+    const { month, year, transactionId } = req.params;
+    const { description, amount, category, type } = req.body;
 
     const expenseDoc = await Expense.findOne({
       user: req.user.id,
       month,
       year,
     });
-
     if (!expenseDoc) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'No budget found for this month',
-      });
+      return res
+        .status(404)
+        .json({ status: 'error', message: 'Budget not found' });
     }
+
+    const transaction = expenseDoc.transactions.id(transactionId);
+    if (!transaction) {
+      return res
+        .status(404)
+        .json({ status: 'error', message: 'Transaction not found' });
+    }
+
+    if (description !== undefined) transaction.description = description;
+    if (amount !== undefined) transaction.amount = amount;
+    if (category !== undefined) transaction.category = category;
+    if (type !== undefined) transaction.type = type;
+
+    await expenseDoc.save();
+
+    res.status(200).json({ status: 'success', data: expenseDoc });
+  } catch (err) {
+    console.error('Error in updateTransaction:', err);
+    res
+      .status(500)
+      .json({ status: 'error', message: 'Failed to update transaction' });
+  }
+};
+
+// Delete a transaction
+exports.deleteTransaction = async (req, res) => {
+  try {
+    const { month, year, transactionId } = req.params;
+
+    const expenseDoc = await Expense.findOne({
+      user: req.user.id,
+      month,
+      year,
+    });
+    if (!expenseDoc) {
+      return res
+        .status(404)
+        .json({ status: 'error', message: 'Budget not found' });
+    }
+
+    const index = expenseDoc.transactions.findIndex(
+      (tx) => tx._id.toString() === transactionId
+    );
+
+    if (index === -1) {
+      return res
+        .status(404)
+        .json({ status: 'error', message: 'Transaction not found' });
+    }
+
+    expenseDoc.transactions.splice(index, 1); // ✅ remove transaction
+    await expenseDoc.save();
 
     res.status(200).json({
       status: 'success',
+      message: 'Transaction deleted',
       data: expenseDoc,
     });
   } catch (err) {
-    console.error('Error in getMonthlyExpense:', err);
+    console.error('Error in deleteTransaction:', err);
     res.status(500).json({
       status: 'error',
-      message: 'Could not retrieve budget data',
+      message: 'Failed to delete transaction',
     });
   }
 };
