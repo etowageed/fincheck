@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const Expense = require('../models/expenseModel');
+const EmailService = require('../utils/emails');
 
 // creating the jwt token
 const createToken = (id) => {
@@ -50,6 +51,10 @@ exports.signUp = async (req, res) => {
       income: req.body.income || 0,
       expenses: [],
     });
+    // send welcome email
+    const signupURL = `${req.protocol}://${req.get('host')}/api/v1/users/me`;
+    await new EmailService(newUser, signupURL).sendWelcome();
+
     // 5) create and send JWT
     const token = createToken(newUser._id);
     // 6) hide password in response
@@ -306,13 +311,8 @@ exports.forgotPassword = async (req, res) => {
     )}/api/v1/auth/resetPassword/${resetToken}`;
 
     try {
-      // TODO: create email service functionality like that from natours project
-      // await sendEmail({
-      //   email: user.email,
-      //   subject: 'Your password reset token (valid for 10min)',
-      //   message,
-      //   html: message,
-      // });
+      // send email about password reset
+      await new EmailService(user, resetURL).sendPasswordReset();
 
       res.status(200).json({
         status: 'success',
