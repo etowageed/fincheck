@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const { type } = require('os');
 
 const userSchema = new mongoose.Schema(
   {
@@ -20,13 +21,19 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String, // must be hashed
-      required: [true, 'Please provide a password'],
+      required: function () {
+        // Password is only required if NONE of the social IDs are present
+        return !this.googleId && !this.facebookId;
+      },
       minLength: [8, 'Password must have atleast 8 characters'],
       select: false,
     },
     confirmPassword: {
       type: String,
-      required: [true, 'Please confirm your password'],
+      required: function () {
+        // confirmPassword is only required if password is required and provided
+        return !this.googleId && !this.facebookId && this.password;
+      },
       validate: {
         // this only works on create() and save()
         validator: function (el) {
@@ -35,6 +42,19 @@ const userSchema = new mongoose.Schema(
         },
         message: 'Passwords do not match',
       },
+    },
+    googleId: {
+      // for google OAuth
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
+    facebookId: {
+      // for facebook OAuth
+      type: String,
+      unique: true,
+      sparse: true,
     },
 
     income: {
@@ -79,8 +99,7 @@ userSchema.methods.createPasswordResetToken = function () {
 // Password management and encryption
 userSchema.pre('save', async function (next) {
   //  Only hash if password was modified
-  if (!this.isModified('password')) return next();
-
+  if (!this.isModified('password') || !this.password) return next(); // ADDED `!this.password` check for clarity
   // now hash the password
   this.password = await bcrypt.hash(this.password, 12);
 
