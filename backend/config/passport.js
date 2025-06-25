@@ -3,6 +3,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oidc');
 const FacebookStrategy = require('passport-facebook');
 const User = require('../models/userModel'); // Your User model
+const EmailService = require('../utils/emails');
 
 // ------------------------------------
 // Passport Serialization/Deserialization
@@ -37,6 +38,7 @@ passport.use(
 
         if (user) {
           return cb(null, user);
+          // eslint-disable-next-line no-else-return
         } else {
           // Check if a user with this email already exists (for linking accounts)
           if (profile.emails && profile.emails.length > 0) {
@@ -59,6 +61,28 @@ passport.use(
             // You might not get a password from social login, so it'll be null or undefined
           });
           await newUser.save();
+
+          // Send welcome email if needed
+          if (newUser.email) {
+            try {
+              // You need to define the base URL for your application.
+              // This could be from an environment variable (e.g., process.env.APP_URL)
+              // or hardcoded for now if you know it (e.g., 'http://localhost:3000').
+              const appBaseUrl = process.env.APP_BASE_URL; // Define your app's base URL here
+              // TODO: change this to prod url
+
+              // Create an instance of EmailService
+              const emailInstance = new EmailService(newUser, appBaseUrl);
+              await emailInstance.sendWelcome(); // Call the instance method
+              console.log(`Welcome email sent to ${newUser.email}`);
+            } catch (emailError) {
+              console.error(
+                `Failed to send welcome email to ${newUser.email}:`,
+                emailError
+              );
+            }
+          }
+
           return cb(null, newUser);
         }
       } catch (err) {
@@ -85,6 +109,7 @@ passport.use(
 
         if (user) {
           return cb(null, user);
+          // eslint-disable-next-line no-else-return
         } else {
           if (profile.emails && profile.emails.length > 0) {
             user = await User.findOne({ email: profile.emails[0].value });
@@ -103,6 +128,22 @@ passport.use(
                 : null,
           });
           await newUser.save();
+
+          // Send welcome email if needed
+          if (newUser.email) {
+            try {
+              const appBaseUrl = process.env.APP_BASE_URL; // Define your app's base URL here
+              const emailInstance = new EmailService(newUser, appBaseUrl);
+              await emailInstance.sendWelcome(); // Call the instance method
+              console.log(`Welcome email sent to ${newUser.email}`);
+            } catch (emailError) {
+              console.error(
+                `Failed to send welcome email to ${newUser.email}:`,
+                emailError
+              );
+            }
+          }
+
           return cb(null, newUser);
         }
       } catch (err) {

@@ -5,18 +5,20 @@ class EmailService {
     this.to = user.email;
     this.name = user.name || user.email.split('@')[0];
     this.url = url;
-    this.from = `Fincheck 👋 <${process.env.EMAIL_FROM}>`;
+    this.from = `Fincheck 💸 <${process.env.EMAIL_FROM}>`;
   }
 
   newTransport() {
     if (process.env.NODE_ENV === 'production') {
-      // sendgrid when in production
+      // Brevo when in production
 
       return nodemailer.createTransport({
-        service: 'SendGrid',
+        service: 'Brevo',
+        host: process.env.BREVO_EMAIL_HOST,
+        port: process.env.BREVO_EMAIL_PORT,
         auth: {
-          user: process.env.SENDGRID_USERNAME,
-          pass: process.env.SENDGRID_PASSWORD,
+          user: process.env.BREVO_EMAIL_USERNAME,
+          pass: process.env.BREVO_EMAIL_PASSWORD,
         },
       });
     }
@@ -48,7 +50,7 @@ class EmailService {
   async sendWelcome() {
     await this.send(
       'Welcome to Fincheck 🎉',
-      `<h1>Hello, ${this.name}!</h1><p>Thanks for signing up. You can start managing your finances <a href="${this.url}">here</a>.</p>`
+      `<h1>Hello, ${this.name}! 👋</h1><p>Thanks for signing up. You can start managing your finances <a href="${this.url}">here</a>.</p>`
     );
   }
 
