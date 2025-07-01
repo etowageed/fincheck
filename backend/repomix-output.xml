@@ -1,0 +1,1668 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+config/
+  passport.js
+controllers/
+  authController.js
+  expenseController.js
+  userController.js
+middleware/
+  errorHandler.js
+models/
+  expenseModel.js
+  userModel.js
+routes/
+  authRoutes.js
+  expenseRoutes.js
+  userRoutes.js
+utils/
+  apiFeatures.js
+  appError.js
+  catchAsync.js
+  emails.js
+.eslintrc.js
+.gitignore
+app.js
+package.json
+server.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="config/passport.js">
+// config/passport.js
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oidc');
+const FacebookStrategy = require('passport-facebook');
+const User = require('../models/userModel'); // Your User model
+const EmailService = require('../utils/emails');
+
+// ------------------------------------
+// Passport Serialization/Deserialization
+// ------------------------------------
+passport.serializeUser((user, done) => {
+  done(null, user.id); // Store user ID in session
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
+
+// ------------------------------------
+// Google Strategy
+// ------------------------------------
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: '/api/v1/auth/google/callback', // Ensure this matches your route
+      scope: ['profile', 'email'],
+    },
+    async (issuer, profile, cb) => {
+      try {
+        let user = await User.findOne({ googleId: profile.id });
+
+        if (user) {
+          return cb(null, user);
+          // eslint-disable-next-line no-else-return
+        } else {
+          // Check if a user with this email already exists (for linking accounts)
+          if (profile.emails && profile.emails.length > 0) {
+            user = await User.findOne({ email: profile.emails[0].value });
+            if (user) {
+              // Link existing email user to Google account
+              user.googleId = profile.id;
+              await user.save();
+              return cb(null, user);
+            }
+          }
+          // Create a new user if no existing user or email found
+          const newUser = new User({
+            googleId: profile.id,
+            name: profile.displayName || profile.name.givenName, // Or extract first/last name
+            email:
+              profile.emails && profile.emails.length > 0
+                ? profile.emails[0].value
+                : null,
+            // You might not get a password from social login, so it'll be null or undefined
+          });
+          await newUser.save();
+
+          // Send welcome email if needed
+          if (newUser.email) {
+            try {
+              // You need to define the base URL for your application.
+              // This could be from an environment variable (e.g., process.env.APP_URL)
+              // or hardcoded for now if you know it (e.g., 'http://localhost:3000').
+              const appBaseUrl = process.env.APP_BASE_URL; // Define your app's base URL here
+              // TODO: change this to prod url
+
+              // Create an instance of EmailService
+              const emailInstance = new EmailService(newUser, appBaseUrl);
+              await emailInstance.sendWelcome(); // Call the instance method
+              console.log(`Welcome email sent to ${newUser.email}`);
+            } catch (emailError) {
+              console.error(
+                `Failed to send welcome email to ${newUser.email}:`,
+                emailError
+              );
+            }
+          }
+
+          return cb(null, newUser);
+        }
+      } catch (err) {
+        return cb(err, null);
+      }
+    }
+  )
+);
+
+// ------------------------------------
+// Facebook Strategy (Similar logic)
+// ------------------------------------
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: process.env.FACEBOOK_APP_ID,
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
+      callbackURL: '/api/v1/auth/facebook/callback', // Ensure this matches your route
+      profileFields: ['id', 'displayName', 'emails'], // Request necessary fields
+    },
+    async (accessToken, refreshToken, profile, cb) => {
+      try {
+        let user = await User.findOne({ facebookId: profile.id });
+
+        if (user) {
+          return cb(null, user);
+          // eslint-disable-next-line no-else-return
+        } else {
+          if (profile.emails && profile.emails.length > 0) {
+            user = await User.findOne({ email: profile.emails[0].value });
+            if (user) {
+              user.facebookId = profile.id;
+              await user.save();
+              return cb(null, user);
+            }
+          }
+          const newUser = new User({
+            facebookId: profile.id,
+            name: profile.displayName,
+            email:
+              profile.emails && profile.emails.length > 0
+                ? profile.emails[0].value
+                : null,
+          });
+          await newUser.save();
+
+          // Send welcome email if needed
+          if (newUser.email) {
+            try {
+              const appBaseUrl = process.env.APP_BASE_URL; // Define your app's base URL here
+              const emailInstance = new EmailService(newUser, appBaseUrl);
+              await emailInstance.sendWelcome(); // Call the instance method
+              console.log(`Welcome email sent to ${newUser.email}`);
+            } catch (emailError) {
+              console.error(
+                `Failed to send welcome email to ${newUser.email}:`,
+                emailError
+              );
+            }
+          }
+
+          return cb(null, newUser);
+        }
+      } catch (err) {
+        return cb(err, null);
+      }
+    }
+  )
+);
+
+// TODO:facebook Oauth
+// Export passport to be used in your app.js
+module.exports = passport;
+</file>
+
+<file path="controllers/authController.js">
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/userModel');
+const Expense = require('../models/expenseModel');
+const EmailService = require('../utils/emails');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+
+// creating the jwt token
+const createToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
+
+// sign up
+exports.signup = catchAsync(async (req, res, next) => {
+  const { name, email, password, confirmPassword } = req.body;
+
+  // 1) basic validation
+  if (!name || !email || !password) {
+    return next(new AppError('Please provide name, email, and password', 400));
+  }
+
+  if (password !== confirmPassword) {
+    return next(new AppError('Passwords do not match', 400));
+  }
+
+  // 2) Check if user already exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return next(new AppError('User with email already exists', 400));
+  }
+  // 3) Hash the password (actually happens in the presave hook)
+
+  //  4) finally create new user
+  const newUser = await User.create({
+    name,
+    email,
+    password,
+    confirmPassword,
+    income: req.body.income || 0,
+    expenses: [],
+  });
+  // send welcome email
+  const signupURL = `${req.protocol}://${req.get('host')}/api/v1/users/me`;
+
+  // Using try-catch for email sending as it's an external service,
+  // but let the main error handler catch general errors.
+  try {
+    await new EmailService(newUser, signupURL).sendWelcome();
+  } catch (emailError) {
+    console.error(
+      `Failed to send welcome email to ${newUser.email}:`,
+      emailError
+    );
+    // Optionally, you could still send a response here or log it for monitoring
+    // but don't prevent user creation if email sending fails.
+  }
+
+  // 5) create and send JWT
+  const token = createToken(newUser._id);
+  // 6) hide password in response
+  newUser.password = undefined;
+
+  res.status(201).json({
+    status: 'success',
+    token,
+    data: {
+      user: newUser,
+    },
+  });
+});
+
+// login
+exports.login = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // 1) check if email and password are entered
+
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password', 400));
+  }
+
+  // 2a) find user by email and check if user exists and pwd is correct
+  const user = await User.findOne({ email }).select('+password');
+
+  if (!user) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Incorrect email or password',
+    });
+  }
+
+  // 2b) verify password by comparing entered password with hashed password
+  // const isMatch = await bcrypt.compare(password, user.password);
+
+  // if (!isMatch) {
+  //   return res.status(401).json({
+  //     status: 'error',
+  //     message: 'Incorrect email or password',
+  //   });
+  // }
+
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    // Combines user check and password verification for timing attack prevention
+    return next(new AppError('Incorrect email or password', 401));
+  }
+
+  // 3) create and send jwt
+  const token = createToken(user._id);
+  user.password = undefined; // this hides the password in the response
+
+  // 4) send user data
+  res.status(200).json({
+    status: 'success',
+    token,
+    data: {
+      user,
+    },
+  });
+});
+
+// check login status
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  let token;
+
+  //  1) get token if it still exists
+  if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  } else if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token || token === 'loggedout') {
+    return res.status(200).json({
+      status: 'success',
+      isLoggedIn: false,
+    });
+  }
+
+  // 2) verifying if token is valid
+  // The global error handler will catch JsonWebTokenError and TokenExpiredError
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  // 3) check if user still exists
+  const user = await User.findById(decoded.id);
+  if (!user) {
+    return res.status(200).json({
+      status: 'success',
+      isLoggedIn: false,
+    });
+  }
+  // 4) check if user changed password after the token was issued
+  if (user.changedPasswordAfter(decoded.iat)) {
+    return res.status(200).json({
+      status: 'success',
+      isLoggedIn: false,
+    });
+  }
+
+  // 5) if user is logged in
+  res.status(200).json({
+    status: 'success',
+    isLoggedIn: true,
+    data: {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        income: user.income,
+      },
+    },
+  });
+});
+
+// protect routes
+exports.protect = catchAsync(async (req, res, next) => {
+  // 1) get the token and see if it still exists
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies && req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+
+  if (!token) {
+    return next(
+      new AppError('You are not logged in. Please log in for access', 401)
+    );
+  }
+
+  // 2) verifying if token is valid
+  // This will throw errors handled by globalErrorHandler (JsonWebTokenError, TokenExpiredError)
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  // 3) check if user still exists
+  const user = await User.findById(decoded.id);
+  if (!user) {
+    return next(
+      new AppError('The user belonging to this token no longer exists', 401)
+    );
+  }
+  // 4) check if user changed password after the token was issued
+  if (user.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError('User recently changed password! Please login again', 401)
+    );
+  }
+
+  // 5) now grant access to the protected route
+  req.user = user;
+  next();
+});
+
+// forgot password
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  // 1) get user based on POSTed email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError('There is no user with that email address', 404));
+  }
+
+  // 2) generate the random reset token
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false }); // this helps to turn
+  // of the validation from the model since we're using only the email
+
+  // 3) send the token to the user's email
+  const resetURL = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/auth/resetPassword/${resetToken}`;
+
+  try {
+    // send email about password reset
+    await new EmailService(user, resetURL).sendPasswordReset();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Token sent to email',
+      resetURL, //TODO: we don't send this in productiomn
+    });
+  } catch (err) {
+    // If email sending fails, revert the token fields and then throw an operational error
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return next(new AppError('Error sending email. Try again later', 500));
+  }
+});
+
+// reset password
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  // 1) get user based on the token created during forgot password
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  // 2) if token has not expired and there's a user, then set new password
+  if (!user) {
+    return next(new AppError('Token is invalid or has expired', 400));
+  }
+  // 3) update password and remove reset token fields
+  const { password } = req.body;
+  if (!password) {
+    return next(new AppError('Please provide a new password', 400));
+  }
+
+  (user.password = req.body.password),
+    (user.confirmPassword = req.body.confirmPassword); // Model validation will handle password match
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  user.passwordChangedAt = Date.now();
+  await user.save(); // This will trigger pre-save hash and validation
+
+  // 4) log the user in and send jwt
+  const token = createToken(user._id);
+
+  res.status(200).json({
+    status: 'success',
+    token,
+    data: {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    },
+  });
+});
+
+// Update user password
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return next(
+      new AppError('Current password and new password are required', 400)
+    );
+  }
+
+  // Find user by req.user.id if this is intended for authenticated user,
+  // or by req.params.id if it's an admin changing another user's password.
+  // Assuming it's for the authenticated user based on typical app flow.
+  // The original code used req.params.id, so keeping that for now.
+  const user = await User.findById(req.params.id).select('+password');
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  // Verify current password
+  const isCurrentPasswordValid = await bcrypt.compare(
+    currentPassword,
+    user.password
+  );
+  if (!isCurrentPasswordValid) {
+    return next(new AppError('Current password is incorrect', 400));
+  }
+
+  // Update password (pre-save middleware will handle hashing)
+  user.password = newPassword;
+  user.confirmPassword = newPassword; // Ensure confirmPassword is also set for model validation
+  await user.save(); // This will trigger pre-save hash and validation
+
+  res.status(200).json({
+    success: true, // Keeping 'success' here for consistency with original format for this route
+    message: 'Password updated successfully',
+  });
+});
+
+// logout
+exports.logout = (req, res) => {
+  // This can remain synchronous
+  // clear Jwt
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(0), // jwt token expires immediately
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Successfully logged out',
+  });
+};
+</file>
+
+<file path="controllers/expenseController.js">
+// backend/controllers/expenseController.js
+const Expense = require('../models/expenseModel');
+const AppError = require('../utils/appError'); // NEW
+const catchAsync = require('../utils/catchAsync');
+
+// Create or update monthly monthlyBudget document
+exports.upsertMonthlyExpense = catchAsync(async (req, res, next) => {
+  const { month, year, income, monthlyBudget } = req.body;
+
+  let expenseDoc = await Expense.findOneAndUpdate(
+    { user: req.user.id, month, year },
+    { income, monthlyBudget },
+    { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true } // Added runValidators
+  );
+
+  res.status(200).json({
+    status: 'success',
+    data: expenseDoc,
+  });
+});
+
+// Get full monthly expense
+exports.getMonthlyExpense = catchAsync(async (req, res, next) => {
+  const { month, year } = req.params;
+
+  const expenseDoc = await Expense.findOne({
+    user: req.user.id,
+    month,
+    year,
+  });
+
+  if (!expenseDoc) {
+    return next(new AppError('No monthlyBudget found for this month', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: expenseDoc,
+  });
+});
+
+// Delete a monthly monthlyBudget
+exports.deleteMonthlyExpense = catchAsync(async (req, res, next) => {
+  const { month, year } = req.params;
+  const deleted = await Expense.findOneAndDelete({
+    user: req.user.id,
+    month,
+    year,
+  });
+
+  if (!deleted) {
+    return next(new AppError('No monthlyBudget to delete', 404));
+  }
+
+  res
+    .status(200)
+    .json({ status: 'success', message: 'monthlyBudget deleted successfully' });
+});
+
+// add a transaction
+exports.addTransaction = catchAsync(async (req, res, next) => {
+  const { month, year } = req.params;
+  const { description, amount, category, type } = req.body;
+
+  let expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+
+  // If no document exists, create one with default income = 0 and empty monthlyBudget
+  if (!expenseDoc) {
+    expenseDoc = await Expense.create({
+      user: req.user.id,
+      month,
+      year,
+      income: 0,
+      monthlyBudget: [],
+      transactions: [],
+    });
+  }
+
+  // Push the new transaction
+  expenseDoc.transactions.push({
+    description,
+    amount,
+    category,
+    type: type || 'actual',
+  });
+
+  await expenseDoc.save(); // This will trigger validation for transactionSchema
+
+  res.status(201).json({
+    status: 'success',
+    data: expenseDoc,
+  });
+});
+
+// Update a transaction
+exports.updateTransaction = catchAsync(async (req, res, next) => {
+  const { month, year, transactionId } = req.params;
+  const { description, amount, category, type } = req.body;
+
+  const expenseDoc = await Expense.findOne({
+    user: req.user.id,
+    month,
+    year,
+  });
+  if (!expenseDoc) {
+    return next(new AppError('monthlyBudget not found', 404));
+  }
+
+  const transaction = expenseDoc.transactions.id(transactionId);
+  if (!transaction) {
+    return next(new AppError('Transaction not found', 404));
+  }
+
+  if (description !== undefined) transaction.description = description;
+  if (amount !== undefined) transaction.amount = amount;
+  if (category !== undefined) transaction.category = category;
+  if (type !== undefined) transaction.type = type;
+
+  await expenseDoc.save(); // This will trigger validation for transactionSchema
+
+  res.status(200).json({ status: 'success', data: expenseDoc });
+});
+
+// Delete a transaction
+exports.deleteTransaction = catchAsync(async (req, res, next) => {
+  const { month, year, transactionId } = req.params;
+
+  const expenseDoc = await Expense.findOne({
+    user: req.user.id,
+    month,
+    year,
+  });
+  if (!expenseDoc) {
+    return next(new AppError('monthlyBudget not found', 404));
+  }
+
+  // Using .id() method directly for simplicity and Mongoose subdocument handling
+  // If the .id() method doesn't find it, it returns null
+  expenseDoc.transactions.id(transactionId).remove();
+
+  await expenseDoc.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Transaction deleted',
+    data: expenseDoc,
+  });
+});
+</file>
+
+<file path="controllers/userController.js">
+// backend/controllers/userController.js
+const User = require('../models/userModel');
+const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
+
+// getting all users
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  // 1) create APIFeatures instance
+  const features = new APIFeatures(User.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields(['password'])
+    .paginate();
+
+  // 2) get results with metadata
+  const result = await features.getResults();
+
+  res.status(200).json(result);
+});
+
+// getting a single user
+exports.getUser = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id, '-password');
+
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  res.status(200).json({
+    success: true, // Keeping 'success' here for consistency with original format for this route
+    data: user,
+  });
+});
+
+// No createUser handler for now
+
+// updating a user
+
+exports.updateUser = catchAsync(async (req, res, next) => {
+  const { name, email } = req.body;
+  const updateData = {};
+
+  if (name) updateData.name = name;
+  if (email) updateData.email = email;
+
+  // checking if email being updated and already exists
+  if (email) {
+    const existingUser = await User.findOne({
+      email,
+      _id: { $ne: req.params.id },
+    });
+
+    if (existingUser) {
+      return next(new AppError('User with this email already exists', 400));
+    }
+  }
+  const user = await User.findByIdAndUpdate(req.params.id, updateData, {
+    new: true,
+    runValidators: true,
+    select: '-password',
+  });
+
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  res.status(200).json({
+    success: true, // Keeping 'success' here for consistency with original format for this route
+    data: user,
+  });
+});
+
+// delete user
+exports.deleteUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  res.status(200).json({
+    success: true, // Keeping 'success' here for consistency with original format for this route
+    message: 'User deleted successfully',
+    data: {},
+  });
+});
+
+// get user profile data
+exports.getMe = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('-password');
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+});
+</file>
+
+<file path="middleware/errorHandler.js">
+// backend/middlewares/errorHandler.js
+const AppError = require('../utils/appError');
+
+const handleCastErrorDB = (err) => {
+  const message = `Invalid ${err.path}: ${err.value}.`;
+  return new AppError(message, 400);
+};
+
+const handleDuplicateFieldsDB = (err) => {
+  const value = err.keyValue.name || err.keyValue.email; // Adjust based on common duplicate fields
+  const message = `Duplicate field value: "${value}". Please use another value!`;
+  return new AppError(message, 400);
+};
+
+const handleValidationErrorDB = (err) => {
+  const errors = Object.values(err.errors).map((el) => el.message);
+  const message = `Invalid input data. ${errors.join('. ')}`;
+  return new AppError(message, 400);
+};
+
+const handleJWTError = () =>
+  new AppError('Invalid token. Please log in again!', 401);
+
+const handleJWTExpiredError = () =>
+  new AppError('Your token has expired! Please log in again.', 401);
+
+const sendErrorDev = (err, res) => {
+  res.status(err.statusCode).json({
+    status: err.status,
+    error: err,
+    message: err.message,
+    stack: err.stack,
+  });
+};
+
+const sendErrorProd = (err, res) => {
+  // Operational, trusted error: send message to client
+  if (err.isOperational) {
+    res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+    });
+    // Programming or other unknown error: don't leak error details
+  } else {
+    // 1) Log error
+    console.error('ERROR 💥', err);
+
+    // 2) Send generic message
+    res.status(500).json({
+      status: 'error',
+      message: 'Something went very wrong!',
+    });
+  }
+};
+
+module.exports = (err, req, res, next) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || 'error';
+
+  if (process.env.NODE_ENV === 'development') {
+    sendErrorDev(err, res);
+  } else if (process.env.NODE_ENV === 'production') {
+    let error = { ...err };
+    error.message = err.message; // Ensure message is copied
+
+    if (error.name === 'CastError') error = handleCastErrorDB(error);
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error); // Handle duplicate fields error
+    if (error.name === 'ValidationError')
+      error = handleValidationErrorDB(error);
+    if (error.name === 'JsonWebTokenError') error = handleJWTError();
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+
+    sendErrorProd(error, res);
+  }
+};
+</file>
+
+<file path="models/expenseModel.js">
+const mongoose = require('mongoose');
+
+// subdocument schema for recurring expenses(aka monthlyBudget) (e.g. rent)
+
+const monthlyBudgetSchema = new mongoose.Schema({
+  category: { type: String, required: true },
+  amount: { type: Number, required: true },
+});
+
+// subdocument schema for actual transactions (money spent)
+const transactionSchema = new mongoose.Schema({
+  description: { type: String },
+  amount: { type: Number, required: true },
+  category: { type: String, required: true },
+  type: { type: String, enum: ['actual', 'excluded'], default: 'actual' }, // 'excluded expenses = savings/investments
+  date: { type: Date, default: Date.now },
+});
+
+// main expense schema
+const expenseSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    month: { type: Number, required: true },
+    year: { type: Number, required: true },
+
+    income: { type: Number, default: 0 },
+
+    monthlyBudget: [monthlyBudgetSchema],
+    transactions: [transactionSchema],
+  },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true }, // this enables the virtual properties
+    toObject: { virtuals: true },
+  }
+);
+
+// virtual properties = computed fields that are not stored in the database
+// but calculated dynamically whenever a document is read
+
+// totalMonthlyBudget - adds up all the amounts from the monthlyBudget array
+expenseSchema.virtual('totalMonthlyBudget').get(function () {
+  return this.monthlyBudget.reduce((sum, exp) => sum + exp.amount, 0);
+});
+
+// actualSpend - calculates the 'actual' expenses and ignores the 'excluded'
+expenseSchema.virtual('actualSpend').get(function () {
+  return this.transactions
+    .filter((t) => t.type === 'actual')
+    .reduce((sum, tx) => sum + tx.amount, 0);
+});
+
+// excludedTotal calculates the sum of excluded transactions e.g savings/investments
+expenseSchema.virtual('excludedTotal').get(function () {
+  return this.transactions
+    .filter((t) => t.type === 'excluded')
+    .reduce((sum, tx) => sum + tx.amount, 0);
+});
+
+// safeToSpend calculates all the money left to spend for the month
+expenseSchema.virtual('safeToSpend').get(function () {
+  return this.income - this.totalMonthlyBudget - this.actualSpend - this.excludedTotal;
+});
+
+// netSpend calculates the actual + excluded expenses
+
+expenseSchema.virtual('netSpend').get(function () {
+  return this.actualSpend + this.excludedTotal;
+});
+
+// index to prevent duplication of monthly monthlyBudget and This ensures
+// only one document per user per month can exist
+expenseSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
+
+const Expense = mongoose.model('Expense', expenseSchema);
+
+module.exports = Expense;
+</file>
+
+<file path="models/userModel.js">
+const mongoose = require('mongoose');
+const validator = require('validator');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+const { type } = require('os');
+
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Please tell us your name'],
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      validate: [validator.isEmail, 'Please provide a valid email'],
+      trim: true,
+    },
+
+    password: {
+      type: String, // must be hashed
+      required: function () {
+        // Password is only required if NONE of the social IDs are present
+        return !this.googleId && !this.facebookId;
+      },
+      minLength: [8, 'Password must have atleast 8 characters'],
+      select: false,
+      trim: true, // trim whitespace
+    },
+    confirmPassword: {
+      type: String,
+      required: function () {
+        // confirmPassword is only required if password is required and provided
+        return !this.googleId && !this.facebookId && this.password;
+      },
+      validate: {
+        // this only works on create() and save()
+        validator: function (el) {
+          // the .this only refers to the current document being created/saved
+          return el === this.password;
+        },
+        message: 'Passwords do not match',
+      },
+    },
+    googleId: {
+      // for google OAuth
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
+    facebookId: {
+      // for facebook OAuth
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
+    income: {
+      type: Number,
+      default: 0,
+      min: [0, 'Income cannot be negative'], // Ensure income is non-negative
+    },
+    expenses: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Expense',
+      },
+    ],
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Middleware to hash password before saving
+userSchema.pre('save', async function (next) {
+  // Only run this function if password was actually modified
+  if (!this.isModified('password')) return next();
+
+  // Hash the password with cost of 12
+  this.password = await bcrypt.hash(this.password, 12);
+
+  // Delete confirmPassword field
+  this.confirmPassword = undefined;
+  next();
+});
+
+// Middleware to update passwordChangedAt when password is changed
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000; // Subtract 1 second to ensure token is created after password change
+  next();
+});
+
+// Method to check if password was changed after token was issued
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    return JWTTimestamp < changedTimestamp;
+  }
+  // False means not changed
+  return false;
+};
+
+// Method to create password reset token
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  console.log({ resetToken }, this.passwordResetToken); // For debugging, remove in production
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+  return resetToken;
+};
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
+</file>
+
+<file path="routes/authRoutes.js">
+const express = require('express');
+const authController = require('../controllers/authController');
+const passport = require('../config/passport');
+const rateLimit = require('express-rate-limit');
+
+const router = express.Router();
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 login requests per windowMs
+  message: 'Too many login attempts from this IP, please try again later.',
+});
+
+// router.post('/signup', authController.signup);
+router.post('/login', loginLimiter, authController.login);
+router.get('/logout', authController.logout);
+router.get('/isLoggedIn', authController.isLoggedIn);
+router.post('/forgotpassword', authController.forgotPassword);
+router.patch('/resetpassword/:token', authController.resetPassword);
+router.patch('/:id/updatepassword', authController.updatePassword);
+
+// Google Auth Routes
+router.get(
+  '/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+router.get(
+  '/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    // Successful authentication, redirect home or to a dashboard
+    res.redirect('/api/v1/users/me'); // Or wherever you redirect after login
+  }
+);
+
+// Facebook Auth Routes
+router.get(
+  '/facebook',
+  passport.authenticate('facebook', { scope: ['email', 'public_profile'] })
+);
+
+router.get(
+  '/facebook/callback',
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/api/v1/users/me'); // Or wherever you redirect after login
+  }
+);
+
+module.exports = router;
+</file>
+
+<file path="routes/expenseRoutes.js">
+const express = require('express');
+const expenseController = require('../controllers/expenseController');
+const authController = require('../controllers/authController');
+
+const router = express.Router();
+
+router.use(authController.protect); // protects all routes below
+
+router.post('/', expenseController.upsertMonthlyExpense); // creates or updates monthly expense
+
+router.post('/:month/:year/transactions', expenseController.addTransaction);
+
+router
+  .route('/:month/:year')
+  .get(expenseController.getMonthlyExpense)
+  .delete(expenseController.deleteMonthlyExpense);
+
+router
+  .route('/:month/:year/transactions/:transactionId')
+  .patch(expenseController.updateTransaction)
+  .delete(expenseController.deleteTransaction);
+
+module.exports = router;
+</file>
+
+<file path="routes/userRoutes.js">
+const express = require('express');
+const authController = require('../controllers/authController');
+const userController = require('../controllers/userController');
+
+const router = express.Router();
+
+router.use(authController.protect); // protects all the routes that follow
+
+router.get('/', userController.getAllUsers);
+router.get('/me', userController.getMe);
+router
+  .route('/:id')
+  .get(userController.getUser)
+  .patch(userController.updateUser)
+  .delete(userController.deleteUser);
+
+module.exports = router;
+</file>
+
+<file path="utils/apiFeatures.js">
+class APIFeatures {
+  constructor(query, queryString, excludeFields = []) {
+    this.query = query;
+    this.queryString = queryString;
+    this.excludeFields = ['select', 'sort', 'page', 'limit', ...excludeFields];
+  }
+
+  filter() {
+    // copy the request query
+    const reqQuery = { ...this.queryString };
+
+    // remove the fields that are not for filtering
+    this.excludeFields.forEach((param) => delete reqQuery[param]);
+
+    // create the query string
+
+    let queryStr = JSON.stringify(reqQuery);
+
+    // create operators (mongoose operators)
+    queryStr = queryStr.replace(
+      /\b(gt|gte|lt|lte|in|ne)\b/g,
+      (match) => `$${match}`
+    );
+
+    // applying filter to query
+    this.query = this.query.find(JSON.parse(queryStr));
+
+    return this;
+  }
+
+  sort() {
+    if (this.queryString.sort) {
+      const sortBy = this.queryString.sort(',').join(' ');
+      this.query = this.query.sort(sortBy);
+    } else {
+      // this is the default sort which is by creation date (newest first)
+      this.query = this.query.sort('-createdAt');
+    }
+
+    return this;
+  }
+
+  limitFields(defaultExclude = []) {
+    if (this.queryString.select) {
+      const fields = this.queryString.select.split(',').join(' ');
+
+      // handle excluded fields (eg. password)
+      if (defaultExclude.length > 0) {
+        const excludeStr = defaultExclude.map((field) => `-${field}`).join(' ');
+        // Only exclude if not explicitly requested
+        const explicitlyRequested = defaultExclude.some((field) =>
+          this.queryString.select.split(',').includes(field)
+        );
+
+        if (!explicitlyRequested) {
+          this.query = this.query.select(`${fields} ${excludeStr}`);
+        } else {
+          this.query = this.query.select(fields);
+        }
+      } else {
+        this.query = this.query.select(fields);
+      }
+    } else if (defaultExclude.length > 0) {
+      // apply default exclusions when no specific selection
+      const excludeStr = defaultExclude.map((field) => `-${field}`).join(' ');
+      this.query = this.query.select(excludeStr);
+    }
+
+    return this;
+  }
+
+  paginate() {
+    const page = parseInt(this.queryString.page, 10) || 1;
+    const limit = parseInt(this.queryString.limit, 10) || 25;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    // Apply pagination
+    this.query = this.query.skip(startIndex).limit(limit);
+
+    // Store pagination info for later use
+    this.paginationInfo = {
+      page,
+      limit,
+      startIndex,
+      endIndex,
+    };
+
+    return this;
+  }
+
+  // Helper method to get final results with metadata
+  async getResults() {
+    // Get total count before executing the main query
+    const totalQuery = this.query.model.find(this.query.getFilter());
+    const total = await totalQuery.countDocuments();
+
+    // Execute the main query
+    const results = await this.query;
+
+    if (this.paginationInfo) {
+      const { page, limit, startIndex, endIndex } = this.paginationInfo;
+
+      // Calculate pagination links
+      const pagination = {};
+
+      if (endIndex < total) {
+        pagination.next = {
+          page: page + 1,
+          limit,
+        };
+      }
+
+      if (startIndex > 0) {
+        pagination.prev = {
+          page: page - 1,
+          limit,
+        };
+      }
+
+      return {
+        success: true,
+        count: results.length,
+        total,
+        page,
+        limit,
+        pagination: Object.keys(pagination).length > 0 ? pagination : undefined,
+        data: results,
+      };
+    }
+
+    return {
+      success: true,
+      count: results.length,
+      data: results,
+    };
+  }
+}
+
+module.exports = APIFeatures;
+</file>
+
+<file path="utils/appError.js">
+// backend/utils/appError.js
+class AppError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+
+    this.statusCode = statusCode;
+    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.isOperational = true; // Mark as operational error
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+module.exports = AppError;
+</file>
+
+<file path="utils/catchAsync.js">
+// backend/utils/catchAsync.js
+module.exports = (fn) => {
+  return (req, res, next) => {
+    fn(req, res, next).catch(next);
+  };
+};
+</file>
+
+<file path="utils/emails.js">
+const nodemailer = require('nodemailer');
+
+class EmailService {
+  constructor(user, url) {
+    this.to = user.email;
+    this.name = user.name || user.email.split('@')[0];
+    this.url = url;
+    this.from = `Fincheck 💸 <${process.env.EMAIL_FROM}>`;
+  }
+
+  newTransport() {
+    if (process.env.NODE_ENV === 'production') {
+      // Brevo when in production
+
+      return nodemailer.createTransport({
+        service: 'Brevo',
+        host: process.env.BREVO_EMAIL_HOST,
+        port: process.env.BREVO_EMAIL_PORT,
+        auth: {
+          user: process.env.BREVO_EMAIL_USERNAME,
+          pass: process.env.BREVO_EMAIL_PASSWORD,
+        },
+      });
+    }
+
+    // uses mailtrap when in development
+    return nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+  }
+
+  //   actualy sends the email
+  async send(subject, htmlContent) {
+    const mailOptions = {
+      from: this.from,
+      to: this.to,
+      subject,
+      html: htmlContent,
+    };
+
+    // creates a transport and sends the email
+    await this.newTransport().sendMail(mailOptions);
+  }
+
+  async sendWelcome() {
+    await this.send(
+      'Welcome to Fincheck 🎉',
+      `<h1>Hello, ${this.name}! 👋</h1><p>Thanks for signing up. You can start managing your finances <a href="${this.url}">here</a>.</p>`
+    );
+  }
+
+  async sendPasswordReset() {
+    await this.send(
+      'Your password reset link (valid for 10 min)',
+      `<p>Hi ${this.name},</p><p>Click below to reset your password:</p><p><a href="${this.url}">${this.url}</a></p><p>If you didn't request this, please ignore.</p>`
+    );
+  }
+}
+
+module.exports = EmailService;
+</file>
+
+<file path=".eslintrc.js">
+module.exports = {
+  env: {
+    node: true,
+    commonjs: true,
+    es2021: true,
+  },
+  extends: ["airbnb-base", "plugin:node/recommended"],
+  parserOptions: {
+    ecmaVersion: 12,
+  },
+  rules: {
+    // Customize rules as needed
+    "no-console": "off", // Allow console.* (common in backends)
+    "node/no-unsupported-features/es-syntax": "off", // Allow modern syntax if using Babel/ESM
+    "func-names": "off",
+    "no-underscore-dangle": "off", // Useful for Express (e.g., `_id`)
+    "consistent-return": "off", // Let you return conditionally
+  },
+};
+</file>
+
+<file path=".gitignore">
+node_modules/
+.env
+.DS_Store
+.vscode/
+.package-lock.json
+ai-dev/
+</file>
+
+<file path="app.js">
+const path = require('path');
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const enforce = require('express-sslify'); // Add this for HTTPS enforcement
+const session = require('express-session'); // Add this
+require('dotenv').config();
+
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./middleware/errorHandler'); // Import the global error handler
+
+const app = express();
+
+app.use(helmet()); // Set security headers
+// TODO uncomment this code when in production to enforce HTTPS
+// Only use this in production where a load balancer/proxy handles SSL termination
+// if (process.env.NODE_ENV === 'production') {
+//   app.use(enforce.HTTPS({ trustProtoHeader: true })); // Important for Heroku, AWS ELB, etc.
+// }
+
+app.use(cookieParser());
+
+// Add session middleware
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key', // Use a strong, unique secret
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 1 day
+  })
+);
+
+// apply rate limiting to all requests
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+});
+
+app.use(limiter);
+
+// Initialize Passport
+const passport = require('./config/passport');
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// importing the routers
+const authRouter = require('./routes/authRoutes');
+const userRouter = require('./routes/userRoutes');
+const expenseRouter = require('./routes/expenseRoutes');
+
+app.use(express.json({ limit: '10kb' }));
+
+// mounting the routes
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/expenses', expenseRouter);
+
+// Handle undefined routes
+app.all('/{*any}', (req, res, next) => {
+  // remenber to use this syntax henceforth due to the new version of express
+  // This will catch all undefined routes and pass to the next middleware
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+// Global error handler
+app.use(globalErrorHandler);
+
+module.exports = app;
+</file>
+
+<file path="package.json">
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js",
+    "dev": "nodemon server.js",
+    "start:prod": "NODE_ENV=production nodemon server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.1",
+    "express-session": "^1.18.1",
+    "express-sslify": "^1.2.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.15.0",
+    "mongoose": "^8.13.2",
+    "nodemailer": "^7.0.3",
+    "passport": "^0.7.0",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oidc": "^0.1.0",
+    "validator": "^13.15.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-node": "^11.1.0",
+    "nodemon": "^3.1.9"
+  }
+}
+</file>
+
+<file path="server.js">
+const mongoose = require('mongoose');
+require('dotenv').config();
+
+const app = require('./app');
+
+const PORT = process.env.PORT || 5000;
+
+// Routes
+app.get('/', (req, res) => {
+  res.send('Fincheck API running...');
+});
+
+// MongoDB connection
+mongoose
+  .connect(process.env.DATABASE, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('DB connection successful');
+    app.listen(PORT, () => {
+      console.log(`...Server is running on port ${PORT}...`);
+    });
+  })
+  .catch((err) => {
+    console.error('DB connection error:', err);
+  });
+</file>
+
+</files>

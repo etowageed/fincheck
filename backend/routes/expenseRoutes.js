@@ -6,11 +6,11 @@ const router = express.Router();
 
 router.use(authController.protect); // protects all routes below
 
-router.post('/', expenseController.upsertMonthlyExpense); // creates or updates monthly expense
-
 router
-  .route('/:month/:year/transactions') // TODO: make it that the route parameters are automatically added without manually entering them
-  .post(expenseController.addTransaction);
+  .post('/', expenseController.upsertMonthlyExpense)
+  .get('/', expenseController.getAllMonthlyExpenses); // creates or updates monthly expense
+
+router.post('/:month/:year/transactions', expenseController.addTransaction);
 
 router
   .route('/:month/:year')

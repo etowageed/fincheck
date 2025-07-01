@@ -1,156 +1,101 @@
+// backend/controllers/userController.js
 const User = require('../models/userModel');
 const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
 
 // getting all users
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  // 1) create APIFeatures instance
+  const features = new APIFeatures(User.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields(['password'])
+    .paginate();
 
-exports.getAllUsers = async (req, res) => {
-  try {
-    // 1) create APIFeatures instance
-    const features = new APIFeatures(User.find(), req.query)
-      .filter()
-      .sort()
-      .limitFields(['password'])
-      .paginate();
+  // 2) get results with metadata
+  const result = await features.getResults();
 
-    // 2) get results with metadata
-    const result = await features.getResults();
-
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server Error',
-      error: error.message,
-    });
-  }
-};
+  res.status(200).json(result);
+});
 
 // getting a single user
+exports.getUser = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id, '-password');
 
-exports.getUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id, '-password');
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: user,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server Error',
-      error: error.message,
-    });
+  if (!user) {
+    return next(new AppError('User not found', 404));
   }
-};
+
+  res.status(200).json({
+    success: true, // Keeping 'success' here for consistency with original format for this route
+    data: user,
+  });
+});
 
 // No createUser handler for now
 
 // updating a user
-// TODO this handler route will be protected
-exports.updateUser = async (req, res) => {
-  try {
-    const { name, email } = req.body;
-    const updateData = {};
 
-    if (name) updateData.name = name;
-    if (email) updateData.email = email;
+exports.updateUser = catchAsync(async (req, res, next) => {
+  const { name, email } = req.body;
+  const updateData = {};
 
-    // checking if email being updated and already exists
-    if (email) {
-      const existingUser = await User.findOne({
-        email,
-        _id: { $ne: req.params.id },
-      });
+  if (name) updateData.name = name;
+  if (email) updateData.email = email;
 
-      if (existingUser) {
-        return res.status(400).json({
-          success: false,
-          message: 'User with this email already exists',
-        });
-      }
+  // checking if email being updated and already exists
+  if (email) {
+    const existingUser = await User.findOne({
+      email,
+      _id: { $ne: req.params.id },
+    });
+
+    if (existingUser) {
+      return next(new AppError('User with this email already exists', 400));
     }
-    const user = await User.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-      runValidators: true,
-      select: '-password',
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: user,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Failed to update user',
-      error: error.message,
-    });
   }
-};
+  const user = await User.findByIdAndUpdate(req.params.id, updateData, {
+    new: true,
+    runValidators: true,
+    select: '-password',
+  });
+
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  res.status(200).json({
+    success: true, // Keeping 'success' here for consistency with original format for this route
+    data: user,
+  });
+});
 
 // delete user
-
-exports.deleteUser = async (req, res) => {
-  try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'User deleted successfully',
-      data: {},
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server Error',
-      error: error.message,
-    });
+exports.deleteUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (!user) {
+    return next(new AppError('User not found', 404));
   }
-};
+
+  res.status(200).json({
+    success: true, // Keeping 'success' here for consistency with original format for this route
+    message: 'User deleted successfully',
+    data: {},
+  });
+});
 
 // get user profile data
-exports.getMe = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'User not found',
-      });
-    }
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        user,
-      },
-    });
-  } catch (err) {
-    console.error('Get user error:', err);
-    res.status(500).json({
-      status: 'error',
-      message: 'Server error',
-    });
+exports.getMe = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('-password');
+  if (!user) {
+    return next(new AppError('User not found', 404));
   }
-};
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user,
+    },
+  });
+});

@@ -1,211 +1,172 @@
-const User = require('../models/userModel');
+// backend/controllers/expenseController.js
 const Expense = require('../models/expenseModel');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
-// Create or update monthly budget document
-exports.upsertMonthlyExpense = async (req, res) => {
-  try {
-    const { month, year, income, fixedExpenses } = req.body;
+// Create or update monthly expense document (monthlyBudget and actuals)
+exports.upsertMonthlyExpense = catchAsync(async (req, res, next) => {
+  let { month, year, income, monthlyBudget } = req.body;
+  // Use 'let' as we might reassign month/year
 
-    let expenseDoc = await Expense.findOneAndUpdate(
-      { user: req.user.id, month, year },
-      { income, fixedExpenses },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+  // If month or year are not provided in the request body,
+  // automatically set them to the current month and year.
+  // This ensures the findOneAndUpdate query correctly targets the current month's document.
+  const currentDate = new Date();
+  if (month === undefined || month === null) {
+    month = currentDate.getMonth(); // Mongoose default for month is 0-indexed (Jan=0, Dec=11)
+  }
+  if (year === undefined || year === null) {
+    year = currentDate.getFullYear();
+  }
+
+  const expenseDoc = await Expense.findOneAndUpdate(
+    { user: req.user.id, month, year }, // Query based on user, calculated/provided month and year
+    { income, monthlyBudget }, // Data to update/set (income and monthlyBudget array)
+    {
+      upsert: true, // Create the document if it doesn't exist
+      new: true, // Return the updated/new document
+      setDefaultsOnInsert: true, // Apply schema defaults for new documents (e.g., timestamps)
+      runValidators: true, // Run schema validators on the update operation
+    }
+  );
+
+  res.status(200).json({
+    status: 'success',
+    data: expenseDoc,
+  });
+});
+
+// Get all monthly expense summaries for a user (e.g., for dashboard overview)
+exports.getAllMonthlyExpenses = catchAsync(async (req, res, next) => {
+  const expenses = await Expense.find({ user: req.user.id }).sort({
+    year: -1,
+    month: -1,
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: expenses.length,
+    data: expenses,
+  });
+});
+
+// Add a transaction to an existing monthly expense document
+exports.addTransaction = catchAsync(async (req, res, next) => {
+  const { month, year } = req.params; // Expect month and year from URL parameters
+  const { description, amount, category, type } = req.body;
+
+  const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+
+  if (!expenseDoc) {
+    return next(
+      new AppError('No expense document found for this month and year.', 404)
     );
-
-    res.status(200).json({
-      status: 'success',
-      data: expenseDoc,
-    });
-  } catch (err) {
-    console.error('Error in upsertMonthlyExpense:', err);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to create or update expense data',
-    });
   }
-};
 
-// Get full monthly expense
-exports.getMonthlyExpense = async (req, res) => {
-  try {
-    const { month, year } = req.params;
+  // Add the new transaction to the transactions array
+  expenseDoc.transactions.push({
+    description,
+    amount,
+    category,
+    type: type || 'actual', // Default to 'actual' if type is not provided
+  });
 
-    const expenseDoc = await Expense.findOne({
-      user: req.user.id,
-      month,
-      year,
-    });
+  await expenseDoc.save({ validateBeforeSave: true }); // Save and run validators
 
-    if (!expenseDoc) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'No budget found for this month',
-      });
-    }
+  res.status(200).json({
+    status: 'success',
+    data: expenseDoc,
+  });
+});
 
-    res.status(200).json({
-      status: 'success',
-      data: expenseDoc,
-    });
-  } catch (err) {
-    console.error('Error in getMonthlyExpense:', err);
-    res.status(500).json({
-      status: 'error',
-      message: 'Could not retrieve budget data',
-    });
-  }
-};
+// Update an existing transaction within a monthly expense document
+exports.updateTransaction = catchAsync(async (req, res, next) => {
+  const { month, year, transactionId } = req.params;
+  const { description, amount, category, type } = req.body;
 
-// Delete a monthly budget
-exports.deleteMonthlyExpense = async (req, res) => {
-  try {
-    const { month, year } = req.params;
-    const deleted = await Expense.findOneAndDelete({
-      user: req.user.id,
-      month,
-      year,
-    });
+  const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
 
-    if (!deleted) {
-      return res
-        .status(404)
-        .json({ status: 'error', message: 'No budget to delete' });
-    }
-
-    res
-      .status(200)
-      .json({ status: 'success', message: 'Budget deleted successfully' });
-  } catch (err) {
-    console.error('Error in deleteMonthlyExpense:', err);
-    res
-      .status(500)
-      .json({ status: 'error', message: 'Failed to delete budget' });
-  }
-};
-
-// add a transaction
-
-exports.addTransaction = async (req, res) => {
-  try {
-    const { month, year } = req.params;
-    const { description, amount, category, type } = req.body;
-
-    let expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
-
-    // If no document exists, create one with default income = 0 and empty fixedExpenses
-    if (!expenseDoc) {
-      expenseDoc = await Expense.create({
-        user: req.user.id,
-        month,
-        year,
-        income: 0,
-        fixedExpenses: [],
-        transactions: [],
-      });
-    }
-
-    // Push the new transaction
-    expenseDoc.transactions.push({
-      description,
-      amount,
-      category,
-      type: type || 'actual',
-    });
-
-    await expenseDoc.save();
-
-    res.status(201).json({
-      status: 'success',
-      data: expenseDoc,
-    });
-  } catch (err) {
-    console.error('Error in addTransaction:', err);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to add transaction',
-    });
-  }
-};
-
-// Update a transaction
-exports.updateTransaction = async (req, res) => {
-  try {
-    const { month, year, transactionId } = req.params;
-    const { description, amount, category, type } = req.body;
-
-    const expenseDoc = await Expense.findOne({
-      user: req.user.id,
-      month,
-      year,
-    });
-    if (!expenseDoc) {
-      return res
-        .status(404)
-        .json({ status: 'error', message: 'Budget not found' });
-    }
-
-    const transaction = expenseDoc.transactions.id(transactionId);
-    if (!transaction) {
-      return res
-        .status(404)
-        .json({ status: 'error', message: 'Transaction not found' });
-    }
-
-    if (description !== undefined) transaction.description = description;
-    if (amount !== undefined) transaction.amount = amount;
-    if (category !== undefined) transaction.category = category;
-    if (type !== undefined) transaction.type = type;
-
-    await expenseDoc.save();
-
-    res.status(200).json({ status: 'success', data: expenseDoc });
-  } catch (err) {
-    console.error('Error in updateTransaction:', err);
-    res
-      .status(500)
-      .json({ status: 'error', message: 'Failed to update transaction' });
-  }
-};
-
-// Delete a transaction
-exports.deleteTransaction = async (req, res) => {
-  try {
-    const { month, year, transactionId } = req.params;
-
-    const expenseDoc = await Expense.findOne({
-      user: req.user.id,
-      month,
-      year,
-    });
-    if (!expenseDoc) {
-      return res
-        .status(404)
-        .json({ status: 'error', message: 'Budget not found' });
-    }
-
-    const index = expenseDoc.transactions.findIndex(
-      (tx) => tx._id.toString() === transactionId
+  if (!expenseDoc) {
+    return next(
+      new AppError('No expense document found for this month and year.', 404)
     );
-
-    if (index === -1) {
-      return res
-        .status(404)
-        .json({ status: 'error', message: 'Transaction not found' });
-    }
-
-    expenseDoc.transactions.splice(index, 1); // ✅ remove transaction
-    await expenseDoc.save();
-
-    res.status(200).json({
-      status: 'success',
-      message: 'Transaction deleted',
-      data: expenseDoc,
-    });
-  } catch (err) {
-    console.error('Error in deleteTransaction:', err);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to delete transaction',
-    });
   }
-};
+
+  // Find the transaction by ID and update its fields
+  const transaction = expenseDoc.transactions.id(transactionId);
+  if (!transaction) {
+    return next(new AppError('Transaction not found.', 404));
+  }
+
+  transaction.set({ description, amount, category, type }); // Update using .set()
+
+  await expenseDoc.save({ validateBeforeSave: true });
+
+  res.status(200).json({
+    status: 'success',
+    data: expenseDoc,
+  });
+});
+
+// Delete a transaction from a monthly expense document
+exports.deleteTransaction = catchAsync(async (req, res, next) => {
+  const { month, year, transactionId } = req.params;
+
+  const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+
+  if (!expenseDoc) {
+    return next(
+      new AppError('No expense document found for this month and year.', 404)
+    );
+  }
+
+  // Remove the transaction by its ID
+  expenseDoc.transactions.id(transactionId).deleteOne(); // Use deleteOne() to remove subdocument
+
+  await expenseDoc.save({ validateBeforeSave: true });
+
+  res.status(204).json({
+    status: 'success',
+    data: null, // No content for 204
+  });
+});
+
+// Delete a monthlyBudget item from a monthly expense document
+exports.deleteMonthlyExpense = catchAsync(async (req, res, next) => {
+  const { month, year, monthlyBudgetId } = req.params;
+
+  const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+
+  if (!expenseDoc) {
+    return next(
+      new AppError('No expense document found for this month and year.', 404)
+    );
+  }
+
+  expenseDoc.monthlyBudget.id(monthlyBudgetId).deleteOne(); // Use deleteOne() to remove subdocument
+
+  await expenseDoc.save({ validateBeforeSave: true });
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
+// Get expenses for a specific month and year
+exports.getMonthlyExpense = catchAsync(async (req, res, next) => {
+  const { month, year } = req.params;
+
+  const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+
+  if (!expenseDoc) {
+    return next(
+      new AppError('No expense document found for this month and year.', 404)
+    );
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: expenseDoc,
+  });
+});

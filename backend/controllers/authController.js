@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const Expense = require('../models/expenseModel');
 const EmailService = require('../utils/emails');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
 // creating the jwt token
 const createToken = (id) => {
@@ -13,458 +15,344 @@ const createToken = (id) => {
 };
 
 // sign up
-exports.signUp = async (req, res) => {
-  try {
-    const { name, email, password, confirmPassword } = req.body;
+exports.signup = catchAsync(async (req, res, next) => {
+  const { name, email, password, confirmPassword } = req.body;
 
-    // 1) basic validation
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Please provide a name, email and password',
-      });
-    }
-
-    if (password !== confirmPassword) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Passwords do not match',
-      });
-    }
-
-    // 2) Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'User with email already exists',
-      });
-    }
-    // 3) Hash the password (actually happens in the presave hook)
-
-    //  4) finally create new user
-    const newUser = await User.create({
-      name,
-      email,
-      password,
-      confirmPassword,
-      income: req.body.income || 0,
-      expenses: [],
-    });
-    // send welcome email
-    const signupURL = `${req.protocol}://${req.get('host')}/api/v1/users/me`;
-    await new EmailService(newUser, signupURL).sendWelcome();
-
-    // 5) create and send JWT
-    const token = createToken(newUser._id);
-    // 6) hide password in response
-    newUser.password = undefined;
-
-    res.status(201).json({
-      status: 'success',
-      token,
-      data: {
-        user: newUser,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      status: 'error',
-      message: 'Server error during signup',
-    });
+  // 1) basic validation
+  if (!name || !email || !password) {
+    return next(new AppError('Please provide name, email, and password', 400));
   }
-};
+
+  if (password !== confirmPassword) {
+    return next(new AppError('Passwords do not match', 400));
+  }
+
+  // 2) Check if user already exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return next(new AppError('User with email already exists', 400));
+  }
+  // 3) Hash the password (actually happens in the presave hook)
+
+  //  4) finally create new user
+  const newUser = await User.create({
+    name,
+    email,
+    password,
+    confirmPassword,
+    income: req.body.income || 0,
+    expenses: [],
+  });
+  // send welcome email
+  const signupURL = `${req.protocol}://${req.get('host')}/api/v1/users/me`;
+
+  // Using try-catch for email sending as it's an external service,
+  // but let the main error handler catch general errors.
+  try {
+    await new EmailService(newUser, signupURL).sendWelcome();
+  } catch (emailError) {
+    console.error(
+      `Failed to send welcome email to ${newUser.email}:`,
+      emailError
+    );
+    // Optionally, you could still send a response here or log it for monitoring
+    // but don't prevent user creation if email sending fails.
+  }
+
+  // 5) create and send JWT
+  const token = createToken(newUser._id);
+  // 6) hide password in response
+  newUser.password = undefined;
+
+  res.status(201).json({
+    status: 'success',
+    token,
+    data: {
+      user: newUser,
+    },
+  });
+});
 
 // login
-exports.login = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
+exports.login = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
 
-    // 1) check if email and password are entered
+  // 1) check if email and password are entered
 
-    if (!email || !password) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Please provide email and password',
-      });
-    }
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password', 400));
+  }
 
-    // 2a) find user by email and check if user exists and pwd is correct
-    const user = await User.findOne({ email }).select('+password');
+  // 2a) find user by email and check if user exists and pwd is correct
+  const user = await User.findOne({ email }).select('+password');
 
-    if (!user) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Incorrect email or password',
-      });
-    }
-
-    // 2b) verify password by comparing entered password with hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Incorrect email or password',
-      });
-    }
-    // TODO:add dummy bcrypt to prevent timing attacks
-
-    // 3) create and send jwt
-    const token = createToken(user._id);
-    user.password = undefined; // this hides the password in the response
-
-    // 4) send user data
-    res.status(200).json({
-      status: 'success',
-      token,
-      data: {
-        user,
-      },
-    });
-  } catch (err) {
-    console.error('Login error', err);
-    res.status(500).json({
+  if (!user) {
+    return res.status(401).json({
       status: 'error',
-      message: 'Server error during login',
+      message: 'Incorrect email or password',
     });
   }
-  next();
-};
+
+  // 2b) verify password by comparing entered password with hashed password
+  // const isMatch = await bcrypt.compare(password, user.password);
+
+  // if (!isMatch) {
+  //   return res.status(401).json({
+  //     status: 'error',
+  //     message: 'Incorrect email or password',
+  //   });
+  // }
+
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    // Combines user check and password verification for timing attack prevention
+    return next(new AppError('Incorrect email or password', 401));
+  }
+
+  // 3) create and send jwt
+  const token = createToken(user._id);
+  user.password = undefined; // this hides the password in the response
+
+  // 4) send user data
+  res.status(200).json({
+    status: 'success',
+    token,
+    data: {
+      user,
+    },
+  });
+});
 
 // check login status
-exports.isLoggedIn = async (req, res, next) => {
-  try {
-    // TODO: make this into a function so it can be reused b/w protect and isLoggedIn
-    let token;
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  let token;
 
-    //  1) get token if it still exists
-    if (req.cookies.jwt) {
-      token = req.cookies.jwt;
-    } else if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer')
-    ) {
-      token = req.headers.authorization.split(' ')[1];
-    }
+  //  1) get token if it still exists
+  if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  } else if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
 
-    if (!token || token === 'loggedout') {
-      return res.status(200).json({
-        status: 'success',
-        isLoggedIn: false,
-      });
-    }
-
-    // 2) verifying if token is valid
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // 3) check if user still exists
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(200).json({
-        status: 'success',
-        isLoggedIn: false,
-      });
-    }
-    // 4) check if user changed password after the token was issued
-    if (user.changedPasswordAfter(decoded.iat)) {
-      return res.status(200).json({
-        status: 'success',
-        isLoggedIn: false,
-      });
-    }
-    // Auto-initialize monthly expense document if missing // TODO modularize this part
-    // and import so as to keep this
-    // isLoggedIn function generalized
-
-    // Inside isLoggedIn, after verifying token and fetching user
-    // const today = new Date();
-    // const currentMonth = today.getMonth(); // 0-indexed
-    // const currentYear = today.getFullYear();
-
-    // const existingDoc = await Expense.findOne({
-    //   user: user._id,
-    //   month: currentMonth,
-    //   year: currentYear,
-    // });
-
-    // if (!existingDoc) {
-    //   console.log('Creating new monthly expense doc for user:', user._id); // ✅ Add this log
-    //   await Expense.create({
-    //     user: user._id,
-    //     month: currentMonth,
-    //     year: currentYear,
-    //     income: user.income || 0,
-    //     fixedExpenses: [],
-    //     transactions: [],
-    //   });
-    // }
-
-    // 5) if user is logged in
-    res.status(200).json({
-      status: 'success',
-      isLoggedIn: true,
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          income: user.income,
-        },
-      },
-    });
-  } catch (err) {
-    // we don't show errors for this route, we just say user is not logged in
-    res.status(200).json({
+  if (!token || token === 'loggedout') {
+    return res.status(200).json({
       status: 'success',
       isLoggedIn: false,
     });
   }
-};
+
+  // 2) verifying if token is valid
+  // The global error handler will catch JsonWebTokenError and TokenExpiredError
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  // 3) check if user still exists
+  const user = await User.findById(decoded.id);
+  if (!user) {
+    return res.status(200).json({
+      status: 'success',
+      isLoggedIn: false,
+    });
+  }
+  // 4) check if user changed password after the token was issued
+  if (user.changedPasswordAfter(decoded.iat)) {
+    return res.status(200).json({
+      status: 'success',
+      isLoggedIn: false,
+    });
+  }
+
+  // 5) if user is logged in
+  res.status(200).json({
+    status: 'success',
+    isLoggedIn: true,
+    data: {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        income: user.income,
+      },
+    },
+  });
+});
 
 // protect routes
-exports.protect = async (req, res, next) => {
-  try {
-    // 1) get the token and see if it still exists
-    let token;
+exports.protect = catchAsync(async (req, res, next) => {
+  // 1) get the token and see if it still exists
+  let token;
 
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith('Bearer')
-    ) {
-      token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies && req.cookies.jwt) {
-      token = req.cookies.jwt;
-    }
-
-    if (!token) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'You are not logged in. Please log in for access',
-      });
-    }
-
-    // 2) verifying if token is valid
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // 3) check if user still exists
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'The user belonging to this token no longer exists',
-      });
-    }
-    // 4) check if user changed password after the token was issued
-    if (user.changedPasswordAfter(decoded.iat)) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'User recently changed password! Please login again',
-      });
-    }
-
-    // 5) now grant access to the protected route
-    req.user = user;
-    next();
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Invalid token. Please log in again.',
-      });
-    } else if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Your token has expired. Please log in again.',
-      });
-    }
-
-    console.error('Auth protection error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Server error during authentication',
-    });
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies && req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
-};
+
+  if (!token) {
+    return next(
+      new AppError('You are not logged in. Please log in for access', 401)
+    );
+  }
+
+  // 2) verifying if token is valid
+  // This will throw errors handled by globalErrorHandler (JsonWebTokenError, TokenExpiredError)
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  // 3) check if user still exists
+  const user = await User.findById(decoded.id);
+  if (!user) {
+    return next(
+      new AppError('The user belonging to this token no longer exists', 401)
+    );
+  }
+  // 4) check if user changed password after the token was issued
+  if (user.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError('User recently changed password! Please login again', 401)
+    );
+  }
+
+  // 5) now grant access to the protected route
+  req.user = user;
+  next();
+});
 
 // forgot password
-exports.forgotPassword = async (req, res) => {
-  try {
-    // 1) get user based on POSTed email
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'There is no user with that email address',
-      });
-    }
-
-    // 2) generate the random reset token
-    const resetToken = user.createPasswordResetToken();
-    await user.save({ validateBeforeSave: false }); // this helps to turn
-    // of the validation from the model since we're using only the email
-
-    // 3) send the token to the user's email
-    const resetURL = `${req.protocol}://${req.get(
-      'host'
-    )}/api/v1/auth/resetPassword/${resetToken}`;
-
-    try {
-      // send email about password reset
-      await new EmailService(user, resetURL).sendPasswordReset();
-
-      res.status(200).json({
-        status: 'success',
-        message: 'Token sent to email',
-        resetURL, //TODO: we don't send this in productiomn
-      });
-    } catch (err) {
-      user.passwordResetToken = undefined;
-      user.passwordResetExpires = undefined;
-      await user.save({ validateBeforeSave: false });
-
-      return res.status(500).json({
-        status: 'error',
-        message: 'Error sending email. Try again later',
-      });
-    }
-  } catch (err) {
-    console.error('Forgot password error:', err);
-    res.status(500).json({
-      status: 'error',
-      message: 'Error processing password reset request',
-    });
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  // 1) get user based on POSTed email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError('There is no user with that email address', 404));
   }
-};
 
-// reset password
-exports.resetPassword = async (req, res) => {
+  // 2) generate the random reset token
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false }); // this helps to turn
+  // of the validation from the model since we're using only the email
+
+  // 3) send the token to the user's email
+  const resetURL = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/auth/resetPassword/${resetToken}`;
+
   try {
-    // 1) get user based on the token created during forgot password
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(req.params.token)
-      .digest('hex');
-    const user = await User.findOne({
-      passwordResetToken: hashedToken,
-      passwordResetExpires: { $gt: Date.now() },
+    // send email about password reset
+    await new EmailService(user, resetURL).sendPasswordReset();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Token sent to email',
+      resetURL, //TODO: we don't send this in productiomn
     });
-
-    // 2) if token has not expired and there's a user, then set new password
-    if (!user) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Token is invalid or has expired',
-      });
-    }
-    // 3) update password and remove reset token fields
-    const { password } = req.body;
-    if (!password) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Please provide a new password',
-      });
-    }
-
-    (user.password = req.body.password),
-      (user.confirmPassword = req.body.confirmPassword);
+  } catch (err) {
+    // If email sending fails, revert the token fields and then throw an operational error
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
-    user.passwordChangedAt = Date.now();
-    await user.save();
+    await user.save({ validateBeforeSave: false });
 
-    // 4) log the user in and send jwt
-    const token = createToken(user._id);
-
-    res.status(200).json({
-      status: 'success',
-      token,
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-        },
-      },
-    });
-  } catch (err) {
-    console.error('Reset password error:', err);
-    res.status(500).json({
-      status: 'error',
-      message: 'Error resetting password',
-    });
+    return next(new AppError('Error sending email. Try again later', 500));
   }
-};
+});
+
+// reset password
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  // 1) get user based on the token created during forgot password
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  // 2) if token has not expired and there's a user, then set new password
+  if (!user) {
+    return next(new AppError('Token is invalid or has expired', 400));
+  }
+  // 3) update password and remove reset token fields
+  const { password } = req.body;
+  if (!password) {
+    return next(new AppError('Please provide a new password', 400));
+  }
+
+  (user.password = req.body.password),
+    (user.confirmPassword = req.body.confirmPassword); // Model validation will handle password match
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  user.passwordChangedAt = Date.now();
+  await user.save(); // This will trigger pre-save hash and validation
+
+  // 4) log the user in and send jwt
+  const token = createToken(user._id);
+
+  res.status(200).json({
+    status: 'success',
+    token,
+    data: {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    },
+  });
+});
 
 // Update user password
-exports.updatePassword = async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
 
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Current password and new password are required',
-      });
-    }
-
-    const user = await User.findById(req.params.id).select('+password');
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
-    }
-
-    // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(
-      currentPassword,
-      user.password
+  if (!currentPassword || !newPassword) {
+    return next(
+      new AppError('Current password and new password are required', 400)
     );
-    if (!isCurrentPasswordValid) {
-      return res.status(400).json({
-        success: false,
-        message: 'Current password is incorrect',
-      });
-    }
-
-    // Update password (pre-save middleware will handle hashing)
-    user.password = newPassword;
-    user.confirmPassword = newPassword;
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Password updated successfully',
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Server Error',
-      error: error.message,
-    });
   }
-};
+
+  // Find user by req.user.id if this is intended for authenticated user,
+  // or by req.params.id if it's an admin changing another user's password.
+  // Assuming it's for the authenticated user based on typical app flow.
+  // The original code used req.params.id, so keeping that for now.
+  const user = await User.findById(req.params.id).select('+password');
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  // Verify current password
+  const isCurrentPasswordValid = await bcrypt.compare(
+    currentPassword,
+    user.password
+  );
+  if (!isCurrentPasswordValid) {
+    return next(new AppError('Current password is incorrect', 400));
+  }
+
+  // Update password (pre-save middleware will handle hashing)
+  user.password = newPassword;
+  user.confirmPassword = newPassword; // Ensure confirmPassword is also set for model validation
+  await user.save(); // This will trigger pre-save hash and validation
+
+  res.status(200).json({
+    success: true, // Keeping 'success' here for consistency with original format for this route
+    message: 'Password updated successfully',
+  });
+});
 
 // logout
-exports.logout = async (req, res) => {
-  try {
-    // clear Jwt
-    res.cookie('jwt', 'loggedout', {
-      expires: new Date(0), // jwt token expires immediately
-      httpOnly: true,
-    });
+exports.logout = (req, res) => {
+  // This can remain synchronous
+  // clear Jwt
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(0), // jwt token expires immediately
+    httpOnly: true,
+  });
 
-    res.status(200).json({
-      status: 'success',
-      message: 'Successfully logged out',
-    });
-  } catch (err) {
-    console.error('Logout error:', err);
-    res.status(500).json({
-      status: 'error',
-      message: 'Error during logout',
-    });
-  }
+  res.status(200).json({
+    status: 'success',
+    message: 'Successfully logged out',
+  });
 };

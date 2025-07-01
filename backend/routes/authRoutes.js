@@ -1,11 +1,18 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const passport = require('../config/passport');
+const rateLimit = require('express-rate-limit');
 
 const router = express.Router();
 
-router.post('/signup', authController.signUp);
-router.post('/login', authController.login);
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 login requests per windowMs
+  message: 'Too many login attempts from this IP, please try again later.',
+});
+
+// router.post('/signup', authController.signup);
+router.post('/login', loginLimiter, authController.login);
 router.get('/logout', authController.logout);
 router.get('/isLoggedIn', authController.isLoggedIn);
 router.post('/forgotpassword', authController.forgotPassword);

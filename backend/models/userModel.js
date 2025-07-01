@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Please provide your name'],
+      required: [true, 'Please tell us your name'],
+      trim: true,
     },
 
     email: {
@@ -17,6 +18,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       validate: [validator.isEmail, 'Please provide a valid email'],
+      trim: true,
     },
 
     password: {
@@ -27,6 +29,7 @@ const userSchema = new mongoose.Schema(
       },
       minLength: [8, 'Password must have atleast 8 characters'],
       select: false,
+      trim: true, // trim whitespace
     },
     confirmPassword: {
       type: String,
@@ -60,6 +63,7 @@ const userSchema = new mongoose.Schema(
     income: {
       type: Number,
       default: 0,
+      min: [0, 'Income cannot be negative'], // Ensure income is non-negative
     },
     expenses: [
       {
@@ -76,62 +80,55 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// instance method that creates a password reset token
-userSchema.methods.createPasswordResetToken = function () {
-  // 1) generate random token
-
-  const resetToken = crypto.randomBytes(32).toString('hex');
-
-  // 2) hash the token and store in the database
-  this.passwordResetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-
-  // 3) set expiration for 10minutes
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
-  // 4) Return the unhashed token to user // TODO:via email
-
-  return resetToken;
-};
-
-// Password management and encryption
+// Middleware to hash password before saving
 userSchema.pre('save', async function (next) {
-  //  Only hash if password was modified
-  if (!this.isModified('password') || !this.password) return next(); // ADDED `!this.password` check for clarity
-  // now hash the password
+  // Only run this function if password was actually modified
+  if (!this.isModified('password')) return next();
+
+  // Hash the password with cost of 12
   this.password = await bcrypt.hash(this.password, 12);
 
-  // remove confirmPassword after validation
+  // Delete confirmPassword field
   this.confirmPassword = undefined;
   next();
 });
 
-// Instance method to check if password was changed after JWT was issued
+// Middleware to update passwordChangedAt when password is changed
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000; // Subtract 1 second to ensure token is created after password change
+  next();
+});
+
+// Method to check if password was changed after token was issued
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
       10
     );
-
     return JWTTimestamp < changedTimestamp;
   }
-
-  // False means password was not changed
+  // False means not changed
   return false;
 };
 
-// Pre-save middleware to set passwordChangedAt
-userSchema.pre('save', function (next) {
-  if (!this.isModified('password') || this.isNew) return next();
+// Method to create password reset token
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
 
-  // Set passwordChangedAt to current time minus 1 second
-  // (to ensure the token is always created after password change)
-  this.passwordChangedAt = Date.now() - 1000;
-  next();
-});
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  console.log({ resetToken }, this.passwordResetToken); // For debugging, remove in production
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+  return resetToken;
+};
 
 const User = mongoose.model('User', userSchema);
 
