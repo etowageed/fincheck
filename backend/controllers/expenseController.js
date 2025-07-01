@@ -80,9 +80,32 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
 });
 
 // Update an existing transaction within a monthly expense document
+// Update an existing transaction within a monthly expense document
 exports.updateTransaction = catchAsync(async (req, res, next) => {
   const { month, year, transactionId } = req.params;
-  const { description, amount, category, type } = req.body;
+
+  // 1. Construct an update object containing ONLY the provided fields from req.body
+  const updateFields = {};
+  if (req.body.description !== undefined) {
+    updateFields.description = req.body.description;
+  }
+  if (req.body.amount !== undefined) {
+    updateFields.amount = req.body.amount;
+  }
+  if (req.body.category !== undefined) {
+    // Assuming category might also be updated partially
+    updateFields.category = req.body.category;
+  }
+  if (req.body.type !== undefined) {
+    // Assuming type might also be updated partially
+    updateFields.type = req.body.type;
+  }
+  // You can add other fields here if your transactionSchema had more updateable fields
+
+  // Check if any fields were actually provided for update
+  if (Object.keys(updateFields).length === 0) {
+    return next(new AppError('No valid fields provided for update.', 400));
+  }
 
   const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
 
@@ -92,14 +115,19 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
     );
   }
 
-  // Find the transaction by ID and update its fields
+  // Find the transaction by ID
   const transaction = expenseDoc.transactions.id(transactionId);
   if (!transaction) {
     return next(new AppError('Transaction not found.', 404));
   }
 
-  transaction.set({ description, amount, category, type }); // Update using .set()
+  // Apply only the provided fields to the transaction subdocument
+  // Mongoose will update only these fields, and 'required' validators
+  // for fields NOT in updateFields will not be triggered
+  // as long as they already have valid values in the document.
+  transaction.set(updateFields);
 
+  // Save the parent document, which also triggers subdocument validations for modified fields
   await expenseDoc.save({ validateBeforeSave: true });
 
   res.status(200).json({
@@ -132,24 +160,26 @@ exports.deleteTransaction = catchAsync(async (req, res, next) => {
 });
 
 // Delete a monthlyBudget item from a monthly expense document
+// Delete a monthly expense document
 exports.deleteMonthlyExpense = catchAsync(async (req, res, next) => {
-  const { month, year, monthlyBudgetId } = req.params;
+  const { month, year } = req.params;
 
+  // Find the document and then delete it
   const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
 
+  // IMPORTANT: Check if the document was found
   if (!expenseDoc) {
     return next(
       new AppError('No expense document found for this month and year.', 404)
     );
   }
 
-  expenseDoc.monthlyBudget.id(monthlyBudgetId).deleteOne(); // Use deleteOne() to remove subdocument
-
-  await expenseDoc.save({ validateBeforeSave: true });
+  // If the document exists, proceed to delete it
+  await expenseDoc.deleteOne(); // This line should now only execute if expenseDoc is not null
 
   res.status(204).json({
     status: 'success',
-    data: null,
+    data: null, // 204 No Content typically returns null data
   });
 });
 
