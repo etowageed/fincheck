@@ -200,3 +200,118 @@ exports.getMonthlyExpense = catchAsync(async (req, res, next) => {
     data: expenseDoc,
   });
 });
+
+// Compare current and previous periods (month or year) for financial metrics
+// TODO add support for comparing custom periods
+exports.comparePeriods = catchAsync(async (req, res, next) => {
+  const { periodType } = req.query; // 'month' or 'year'
+  const now = new Date();
+  const userId = req.user.id;
+
+  let currentFilter = {},
+    previousFilter = {};
+
+  if (periodType === 'month') {
+    const month = now.getMonth();
+    const year = now.getFullYear();
+    currentFilter = { user: userId, month, year };
+    previousFilter =
+      month === 0
+        ? { user: userId, month: 11, year: year - 1 }
+        : { user: userId, month: month - 1, year };
+  } else if (periodType === 'year') {
+    const year = now.getFullYear();
+    currentFilter = { user: userId, year };
+    previousFilter = { user: userId, year: year - 1 };
+  } else {
+    return next(
+      new AppError('Only "month" or "year" periodType is supported', 400)
+    );
+  }
+
+  const [currentDoc, previousDoc] = await Promise.all([
+    Finances.findOne(currentFilter),
+    Finances.findOne(previousFilter),
+  ]);
+
+  if (!currentDoc || !previousDoc) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Not enough data to compare the requested periods.',
+    });
+  }
+
+  const compareFields = [
+    'incomeTotal',
+    'expensesTotal',
+    'excludedExpensesTotal',
+    'safeToSpend',
+    'totalMonthlyBudget',
+    'outflow',
+  ];
+
+  const comparison = compareFields.reduce((result, field) => {
+    const current = currentDoc[field];
+    const previous = previousDoc[field];
+    const difference = current - previous;
+
+    let percentChange = null;
+    let direction = null;
+
+    if (previous !== 0) {
+      percentChange = (difference / previous) * 100;
+      percentChange = Math.round(percentChange * 100) / 100; // Round to 2 decimals
+
+      if (percentChange > 0) direction = 'increase';
+      else if (percentChange < 0) direction = 'decrease';
+      else direction = 'same';
+    }
+
+    result[field] = {
+      current,
+      previous,
+      difference,
+      percentChange,
+      direction, // useful for frontend to decide icon (e.g., ↑ ↓ ↔)
+      displayValue:
+        percentChange !== null
+          ? `${percentChange > 0 ? '+' : ''}${percentChange}%`
+          : 'N/A',
+    };
+
+    return result;
+  }, {});
+
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  const currentPeriodLabel =
+    periodType === 'month'
+      ? `${monthNames[currentDoc.month]} ${currentDoc.year}`
+      : `${currentDoc.year}`;
+
+  const previousPeriodLabel =
+    periodType === 'month'
+      ? `${monthNames[previousDoc.month]} ${previousDoc.year}`
+      : `${previousDoc.year}`;
+
+  res.status(200).json({
+    status: 'success',
+    periodType,
+    currentPeriod: currentPeriodLabel,
+    previousPeriod: previousPeriodLabel,
+    comparison,
+  });
+});

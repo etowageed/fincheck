@@ -1,5 +1,6 @@
 // backend/controllers/userController.js
 const User = require('../models/userModel');
+const Finances = require('../models/financesModel');
 const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
@@ -85,17 +86,60 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
   });
 });
 
-// get user profile data
+// get user profile data plus dashboard
+
 exports.getMe = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('-password');
   if (!user) {
     return next(new AppError('User not found', 404));
   }
 
+  // Get current month/year
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  // Get current month's finances
+  const finances = await Finances.findOne({
+    user: req.user.id,
+    month: currentMonth,
+    year: currentYear,
+  });
+
+  // Default response if no data for this month
+  const dashboard = finances
+    ? {
+        transactions: finances.transactions.slice(-5).reverse(), // latest 5 transactions
+        metrics: {
+          incomeTotal: finances.incomeTotal,
+          expensesTotal: finances.expensesTotal,
+          excludedExpensesTotal: finances.excludedExpensesTotal,
+          outflow: finances.outflow,
+          safeToSpend: finances.safeToSpend,
+          totalMonthlyBudget: finances.totalMonthlyBudget,
+          totalRecurringExpenses: finances.totalRecurringExpenses,
+          totalNonRecurringExpenses: finances.totalNonRecurringExpenses,
+        },
+      }
+    : {
+        transactions: [],
+        metrics: {
+          incomeTotal: 0,
+          expensesTotal: 0,
+          excludedExpensesTotal: 0,
+          outflow: 0,
+          safeToSpend: 0,
+          totalMonthlyBudget: 0,
+          totalRecurringExpenses: 0,
+          totalNonRecurringExpenses: 0,
+        },
+      };
+
   res.status(200).json({
     status: 'success',
     data: {
       user,
+      dashboard,
     },
   });
 });

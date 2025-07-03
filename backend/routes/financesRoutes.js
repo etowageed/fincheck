@@ -22,4 +22,6 @@ router
   .patch(financesController.updateTransaction)
   .delete(financesController.deleteTransaction);
 
+router.get('/compare', financesController.comparePeriods);
+
 module.exports = router;

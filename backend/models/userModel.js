@@ -66,17 +66,6 @@ const userSchema = new mongoose.Schema(
       default: 'user', // Default role for new users
     },
 
-    income: {
-      type: Number,
-      default: 0,
-      min: [0, 'Income cannot be negative'], // Ensure income is non-negative
-    },
-    expenses: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Expense',
-      },
-    ],
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
