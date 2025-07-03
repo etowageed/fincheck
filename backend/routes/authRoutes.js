@@ -11,7 +11,7 @@ const loginLimiter = rateLimit({
   message: 'Too many login attempts from this IP, please try again later.',
 });
 
-// router.post('/signup', authController.signup);
+router.post('/signup', authController.signup);
 router.post('/login', loginLimiter, authController.login);
 router.get('/logout', authController.logout);
 router.get('/isLoggedIn', authController.isLoggedIn);

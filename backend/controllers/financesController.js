@@ -1,11 +1,11 @@
-// backend/controllers/expenseController.js
-const Expense = require('../models/expenseModel');
+// backend/controllers/financesController.js
+const Finances = require('../models/financesModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
-// Create or update monthly expense document (monthlyBudget and actuals)
-exports.upsertMonthlyExpense = catchAsync(async (req, res, next) => {
-  let { month, year, income, monthlyBudget } = req.body;
+// Create or update monthly finances document (monthlyBudget and actuals)
+exports.upsertMonthlyFinances = catchAsync(async (req, res, next) => {
+  let { month, year, monthlyBudget } = req.body;
   // Use 'let' as we might reassign month/year
 
   // If month or year are not provided in the request body,
@@ -19,9 +19,9 @@ exports.upsertMonthlyExpense = catchAsync(async (req, res, next) => {
     year = currentDate.getFullYear();
   }
 
-  const expenseDoc = await Expense.findOneAndUpdate(
+  const expenseDoc = await Finances.findOneAndUpdate(
     { user: req.user.id, month, year }, // Query based on user, calculated/provided month and year
-    { income, monthlyBudget }, // Data to update/set (income and monthlyBudget array)
+    { monthlyBudget },
     {
       upsert: true, // Create the document if it doesn't exist
       new: true, // Return the updated/new document
@@ -38,7 +38,7 @@ exports.upsertMonthlyExpense = catchAsync(async (req, res, next) => {
 
 // Get all monthly expense summaries for a user (e.g., for dashboard overview)
 exports.getAllMonthlyExpenses = catchAsync(async (req, res, next) => {
-  const expenses = await Expense.find({ user: req.user.id }).sort({
+  const expenses = await Finances.find({ user: req.user.id }).sort({
     year: -1,
     month: -1,
   });
@@ -55,7 +55,7 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
   const { month, year } = req.params; // Expect month and year from URL parameters
   const { description, amount, category, type } = req.body;
 
-  const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+  const expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
 
   if (!expenseDoc) {
     return next(
@@ -107,7 +107,7 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
     return next(new AppError('No valid fields provided for update.', 400));
   }
 
-  const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+  const expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
 
   if (!expenseDoc) {
     return next(
@@ -140,7 +140,7 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
 exports.deleteTransaction = catchAsync(async (req, res, next) => {
   const { month, year, transactionId } = req.params;
 
-  const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+  const expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
 
   if (!expenseDoc) {
     return next(
@@ -165,7 +165,7 @@ exports.deleteMonthlyExpense = catchAsync(async (req, res, next) => {
   const { month, year } = req.params;
 
   // Find the document and then delete it
-  const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+  const expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
 
   // IMPORTANT: Check if the document was found
   if (!expenseDoc) {
@@ -187,7 +187,7 @@ exports.deleteMonthlyExpense = catchAsync(async (req, res, next) => {
 exports.getMonthlyExpense = catchAsync(async (req, res, next) => {
   const { month, year } = req.params;
 
-  const expenseDoc = await Expense.findOne({ user: req.user.id, month, year });
+  const expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
 
   if (!expenseDoc) {
     return next(

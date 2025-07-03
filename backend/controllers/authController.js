@@ -2,7 +2,6 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
-const Expense = require('../models/expenseModel');
 const EmailService = require('../utils/emails');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -173,6 +172,7 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
         name: user.name,
         email: user.email,
         income: user.income,
+        role: user.role,
       },
     },
   });
@@ -220,6 +220,19 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = user;
   next();
 });
+
+// middleware to restrict access based on roles
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    // roles is an array like ['admin', 'lead-guide']
+    if (!req.user || !roles.includes(req.user.role)) {
+      return next(
+        new AppError('You do not have permission to perform this action', 403)
+      );
+    }
+    next();
+  };
+};
 
 // forgot password
 exports.forgotPassword = catchAsync(async (req, res, next) => {
@@ -298,6 +311,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     },
   });

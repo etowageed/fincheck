@@ -13,6 +13,11 @@ const monthlyBudgetSchema = new mongoose.Schema({
     required: [true, 'Please provide an amount'],
     min: [0, 'Amount must be positive'],
   },
+
+  isRecurring: {
+    type: Boolean,
+    default: true, // Default to true for recurring expenses
+  },
 });
 
 // subdocument schema for actual transactions (money spent)
@@ -37,15 +42,16 @@ const transactionSchema = new mongoose.Schema({
 
   type: {
     type: String,
-    enum: ['actual', 'excluded'],
-    default: 'actual',
+    required: [true, 'Transaction type is required'], // Added required validation
+    enum: ['expense', 'excludedExpense', 'income'],
+    default: 'expense',
   }, // 'excluded expenses = savings/investments
   date: { type: Date, default: Date.now },
 });
 
 // main expense schema
 
-const expenseSchema = new mongoose.Schema(
+const financesSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.ObjectId,
@@ -62,11 +68,7 @@ const expenseSchema = new mongoose.Schema(
       type: Number,
       default: () => new Date().getFullYear(), // Automatically sets to current year
     },
-    income: {
-      type: Number,
-      default: 0,
-      min: [0, 'Income cannot be negative'], // Ensured min validation
-    },
+
     monthlyBudget: {
       type: [monthlyBudgetSchema],
       default: [],
@@ -88,41 +90,61 @@ const expenseSchema = new mongoose.Schema(
 
 // Compound index to ensure unique monthly expense document per user
 // This index will still work correctly with default values for month and year.
-expenseSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
+financesSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
 
 // virtual properties = computed fields that are not stored in the database
 // but calculated dynamically whenever a document is read
 
 // Virtual properties = computed fields that are not stored in the database
-expenseSchema.virtual('totalMonthlyBudget').get(function () {
+
+financesSchema.virtual('totalMonthlyBudget').get(function () {
   return this.monthlyBudget.reduce((sum, exp) => sum + exp.amount, 0);
 });
 
-expenseSchema.virtual('actualSpend').get(function () {
+// Total recurring budget = sum of all recurring expenses in the monthly budget
+financesSchema.virtual('totalRecurringExpenses').get(function () {
+  return this.monthlyBudget
+    .filter((item) => item.isRecurring)
+    .reduce((sum, item) => sum + item.amount, 0);
+});
+
+// Total non-recurring expenses = sum of all non-recurring expenses in the monthly budget
+financesSchema.virtual('totalNonRecurringExpenses').get(function () {
+  return this.monthlyBudget
+    .filter((item) => !item.isRecurring)
+    .reduce((sum, item) => sum + item.amount, 0);
+});
+
+// total expenses
+financesSchema.virtual('expensesTotal').get(function () {
   return this.transactions
-    .filter((t) => t.type === 'actual')
+    .filter((t) => t.type === 'expense')
     .reduce((sum, tx) => sum + tx.amount, 0);
 });
 
-expenseSchema.virtual('excludedTotal').get(function () {
+// total income
+financesSchema.virtual('incomeTotal').get(function () {
   return this.transactions
-    .filter((t) => t.type === 'excluded')
+    .filter((t) => t.type === 'income')
     .reduce((sum, tx) => sum + tx.amount, 0);
 });
 
-expenseSchema.virtual('safeToSpend').get(function () {
-  return (
-    this.income -
-    this.totalMonthlyBudget -
-    this.actualSpend -
-    this.excludedTotal
-  );
+// total excluded expenses (savings/investments)
+financesSchema.virtual('excludedExpensesTotal').get(function () {
+  return this.transactions
+    .filter((t) => t.type === 'excludedExpense')
+    .reduce((sum, tx) => sum + tx.amount, 0);
 });
 
-expenseSchema.virtual('netSpend').get(function () {
-  return this.actualSpend + this.excludedTotal;
+// safe to spend
+financesSchema.virtual('safeToSpend').get(function () {
+  return this.incomeTotal - this.totalMonthlyBudget - this.outflow;
 });
 
-const Expense = mongoose.model('Expense', expenseSchema);
+financesSchema.virtual('outflow').get(function () {
+  return this.expensesTotal + this.excludedExpensesTotal;
+});
 
-module.exports = Expense;
+const Finances = mongoose.model('Finances', financesSchema);
+
+module.exports = Finances;

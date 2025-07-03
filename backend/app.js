@@ -7,6 +7,9 @@ const enforce = require('express-sslify'); // Add this for HTTPS enforcement
 const session = require('express-session'); // Add this
 require('dotenv').config();
 
+const morgan = require('morgan'); // For logging requests in development
+const cors = require('cors'); // For handling CORS
+
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./middleware/errorHandler'); // Import the global error handler
 
@@ -18,6 +21,22 @@ app.use(helmet()); // Set security headers
 // if (process.env.NODE_ENV === 'production') {
 //   app.use(enforce.HTTPS({ trustProtoHeader: true })); // Important for Heroku, AWS ELB, etc.
 // }
+
+// Morgan for logging requests
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev')); // Use 'dev' format for concise output during development
+}
+
+// CORS Configuration
+// In development, you might allow all origins or specific development origins.
+// In production, always restrict to your frontend's domain(s).
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || '*', // Replace with your frontend's URL in production
+  credentials: true, // Allow cookies to be sent with requests
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+};
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
 
@@ -49,7 +68,7 @@ app.use(passport.session());
 // importing the routers
 const authRouter = require('./routes/authRoutes');
 const userRouter = require('./routes/userRoutes');
-const expenseRouter = require('./routes/expenseRoutes');
+const expenseRouter = require('./routes/financesRoutes');
 
 app.use(express.json({ limit: '10kb' }));
 

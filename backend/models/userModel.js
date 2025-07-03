@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const { type } = require('os');
 
 const userSchema = new mongoose.Schema(
   {
@@ -58,6 +57,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true,
+    },
+
+    role: {
+      // Add this new role field
+      type: String,
+      enum: ['user', 'admin'], // Allowed roles
+      default: 'user', // Default role for new users
     },
 
     income: {
