@@ -2,6 +2,7 @@
 const Finances = require('../models/financesModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const { body, validationResult } = require('express-validator');
 
 // Create or update monthly finances document (monthlyBudget and actuals)
 exports.upsertMonthlyFinances = catchAsync(async (req, res, next) => {
@@ -50,17 +51,67 @@ exports.getAllMonthlyExpenses = catchAsync(async (req, res, next) => {
   });
 });
 
+// Validation middleware for adding a transaction
+exports.validateTransaction = [
+  body('description')
+    .isString()
+    .withMessage('Description must be a string')
+    .trim()
+    .notEmpty()
+    .withMessage('Description is required')
+    .escape(),
+  body('amount')
+    .isFloat({ min: 0 })
+    .withMessage('Amount must be a positive number'),
+  body('category')
+    .isString()
+    .withMessage('Category must be a string')
+    .trim()
+    .notEmpty()
+    .withMessage('Category is required')
+    .escape(),
+  body('type')
+    .optional()
+    .isIn(['expense', 'excludedExpense', 'income'])
+    .withMessage('Type must be expense, excludedExpense, or income'),
+];
+
 // Add a transaction to an existing monthly expense document
 exports.addTransaction = catchAsync(async (req, res, next) => {
+  // Check validation result
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(
+      new AppError(
+        errors
+          .array()
+          .map((e) => e.msg)
+          .join(', '),
+        400
+      )
+    );
+  }
+
   const { month, year } = req.params; // Expect month and year from URL parameters
   const { description, amount, category, type } = req.body;
 
-  const expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
+  let expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
 
+  // If no document exists, create a new one with an empty monthlyBudget
   if (!expenseDoc) {
-    return next(
-      new AppError('No expense document found for this month and year.', 404)
-    );
+    expenseDoc = new Finances({
+      user: req.user.id,
+      month,
+      year,
+      monthlyBudget: [
+        {
+          category: category || 'Uncategorized',
+          amount: amount,
+          isRecurring: false,
+        },
+      ],
+      transactions: [],
+    });
   }
 
   // Add the new transaction to the transactions array
@@ -68,10 +119,10 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
     description,
     amount,
     category,
-    type: type || 'actual', // Default to 'actual' if type is not provided
+    type: type || 'actual',
   });
 
-  await expenseDoc.save({ validateBeforeSave: true }); // Save and run validators
+  await expenseDoc.save({ validateBeforeSave: true });
 
   res.status(200).json({
     status: 'success',
@@ -238,6 +289,10 @@ exports.comparePeriods = catchAsync(async (req, res, next) => {
     return res.status(404).json({
       status: 'fail',
       message: 'Not enough data to compare the requested periods.',
+      missing: {
+        current: !currentDoc,
+        previous: !previousDoc,
+      },
     });
   }
 

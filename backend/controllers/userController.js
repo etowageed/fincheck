@@ -72,6 +72,42 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   });
 });
 
+// updating me (the logged-in user)
+exports.updateMe = catchAsync(async (req, res, next) => {
+  const { name, email } = req.body;
+  const updateData = {};
+
+  if (name) updateData.name = name;
+  if (email) updateData.email = email;
+
+  // checking if email being updated and already exists
+  if (email) {
+    const existingUser = await User.findOne({
+      email,
+      _id: { $ne: req.user.id }, // <-- use req.user.id here
+    });
+
+    if (existingUser) {
+      return next(new AppError('User with this email already exists', 400));
+    }
+  }
+  const user = await User.findByIdAndUpdate(req.user.id, updateData, {
+    // <-- use req.user.id here
+    new: true,
+    runValidators: true,
+    select: '-password',
+  });
+
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
 // delete user
 exports.deleteUser = catchAsync(async (req, res, next) => {
   const user = await User.findByIdAndDelete(req.params.id);

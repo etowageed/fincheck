@@ -10,7 +10,11 @@ router
   .post('/', financesController.upsertMonthlyFinances)
   .get('/', financesController.getAllMonthlyExpenses); // creates or updates monthly expense
 
-router.post('/:month/:year/transactions', financesController.addTransaction);
+router.post(
+  '/:month/:year/transactions',
+  financesController.validateTransaction,
+  financesController.addTransaction
+);
 
 router
   .route('/:month/:year')
