@@ -1,12 +1,14 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const userController = require('../controllers/userController');
+const exportController = require('../controllers/exportController');
 
 const router = express.Router();
 
 router.use(authController.protect); // protects all the routes that follow
 
 router.route('/me').get(userController.getMe).patch(userController.updateMe);
+router.get('/me/export', exportController.downloadData);
 
 router.get('/', authController.restrictTo('admin'), userController.getAllUsers);
 

@@ -68,14 +68,14 @@ app.use(passport.session());
 // importing the routers
 const authRouter = require('./routes/authRoutes');
 const userRouter = require('./routes/userRoutes');
-const expenseRouter = require('./routes/financesRoutes');
+const financesRouter = require('./routes/financesRoutes');
 
 app.use(express.json({ limit: '10kb' }));
 
 // mounting the routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
-app.use('/api/v1/expenses', expenseRouter);
+app.use('/api/v1/finances', financesRouter);
 
 // Handle undefined routes
 app.all('/{*any}', (req, res, next) => {
