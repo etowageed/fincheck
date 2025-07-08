@@ -41,6 +41,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     confirmPassword,
     income: req.body.income || 0,
     expenses: [],
+    lastKnownIP: req.ip || req.headers['x-forwarded-for'],
   });
   // send welcome email
   const signupURL = `${req.protocol}://${req.get('host')}/api/v1/users/me`;
@@ -84,6 +85,8 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 2a) find user by email and check if user exists and pwd is correct
   const user = await User.findOne({ email }).select('+password');
+  user.lastKnownIP = req.ip || req.headers['x-forwarded-for'];
+  await user.save({ validateBeforeSave: false }); // Save IP without validation
 
   if (!user) {
     return res.status(401).json({
@@ -92,15 +95,7 @@ exports.login = catchAsync(async (req, res, next) => {
     });
   }
 
-  // 2b) verify password by comparing entered password with hashed password
-  // const isMatch = await bcrypt.compare(password, user.password);
-
-  // if (!isMatch) {
-  //   return res.status(401).json({
-  //     status: 'error',
-  //     message: 'Incorrect email or password',
-  //   });
-  // }
+  // 2b) verify password
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
     // Combines user check and password verification for timing attack prevention

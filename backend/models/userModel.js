@@ -66,6 +66,11 @@ const userSchema = new mongoose.Schema(
       default: 'user', // Default role for new users
     },
 
+    lastKnownIP: {
+      type: String,
+      default: '',
+    },
+
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,

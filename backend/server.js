@@ -2,6 +2,7 @@ const EmailService = require('./utils/emails'); // Adjust the path as necessary
 const User = require('./models/userModel'); // Adjust the path as necessary
 const mongoose = require('mongoose');
 require('dotenv').config();
+require('./utils/weeklySummaryJob');
 
 const app = require('./app');
 
