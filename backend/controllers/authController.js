@@ -33,6 +33,10 @@ exports.signup = catchAsync(async (req, res, next) => {
   }
   // 3) Hash the password (actually happens in the presave hook)
 
+  // Get the user's IP address, handling proxies
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = forwarded ? forwarded.split(',')[0] : req.ip;
+
   //  4) finally create new user
   const newUser = await User.create({
     name,
@@ -41,7 +45,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     confirmPassword,
     income: req.body.income || 0,
     expenses: [],
-    lastKnownIP: req.ip || req.headers['x-forwarded-for'],
+    lastKnownIP: ip, // Save the last known IP address
   });
   // send welcome email
   const signupURL = `${req.protocol}://${req.get('host')}/api/v1/users/me`;
@@ -85,7 +89,11 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 2a) find user by email and check if user exists and pwd is correct
   const user = await User.findOne({ email }).select('+password');
-  user.lastKnownIP = req.ip || req.headers['x-forwarded-for'];
+
+  // Get the user's IP address, handling proxies
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = forwarded ? forwarded.split(',')[0] : req.ip;
+  user.lastKnownIP = ip;
   await user.save({ validateBeforeSave: false }); // Save IP without validation
 
   if (!user) {

@@ -31,12 +31,21 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: '/api/v1/auth/google/callback', // Ensure this matches your route
       scope: ['profile', 'email'],
+      passReqToCallback: true,
     },
-    async (issuer, profile, cb) => {
+    async (req, issuer, profile, cb) => {
       try {
+        // Get the user's IP address, handling proxies
+        const forwarded = req.headers['x-forwarded-for'];
+        const ip = forwarded ? forwarded.split(',')[0] : req.ip;
+
         let user = await User.findOne({ googleId: profile.id });
 
         if (user) {
+          // Update last known IP address
+          user.lastKnownIP = ip;
+          await user.save({ validateBeforeSave: false });
+
           return cb(null, user);
           // eslint-disable-next-line no-else-return
         } else {
@@ -46,6 +55,7 @@ passport.use(
             if (user) {
               // Link existing email user to Google account
               user.googleId = profile.id;
+              user.lastKnownIP = ip; // Update last known IP address
               await user.save();
               return cb(null, user);
             }
@@ -59,6 +69,7 @@ passport.use(
                 ? profile.emails[0].value
                 : null,
             // You might not get a password from social login, so it'll be null or undefined
+            lastKnownIP: ip, // Save the last known IP address
           });
           await newUser.save();
 
@@ -102,12 +113,18 @@ passport.use(
       clientSecret: process.env.FACEBOOK_APP_SECRET,
       callbackURL: '/api/v1/auth/facebook/callback', // Ensure this matches your route
       profileFields: ['id', 'displayName', 'emails'], // Request necessary fields
+      passReqToCallback: true,
     },
-    async (accessToken, refreshToken, profile, cb) => {
+    async (req, accessToken, refreshToken, profile, cb) => {
       try {
+        const forwarded = req.headers['x-forwarded-for'];
+        const ip = forwarded ? forwarded.split(',')[0] : req.ip;
+
         let user = await User.findOne({ facebookId: profile.id });
 
         if (user) {
+          user.lastKnownIP = ip;
+          await user.save({ validateBeforeSave: false });
           return cb(null, user);
           // eslint-disable-next-line no-else-return
         } else {
@@ -115,6 +132,7 @@ passport.use(
             user = await User.findOne({ email: profile.emails[0].value });
             if (user) {
               user.facebookId = profile.id;
+              user.lastKnownIP = ip;
               await user.save();
               return cb(null, user);
             }
@@ -126,6 +144,7 @@ passport.use(
               profile.emails && profile.emails.length > 0
                 ? profile.emails[0].value
                 : null,
+            lastKnownIP: ip, // Save the last known IP address
           });
           await newUser.save();
 
