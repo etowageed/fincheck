@@ -172,6 +172,4 @@ passport.use(
   )
 );
 
-// TODO:facebook Oauth
-// Export passport to be used in your app.js
 module.exports = passport;

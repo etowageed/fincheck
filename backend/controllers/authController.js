@@ -262,7 +262,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       message: 'Token sent to email',
-      resetURL, //TODO: we don't send this in productiomn
+      resetURL, // we don't send this in production
     });
   } catch (err) {
     // If email sending fails, revert the token fields and then throw an operational error
