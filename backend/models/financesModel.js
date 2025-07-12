@@ -145,6 +145,19 @@ financesSchema.virtual('outflow').get(function () {
   return this.expensesTotal + this.excludedExpensesTotal;
 });
 
+// expenses performance
+financesSchema.virtual('expensesPerformance').get(function () {
+  const budget = this.totalMonthlyBudget;
+  const expenses = this.expensesTotal;
+  if (budget === 0) {
+    return { status: 'safe', percentageUsed: 0 }; // No budget set, always safe
+  }
+  const percentageUsed = Math.round((expenses / budget) * 100);
+  // Below 90% of budget is 'safe', 90% or above is 'danger'
+  const status = percentageUsed < 90 ? 'safe' : 'danger';
+  return { status, percentageUsed };
+});
+
 const Finances = mongoose.model('Finances', financesSchema);
 
 module.exports = Finances;
