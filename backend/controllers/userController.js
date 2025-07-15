@@ -155,6 +155,7 @@ exports.getMe = catchAsync(async (req, res, next) => {
           totalMonthlyBudget: finances.totalMonthlyBudget,
           totalRecurringExpenses: finances.totalRecurringExpenses,
           totalNonRecurringExpenses: finances.totalNonRecurringExpenses,
+          plannedSavings: finances.plannedSavings,
         },
       }
     : {
@@ -168,6 +169,7 @@ exports.getMe = catchAsync(async (req, res, next) => {
           totalMonthlyBudget: 0,
           totalRecurringExpenses: 0,
           totalNonRecurringExpenses: 0,
+          plannedSavings: 0,
         },
       };
 

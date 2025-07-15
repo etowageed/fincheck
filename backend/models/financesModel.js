@@ -58,6 +58,12 @@ const financesSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    expectedMonthlyIncome: {
+      // this is the user's expected monthly income
+      type: Number,
+      min: [0, 'Expected monthly income must be positive'],
+      required: false,
+    },
     month: {
       type: Number,
       min: [0, 'Month must be between 0 (Jan) and 11 (Dec)'], // Ensured min validation with message
@@ -156,6 +162,12 @@ financesSchema.virtual('expensesPerformance').get(function () {
   // Below 90% of budget is 'safe', 90% or above is 'danger'
   const status = percentageUsed < 90 ? 'safe' : 'danger';
   return { status, percentageUsed };
+});
+
+// Planned savings = expected monthly income - total budget
+financesSchema.virtual('plannedSavings').get(function () {
+  if (typeof this.expectedMonthlyIncome !== 'number') return 0;
+  return this.expectedMonthlyIncome - this.totalMonthlyBudget;
 });
 
 const Finances = mongoose.model('Finances', financesSchema);

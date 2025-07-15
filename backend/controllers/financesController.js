@@ -6,8 +6,7 @@ const { body, validationResult } = require('express-validator');
 
 // Create or update monthly finances document (monthlyBudget and actuals)
 exports.upsertMonthlyFinances = catchAsync(async (req, res, next) => {
-  let { month, year, monthlyBudget } = req.body;
-  // Use 'let' as we might reassign month/year
+  let { month, year, monthlyBudget, expectedMonthlyIncome } = req.body;
 
   // If month or year are not provided in the request body,
   // automatically set them to the current month and year.
@@ -22,7 +21,7 @@ exports.upsertMonthlyFinances = catchAsync(async (req, res, next) => {
 
   const expenseDoc = await Finances.findOneAndUpdate(
     { user: req.user.id, month, year }, // Query based on user, calculated/provided month and year
-    { monthlyBudget },
+    { monthlyBudget, expectedMonthlyIncome },
     {
       upsert: true, // Create the document if it doesn't exist
       new: true, // Return the updated/new document
