@@ -19,7 +19,7 @@ const routes = [
   {
     path: "/forgot-password",
     name: "ForgotPassword",
-    component: () => import("@/views/auth/ForgotPassword.vue"),
+    component: () => import("@/components/auth/ForgotPasswordForm.vue"),
   },
   {
     path: "/dashboard",

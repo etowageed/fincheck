@@ -2,10 +2,10 @@
 <template>
     <div>
         <h1>Login page</h1>
-        <AuthLoginForm />
+        <LoginForm />
     </div>
 </template>
 
 <script setup>
-import AuthForm from '@/components/auth/AuthForm.vue';
+import LoginForm from "@/components/auth/LoginForm.vue";
 </script>
