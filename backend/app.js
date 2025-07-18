@@ -38,7 +38,14 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
 };
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  })
+);
+
+//TODO setup proper cors structure with .env for production
 
 app.use(cookieParser());
 

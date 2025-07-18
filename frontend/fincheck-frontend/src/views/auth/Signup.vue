@@ -1,12 +1,14 @@
 <template>
     <div>
-        this is the signup component
+        <div class="min-h-screen flex items-center justify-center bg-gray-100">
+
+            <SignupForm />
+
+        </div>
 
     </div>
 </template>
 
 <script setup>
-
+import SignupForm from '@/components/auth/SignupForm.vue';
 </script>
-
-<style lang="scss" scoped></style>
