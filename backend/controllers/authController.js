@@ -13,6 +13,8 @@ const createToken = (id) => {
   });
 };
 
+exports.createToken = createToken;
+
 // sign up
 exports.signup = catchAsync(async (req, res, next) => {
   const { name, email, password, confirmPassword } = req.body;

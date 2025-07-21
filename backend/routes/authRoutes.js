@@ -2,7 +2,7 @@ const express = require('express');
 const authController = require('../controllers/authController');
 const passport = require('../config/passport');
 const rateLimit = require('express-rate-limit');
-
+const userRoutes = require('./userRoutes'); // Assuming you have user routes defined
 const router = express.Router();
 
 const loginLimiter = rateLimit({
@@ -19,6 +19,8 @@ router.post('/forgotpassword', authController.forgotPassword);
 router.patch('/resetpassword/:token', authController.resetPassword);
 router.patch('/:id/updatepassword', authController.updatePassword);
 
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 // Google Auth Routes
 router.get(
   '/google',
@@ -27,10 +29,13 @@ router.get(
 
 router.get(
   '/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', { failureRedirect: `${frontendUrl}/login` }),
   (req, res) => {
-    // Successful authentication, redirect home or to a dashboard
-    res.redirect('/api/v1/users/me'); // Or wherever you redirect after login
+    const token = require('../controllers/authController').createToken(
+      req.user.id
+    );
+    // res.redirect(`${frontendUrl}/social-callback?token=${token}`);
+    res.redirect(`${frontendUrl}/social-callback#token=${token}`);
   }
 );
 
@@ -42,9 +47,15 @@ router.get(
 
 router.get(
   '/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  passport.authenticate('facebook', {
+    failureRedirect: `${frontendUrl}/login`,
+  }),
   (req, res) => {
-    res.redirect('/api/v1/users/me'); // Or wherever you redirect after login
+    const token = require('../controllers/authController').createToken(
+      req.user.id
+    );
+    // res.redirect(`${frontendUrl}/social-callback?token=${token}`);
+    res.redirect(`${frontendUrl}/social-callback#token=${token}`);
   }
 );
 
