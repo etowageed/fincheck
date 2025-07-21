@@ -22,13 +22,18 @@ const routes = [
     component: () => import("@/views/TransactionsPage.vue"),
   },
   {
+    path: "/dashboard",
+    name: "Dashboard",
+    component: () => import("@/views/DashboardPage.vue"),
+  },
+  {
     path: "/forgot-password",
     name: "ForgotPassword",
     component: () => import("@/components/auth/ForgotPasswordForm.vue"),
   },
   {
-    path: "/social-callback",
-    component: () => import("@/views/auth/SocialCallback.vue"),
+    path: "/login-callback",
+    component: () => import("@/views/auth/LoginCallback.vue"),
   },
   // {
   //   path: "/dashboard",

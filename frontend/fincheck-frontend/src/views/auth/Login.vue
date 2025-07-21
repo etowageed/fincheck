@@ -14,10 +14,9 @@ import LoginForm from '@/components/auth/LoginForm.vue';
 const router = useRouter();
 
 const handleLogin = (data) => {
-    // Expect data to be the response from LoginForm (res.data)
-    if (data?.status === 'success' && data?.token) {
-        // Redirect to the same callback page as social login
-        router.push(`/social-callback#token=${data.token}`);
+    // On successful login, redirect to /transactions (token is now in httpOnly cookie)
+    if (data?.status === 'success') {
+        router.push('/transactions');
     } else {
         // Show error or toast
         console.error('Login failed', data);

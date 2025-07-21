@@ -1,11 +1,11 @@
 <template>
     <div>
-        thsi is the transactions page
+        this is the transactions page
+        <UserTransactions />
     </div>
 </template>
 
 <script setup>
+import UserTransactions from '@/components/dashboard/UserTransactions.vue';
 
 </script>
-
-<style lang="scss" scoped></style>

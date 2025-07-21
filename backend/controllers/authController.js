@@ -13,7 +13,17 @@ const createToken = (id) => {
   });
 };
 
+function sendTokenWithCookie(res, token) {
+  res.cookie('jwt', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'Lax',
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+  });
+}
+
 exports.createToken = createToken;
+exports.sendTokenWithCookie = sendTokenWithCookie;
 
 // sign up
 exports.signup = catchAsync(async (req, res, next) => {
@@ -67,8 +77,10 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   // 5) create and send JWT
   const token = createToken(newUser._id);
-  // 6) hide password in response
   newUser.password = undefined;
+
+  // Set HTTP-only cookie
+  sendTokenWithCookie(res, token);
 
   res.status(201).json({
     status: 'success',
@@ -114,9 +126,12 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 3) create and send jwt
   const token = createToken(user._id);
-  user.password = undefined; // this hides the password in the response
+  user.password = undefined;
 
-  // 4) send user data
+  // Set HTTP-only cookie
+  sendTokenWithCookie(res, token);
+
+  // 4) send user data as before
   res.status(200).json({
     status: 'success',
     token,

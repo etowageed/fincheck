@@ -1,9 +1,13 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const authController = require('../controllers/authController');
 const passport = require('../config/passport');
-const rateLimit = require('express-rate-limit');
-const userRoutes = require('./userRoutes'); // Assuming you have user routes defined
+
 const router = express.Router();
+const {
+  createToken,
+  sendTokenWithCookie,
+} = require('../controllers/authController');
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -31,11 +35,9 @@ router.get(
   '/google/callback',
   passport.authenticate('google', { failureRedirect: `${frontendUrl}/login` }),
   (req, res) => {
-    const token = require('../controllers/authController').createToken(
-      req.user.id
-    );
-    // res.redirect(`${frontendUrl}/social-callback?token=${token}`);
-    res.redirect(`${frontendUrl}/social-callback#token=${token}`);
+    const token = createToken(req.user.id);
+    sendTokenWithCookie(res, token);
+    res.redirect(`${frontendUrl}/transactions`);
   }
 );
 
@@ -51,11 +53,9 @@ router.get(
     failureRedirect: `${frontendUrl}/login`,
   }),
   (req, res) => {
-    const token = require('../controllers/authController').createToken(
-      req.user.id
-    );
-    // res.redirect(`${frontendUrl}/social-callback?token=${token}`);
-    res.redirect(`${frontendUrl}/social-callback#token=${token}`);
+    const token = createToken(req.user.id);
+    sendTokenWithCookie(res, token);
+    res.redirect(`${frontendUrl}/transactions`);
   }
 );
 
