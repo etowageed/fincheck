@@ -19,3 +19,6 @@ export const updatePassword = (userId, data) =>
 export const googleLogin = () => (window.location.href = "/api/v1/auth/google");
 export const facebookLogin = () =>
   (window.location.href = "/api/v1/auth/facebook");
+
+// ✅ Get logged-in user
+export const getCurrentUser = () => api.get("/users/me");

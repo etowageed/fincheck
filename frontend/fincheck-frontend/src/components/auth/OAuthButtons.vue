@@ -11,7 +11,7 @@
 <script setup>
 const backendUrl = import.meta.env.VITE_API_BASE_URL;
 const handleOAuth = (provider) => {
-    window.location.href = `${backendUrl}/api/v1/auth/${provider}`;
+    window.location.href = `${backendUrl}/auth/${provider}`;
 };
 </script>
 <!-- ...existing template... -->
