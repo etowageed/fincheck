@@ -268,9 +268,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   // of the validation from the model since we're using only the email
 
   // 3) send the token to the user's email
-  const resetURL = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/auth/resetPassword/${resetToken}`;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const resetURL = `${frontendUrl}/reset-password/${resetToken}`;
 
   try {
     // send email about password reset
@@ -313,8 +312,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide a new password', 400));
   }
 
-  (user.password = req.body.password),
-    (user.confirmPassword = req.body.confirmPassword); // Model validation will handle password match
+  user.password = req.body.password;
+  user.confirmPassword = req.body.confirmPassword; // Model validation will handle password match
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   user.passwordChangedAt = Date.now();
@@ -347,11 +346,9 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     );
   }
 
-  // Find user by req.user.id if this is intended for authenticated user,
-  // or by req.params.id if it's an admin changing another user's password.
-  // Assuming it's for the authenticated user based on typical app flow.
-  // The original code used req.params.id, so keeping that for now.
-  const user = await User.findById(req.params.id).select('+password');
+  // Use req.user.id if user is authenticated, fallback to req.params.id for admin operations
+  const userId = req.user?.id || req.params.id;
+  const user = await User.findById(userId).select('+password');
   if (!user) {
     return next(new AppError('User not found', 404));
   }
@@ -368,6 +365,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // Update password (pre-save middleware will handle hashing)
   user.password = newPassword;
   user.confirmPassword = newPassword; // Ensure confirmPassword is also set for model validation
+  user.passwordChangedAt = Date.now(); // Important: invalidate existing tokens
   await user.save(); // This will trigger pre-save hash and validation
 
   res.status(200).json({

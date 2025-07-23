@@ -1,5 +1,6 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from "vue-router";
+import { isLoggedIn } from "@/services/auth"; // import the function
 
 const routes = [
   {
@@ -16,20 +17,28 @@ const routes = [
     name: "Signup",
     component: () => import("@/views/auth/Signup.vue"),
   },
+
   {
     path: "/transactions",
     name: "Transactions",
     component: () => import("@/views/TransactionsPage.vue"),
+    meta: { requiresAuth: true }, // Add meta field to indicate this route requires authentication
   },
   {
     path: "/dashboard",
     name: "Dashboard",
     component: () => import("@/views/DashboardPage.vue"),
+    meta: { requiresAuth: true }, // Add meta field to indicate this route requires authentication
   },
   {
     path: "/forgot-password",
     name: "ForgotPassword",
-    component: () => import("@/components/auth/ForgotPasswordForm.vue"),
+    component: () => import("@/views/auth/ForgotPassword.vue"),
+  },
+  {
+    path: "/reset-password/:token",
+    name: "ResetPassword",
+    component: () => import("@/views/auth/ResetPassword.vue"),
   },
   {
     path: "/login-callback",
@@ -52,27 +61,18 @@ const router = createRouter({
   routes,
 });
 
-// Global navigation guard to protect routes
 router.beforeEach(async (to, from, next) => {
-  // Check if the route requires authentication
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
-    try {
-      const response = await isLoggedIn();
-      // If user is logged in, proceed
-      if (response.data.isLoggedIn) {
-        next();
-      } else {
-        // If not logged in, redirect to login page
-        next({ name: "Login" });
-      }
-    } catch (error) {
-      // If there's an error (e.g., network issue, invalid token), redirect to login
-      next({ name: "Login" });
+  if (to.meta.requiresAuth) {
+    // Allow navigation if coming directly from login after successful login
+    if (from.name === "Login" && from.fullPath === "/login") {
+      return next();
     }
-  } else {
-    // If the route doesn't require auth, always let them through
-    next();
+    const loggedIn = await isLoggedIn();
+    if (!loggedIn) {
+      return next("/login");
+    }
   }
+  next();
 });
 
 export default router;

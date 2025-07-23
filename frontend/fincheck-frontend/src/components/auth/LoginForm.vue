@@ -16,6 +16,12 @@
 
         <Button type="submit" label="Login" class="w-full mt-10" />
 
+        <div class="text-center mt-3">
+            <router-link to="/forgot-password" class="text-sm text-blue-600 hover:text-blue-800">
+                Forgot your password?
+            </router-link>
+        </div>
+
         <Divider />
         <OAuthButtons />
     </form>
