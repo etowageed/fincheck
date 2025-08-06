@@ -37,7 +37,15 @@ router.get(
   (req, res) => {
     const token = createToken(req.user.id);
     sendTokenWithCookie(res, token);
-    res.redirect(`${frontendUrl}/transactions`);
+
+    // Check if user is new (you'll need to pass this from passport strategy)
+    const isNewUser = req.user.isNewUser || false;
+
+    if (isNewUser) {
+      res.redirect(`${frontendUrl}/onboarding`);
+    } else {
+      res.redirect(`${frontendUrl}/transactions`);
+    }
   }
 );
 
@@ -55,7 +63,15 @@ router.get(
   (req, res) => {
     const token = createToken(req.user.id);
     sendTokenWithCookie(res, token);
-    res.redirect(`${frontendUrl}/transactions`);
+
+    // Check if user is new
+    const isNewUser = req.user.isNewUser || false;
+
+    if (isNewUser) {
+      res.redirect(`${frontendUrl}/onboarding`);
+    } else {
+      res.redirect(`${frontendUrl}/transactions`);
+    }
   }
 );
 

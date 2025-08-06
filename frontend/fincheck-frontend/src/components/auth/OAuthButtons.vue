@@ -14,4 +14,3 @@ const handleOAuth = (provider) => {
     window.location.href = `${backendUrl}/auth/${provider}`;
 };
 </script>
-<!-- ...existing template... -->

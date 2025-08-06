@@ -60,12 +60,12 @@ exports.signup = catchAsync(async (req, res, next) => {
     lastKnownIP: ip, // Save the last known IP address
   });
   // send welcome email
-  const signupURL = `${req.protocol}://${req.get('host')}/api/v1/users/me`;
+  const appBaseUrl = `${process.env.FRONTEND_URL}/transactions`;
 
   // Using try-catch for email sending as it's an external service,
   // but let the main error handler catch general errors.
   try {
-    await new EmailService(newUser, signupURL).sendWelcome();
+    await new EmailService(newUser, appBaseUrl).sendWelcome();
   } catch (emailError) {
     console.error(
       `Failed to send welcome email to ${newUser.email}:`,

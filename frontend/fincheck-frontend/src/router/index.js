@@ -47,15 +47,7 @@ const routes = [
     name: "ResetPassword",
     component: () => import("@/views/auth/ResetPassword.vue"),
   },
-  {
-    path: "/login-callback",
-    component: () => import("@/views/auth/LoginCallback.vue"),
-  },
-  // {
-  //   path: "/dashboard",
-  //   name: "Dashboard",
-  //   component: { template: "<div>Dashboard (simulated protected route)</div>" },
-  // },
+
   {
     path: "/:pathMatch(.*)*",
     name: "NotFound",

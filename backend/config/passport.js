@@ -46,6 +46,9 @@ passport.use(
           user.lastKnownIP = ip;
           await user.save({ validateBeforeSave: false });
 
+          // Ensure existing users don't get redirected to onboarding
+          user.isNewUser = false;
+
           return cb(null, user);
           // eslint-disable-next-line no-else-return
         } else {
@@ -73,13 +76,16 @@ passport.use(
           });
           await newUser.save();
 
+          // Flag as new user for the redirect logic
+          newUser.isNewUser = true;
+
           // Send welcome email if needed
           if (newUser.email) {
             try {
               // You need to define the base URL for your application.
               // This could be from an environment variable (e.g., process.env.APP_URL)
               // or hardcoded for now if you know it (e.g., 'http://localhost:3000').
-              const appBaseUrl = process.env.APP_BASE_URL; // Define your app's base URL here
+              const appBaseUrl = `${process.env.FRONTEND_URL}/transactions`; // Define your app's base URL here
               // TODO: change this to prod url
 
               // Create an instance of EmailService
@@ -104,7 +110,7 @@ passport.use(
 );
 
 // ------------------------------------
-// Facebook Strategy (Similar logic)
+// Facebook Strategy
 // ------------------------------------
 passport.use(
   new FacebookStrategy(
@@ -148,10 +154,13 @@ passport.use(
           });
           await newUser.save();
 
+          // Flag as new user for the redirect logic
+          newUser.isNewUser = true;
+
           // Send welcome email if needed
           if (newUser.email) {
             try {
-              const appBaseUrl = process.env.APP_BASE_URL; // Define your app's base URL here
+              const appBaseUrl = `${process.env.FRONTEND_URL}/transactions`; // Define your app's base URL here
               const emailInstance = new EmailService(newUser, appBaseUrl);
               await emailInstance.sendWelcome(); // Call the instance method
               console.log(`Welcome email sent to ${newUser.email}`);
