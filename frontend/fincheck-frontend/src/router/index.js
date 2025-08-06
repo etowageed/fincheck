@@ -19,6 +19,13 @@ const routes = [
   },
 
   {
+    path: "/onboarding",
+    name: "Onboarding",
+    component: () => import("@/views/auth/OnboardingPage.vue"),
+    meta: { requiresAuth: true },
+  },
+
+  {
     path: "/transactions",
     name: "Transactions",
     component: () => import("@/views/TransactionsPage.vue"),

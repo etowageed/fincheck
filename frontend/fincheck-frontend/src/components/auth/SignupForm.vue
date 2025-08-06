@@ -36,6 +36,8 @@ import { ref } from 'vue';
 import { signup } from '@/services/auth';
 import OAuthButtons from './OAuthButtons.vue';
 
+const emit = defineEmits(['submit']);
+
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
@@ -48,11 +50,15 @@ const submitSignup = async () => {
     }
 
     try {
-        await signup({ name: name.value, email: email.value, password: password.value, confirmPassword: confirmPassword.value });
+        const result = await signup({ name: name.value, email: email.value, password: password.value, confirmPassword: confirmPassword.value });
         alert('Signup successful!');
+        // Emit the success event to parent component
+        emit('submit', result);
     } catch (err) {
         alert('Signup failed');
         console.error(err);
+        // Emit the failure event to parent component
+        emit('submit', { status: 'error', error: err });
     }
 };
 </script>

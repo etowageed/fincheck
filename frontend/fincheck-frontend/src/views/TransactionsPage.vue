@@ -3,6 +3,7 @@
         this is the transactions page
         <UserTransactions />
 
+        <RouterLink to="/dashboard">Go to Dashboard</RouterLink>
         <Logout />
     </div>
 </template>
