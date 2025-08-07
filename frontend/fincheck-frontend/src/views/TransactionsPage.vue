@@ -3,8 +3,13 @@
         this is the transactions page
         <UserTransactions />
 
-        <RouterLink to="/dashboard">Go to Dashboard</RouterLink>
+        <RouterLink to="/dashboard"><Button label="Go to Dashboard" /></RouterLink>
+
+        <br>
+        <br>
+
         <Logout />
+
     </div>
 </template>
 

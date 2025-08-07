@@ -1,7 +1,13 @@
 <template>
     <div>
-        this is the dashboard page
+        <h1>Dashboard</h1>
+        <br>
+
         <UserDashboard />
+
+        <RouterLink to="/transactions">
+            <Button label="Back to transactions" />
+        </RouterLink>
     </div>
 </template>
 

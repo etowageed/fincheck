@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button @click="logout">Logout</button>
+        <Button @click="logout" icon="pi pi-sign-out" aria-label="Logout" label="Logout" />
     </div>
 </template>
 

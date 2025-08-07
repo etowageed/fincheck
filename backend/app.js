@@ -15,7 +15,7 @@ const globalErrorHandler = require('./middleware/errorHandler'); // Import the g
 
 const app = express();
 
-app.set('trust proxy', true);
+// app.set('trust proxy', true); // uncomment in production
 
 app.use(helmet()); // Set security headers
 // TODO uncomment this code when in production to enforce HTTPS
