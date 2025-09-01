@@ -38,6 +38,18 @@ const routes = [
     meta: { requiresAuth: true }, // Add meta field to indicate this route requires authentication
   },
   {
+    path: "/budget",
+    name: "Budget",
+    component: () => import("@/views/BudgetPage.vue"),
+    meta: { requiresAuth: true }, // Add meta field to indicate this route requires authentication
+  },
+  {
+    path: "/categories",
+    name: "Categories",
+    component: () => import("@/views/CategoriesPage.vue"),
+    meta: { requiresAuth: true }, // Add meta field to indicate this route requires authentication
+  },
+  {
     path: "/forgot-password",
     name: "ForgotPassword",
     component: () => import("@/views/auth/ForgotPassword.vue"),

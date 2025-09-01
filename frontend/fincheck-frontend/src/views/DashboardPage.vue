@@ -5,13 +5,11 @@
 
         <UserDashboard />
 
-        <RouterLink to="/transactions">
-            <Button label="Back to transactions" />
-        </RouterLink>
+
     </div>
 </template>
 
 <script setup>
-import UserDashboard from '@/components/dashboard/UserDashboard.vue';
+// import UserDashboard from '@/components/finances/UserDashboard.vue';
 
 </script>

@@ -1,7 +1,7 @@
 <template>
-    <div>
-        <Button @click="logout" icon="pi pi-sign-out" aria-label="Logout" label="Logout" />
-    </div>
+    <Button @click="handleLogout" icon="pi pi-sign-out" label="Logout"
+        class="w-full !justify-start !text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600" severity="secondary"
+        text />
 </template>
 
 <script setup>
