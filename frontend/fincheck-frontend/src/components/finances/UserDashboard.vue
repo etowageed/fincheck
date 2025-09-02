@@ -2,7 +2,7 @@
 <template>
     <div>
         <h2>User Financial Metrics</h2>
-        <div v-if="loading">Loading...</div>
+        <div v-if="isLoading">Loading...</div>
         <div v-else-if="error">{{ error }}</div>
         <div v-else>
             <ul>
@@ -25,11 +25,11 @@ import { ref, onMounted } from 'vue';
 import api from '@/services/api';
 
 const metrics = ref({});
-const loading = ref(true);
+const isLoading = ref(true);
 const error = ref('');
 
 onMounted(async () => {
-    loading.value = true;
+    isLoading.value = true;
     error.value = '';
     try {
         const res = await api.get('/users/me');
@@ -38,7 +38,7 @@ onMounted(async () => {
         error.value = 'Failed to load metrics';
         console.error(err);
     } finally {
-        loading.value = false;
+        isLoading.value = false;
     }
 });
 </script>
