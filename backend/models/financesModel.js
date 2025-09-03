@@ -3,6 +3,17 @@ const mongoose = require('mongoose');
 // subdocument schema for recurring expenses(aka monthlyBudget) (e.g. rent)
 
 const monthlyBudgetSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Please provide a name'],
+    trim: true, // trim whitespace
+  },
+
+  description: {
+    type: String,
+    required: [false, 'Please provide a description'],
+    trim: true, // trim whitespace
+  },
   category: {
     type: String,
     required: [true, 'Please provide a category'],
@@ -78,12 +89,13 @@ const financesSchema = new mongoose.Schema(
     monthlyBudget: {
       type: [monthlyBudgetSchema],
       default: [],
-      validate: {
-        validator: function (v) {
-          return Array.isArray(v) && v.length > 0;
-        },
-        message: 'A budget must contain at least one item!',
-      },
+      // the validation is off for now to allow creation of an empty budget array
+      // validate: {
+      //   validator: function (v) {
+      //     return Array.isArray(v) && v.length > 0;
+      //   },
+      //   message: 'A budget must contain at least one item!',
+      // },
     },
     transactions: [transactionSchema],
   },

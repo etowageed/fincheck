@@ -28,9 +28,6 @@ export const facebookLogin = () =>
 // ✅ Get logged-in user
 export const getCurrentUser = () => api.get("/users/me");
 
-// Get budgets
-export const getBudgets = () => api.get("/finances");
-
 // Check if user is logged in
 export const isLoggedIn = async () => {
   try {

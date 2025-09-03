@@ -21,7 +21,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Month</p>
-                        <p class="font-medium">{{ budget.month }}</p>
+                        <p class="font-medium">{{ getMonthName(budget.month) }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Expected Income</p>
@@ -32,25 +32,55 @@
 
             <!-- Monthly Budget -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Monthly Budget</h2>
-                <div class="space-y-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">Budget Items</h2>
+                    <AddBudgetItemsForm @budget-item-added="handleBudgetItemAdded" />
+                </div>
+
+                <div v-if="budget.monthlyBudget && budget.monthlyBudget.length > 0" class="space-y-3">
                     <div v-for="item in budget.monthlyBudget" :key="item._id"
-                        class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                        <div>
-                            <p class="font-medium capitalize">{{ item.category }}</p>
-                            <p class="text-sm text-gray-500">
+                        class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <p class="font-medium">{{ item.name }}</p>
+                                <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 capitalize">
+                                    {{ item.category }}
+                                </span>
+                            </div>
+                            <p v-if="item.description" class="text-sm text-gray-600 mb-1">{{ item.description }}</p>
+                            <p class="text-xs text-gray-500">
                                 {{ item.isRecurring ? 'Recurring' : 'One-time' }}
                             </p>
                         </div>
-                        <p class="font-semibold text-blue-600">${{ item.amount }}</p>
+                        <div class="text-right">
+                            <p class="font-semibold text-lg text-blue-600">${{ item.amount }}</p>
+                        </div>
                     </div>
+
+                    <!-- Budget Summary -->
+                    <div class="border-t pt-4 mt-6">
+                        <div class="flex justify-between items-center font-semibold text-lg">
+                            <span>Total Monthly Budget:</span>
+                            <span class="text-blue-600">${{ budget.totalMonthlyBudget }}</span>
+                        </div>
+                        <div v-if="budget.expectedMonthlyIncome"
+                            class="flex justify-between items-center text-sm text-gray-600 mt-1">
+                            <span>Planned Savings:</span>
+                            <span :class="budget.plannedSavings >= 0 ? 'text-green-600' : 'text-red-600'">
+                                ${{ budget.plannedSavings }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="text-center py-4 text-gray-500">
+                    No budget items yet. Add some budget categories to get started.
                 </div>
             </div>
 
             <!-- Transactions -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Transactions</h2>
-                <div class="space-y-3">
+                <div v-if="budget.transactions && budget.transactions.length > 0" class="space-y-3">
                     <div v-for="transaction in budget.transactions" :key="transaction._id"
                         class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                         <div>
@@ -66,14 +96,15 @@
                         </div>
                     </div>
                 </div>
+                <div v-else class="text-center py-4 text-gray-500">
+                    No transactions yet.
+                </div>
             </div>
         </div>
 
         <div v-else class="text-center py-8">
             <p class="text-gray-600">No budget data available</p>
-
-            <!-- now this is where the modal for creating a budget will be triggered -->
-            <AddBudgetEntryForm class="mt-8" />
+            <AddBudgetEntryForm class="mt-8" @budget-created="handleBudgetCreated" />
         </div>
     </div>
 </template>
@@ -81,9 +112,20 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '@/services/api';
+// import AddBudgetEntryForm from '@/components/finances/AddBudgetEntryForm.vue';
+// import AddBudgetItemsForm from '@/components/finances/AddBudgetItemsForm.vue';
 
 const budget = ref(null);
 const isLoading = ref(false);
+
+const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+const getMonthName = (monthIndex) => {
+    return monthNames[monthIndex] || 'Unknown';
+};
 
 const fetchBudget = async () => {
     isLoading.value = true;
@@ -97,6 +139,14 @@ const fetchBudget = async () => {
     } finally {
         isLoading.value = false;
     }
+};
+
+const handleBudgetCreated = (newBudget) => {
+    fetchBudget();
+};
+
+const handleBudgetItemAdded = (updatedBudget) => {
+    fetchBudget();
 };
 
 onMounted(() => {
