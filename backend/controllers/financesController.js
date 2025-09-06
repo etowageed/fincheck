@@ -36,6 +36,36 @@ exports.upsertMonthlyFinances = catchAsync(async (req, res, next) => {
   });
 });
 
+// Delete a monthly budget item from a monthly expense document
+exports.deleteBudgetItem = catchAsync(async (req, res, next) => {
+  const { month, year, budgetItemId } = req.params;
+
+  const expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
+
+  if (!expenseDoc) {
+    return next(
+      new AppError('No expense document found for this month and year.', 404)
+    );
+  }
+
+  // Find the budget item by ID
+  const budgetItem = expenseDoc.monthlyBudget.id(budgetItemId);
+  if (!budgetItem) {
+    return next(new AppError('Budget item not found.', 404));
+  }
+
+  // Remove the budget item by its ID
+  expenseDoc.monthlyBudget.id(budgetItemId).deleteOne();
+
+  await expenseDoc.save({ validateBeforeSave: true });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Budget item deleted successfully',
+    data: expenseDoc,
+  });
+});
+
 // Get all monthly expense summaries for a user (e.g., for dashboard overview)
 exports.getAllMonthlyExpenses = catchAsync(async (req, res, next) => {
   const expenses = await Finances.find({ user: req.user.id }).sort({
@@ -211,7 +241,7 @@ exports.deleteTransaction = catchAsync(async (req, res, next) => {
 
 // Delete a monthlyBudget item from a monthly expense document
 // Delete a monthly expense document
-exports.deleteMonthlyExpense = catchAsync(async (req, res, next) => {
+exports.deleteMonthlyFinances = catchAsync(async (req, res, next) => {
   const { month, year } = req.params;
 
   // Find the document and then delete it

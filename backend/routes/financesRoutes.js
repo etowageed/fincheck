@@ -19,7 +19,12 @@ router.post(
 router
   .route('/:month/:year')
   .get(financesController.getMonthlyExpense)
-  .delete(financesController.deleteMonthlyExpense);
+  .delete(financesController.deleteMonthlyFinances);
+
+// Add this new route for deleting monthly budget items
+router
+  .route('/:month/:year/budget/:budgetItemId')
+  .delete(financesController.deleteBudgetItem);
 
 router
   .route('/:month/:year/transactions/:transactionId')

@@ -1,2 +1,86 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
+
+@layer base {
+  :root {
+    --color-text-primary: 17 24 39; /* gray-900 */
+    --color-text-secondary: 75 85 99; /* gray-600 */
+    --color-text-muted: 107 114 128; /* gray-500 */
+    --color-bg-primary: 255 255 255; /* white */
+    --color-bg-secondary: 249 250 251; /* gray-50 */
+    --color-bg-tertiary: 243 244 246; /* gray-100 */
+    --color-border: 229 231 235; /* gray-200 */
+    --color-accent-blue: 37 99 235; /* blue-600 */
+    --color-accent-green: 22 163 74; /* green-600 */
+    --color-accent-red: 220 38 38; /* red-600 */
+  }
+
+  .dark {
+    --color-text-primary: 243 244 246; /* gray-100 */
+    --color-text-secondary: 156 163 175; /* gray-400 */
+    --color-text-muted: 107 114 128; /* gray-500 */
+    --color-bg-primary: 31 41 55; /* gray-800 */
+    --color-bg-secondary: 55 65 81; /* gray-700 */
+    --color-bg-tertiary: 75 85 99; /* gray-600 */
+    --color-border: 55 65 81; /* gray-700 */
+    --color-accent-blue: 96 165 250; /* blue-400 */
+    --color-accent-green: 74 222 128; /* green-400 */
+    --color-accent-red: 248 113 113; /* red-400 */
+  }
+}
+
+@layer components {
+  .text-primary {
+    color: rgb(var(--color-text-primary));
+  }
+
+  .text-secondary {
+    color: rgb(var(--color-text-secondary));
+  }
+
+  .text-muted {
+    color: rgb(var(--color-text-muted));
+  }
+
+  .bg-primary {
+    background-color: rgb(var(--color-bg-primary));
+  }
+
+  .bg-secondary {
+    background-color: rgb(var(--color-bg-secondary));
+  }
+
+  .bg-tertiary {
+    background-color: rgb(var(--color-bg-tertiary));
+  }
+
+  .border-default {
+    border-color: rgb(var(--color-border));
+  }
+
+  .text-accent-blue {
+    color: rgb(var(--color-accent-blue));
+  }
+
+  .text-accent-green {
+    color: rgb(var(--color-accent-green));
+  }
+
+  .text-accent-red {
+    color: rgb(var(--color-accent-red));
+  }
+
+  /* Card component */
+  .card-primary {
+    @apply bg-primary border border-default rounded-lg shadow-sm;
+  }
+
+  /* Button variants that work with dark mode */
+  .btn-primary {
+    @apply bg-accent-blue text-white hover:opacity-90 px-4 py-2 rounded-md font-medium transition-opacity;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-primary border border-default hover:bg-tertiary px-4 py-2 rounded-md font-medium transition-colors;
+  }
+}

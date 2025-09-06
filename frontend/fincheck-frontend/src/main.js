@@ -5,6 +5,7 @@ import PrimeVue from "primevue/config";
 import Aura from "@primeuix/themes/aura";
 import { createPinia } from "pinia";
 import router from "./router";
+import { useDarkMode } from "./composables/useDarkMode";
 
 import App from "./App.vue";
 
@@ -18,5 +19,9 @@ app.use(PrimeVue, {
 });
 
 app.use(createPinia());
+
+// Initialize dark mode
+const { initTheme } = useDarkMode();
+initTheme();
 
 app.mount("#app");

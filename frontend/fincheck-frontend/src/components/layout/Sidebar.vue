@@ -42,6 +42,10 @@
             <!-- Bottom Section -->
             <div class="px-4 py-6 border-t">
                 <div class="space-y-2">
+                    <!-- Dark Mode Toggle -->
+                    <Button>
+                        <ToggleDarkMode />
+                    </Button>
                     <!-- Settings Link -->
                     <RouterLink to="/settings"
                         class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
