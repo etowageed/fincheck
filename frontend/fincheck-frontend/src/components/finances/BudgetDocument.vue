@@ -1,84 +1,77 @@
 <template>
-    <div class="space-y-6">
+    <div class="space-y-6 ">
         <!-- Budget Header -->
-        <div class="bg-white rounded-lg shadow-sm border p-6">
+        <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Budget Overview</h3>
-                <div class="relative">
-                    <Button icon="pi pi-ellipsis-v" severity="secondary" size="small" text
-                        @click="toggleHeaderMenu($event)" :aria-haspopup="true" :aria-expanded="headerMenuVisible" />
-                    <Menu ref="headerMenuRef" :model="headerMenuItems" :popup="true" />
-                </div>
+                <h3 class="text-lg font-semibold text-primary">Budget Overview</h3>
+                <DropdownMenu :items="headerMenuItems" :entity="budget" @action="handleHeaderAction" />
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                    <p class="text-sm text-gray-500">Created At</p>
-                    <p class="font-medium">{{ new Date(budget.createdAt).toLocaleDateString() }}</p>
+                    <p class="text-sm text-muted">Created At</p>
+                    <p class="font-medium text-primary">{{ new Date(budget.createdAt).toLocaleDateString() }}</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500">Year</p>
-                    <p class="font-medium">{{ budget.year }}</p>
+                    <p class="text-sm text-muted">Year</p>
+                    <p class="font-medium text-primary">{{ budget.year }}</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500">Month</p>
-                    <p class="font-medium">{{ getMonthName(budget.month) }}</p>
+                    <p class="text-sm text-muted">Month</p>
+                    <p class="font-medium text-primary">{{ getMonthName(budget.month) }}</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500">Expected Income</p>
-                    <p class="font-medium text-green-600">${{ budget.expectedMonthlyIncome }}</p>
+                    <p class="text-sm text-muted">Expected Income</p>
+                    <p class="font-medium text-accent-green">${{ budget.expectedMonthlyIncome }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Monthly Budget -->
-        <div class="bg-white rounded-lg shadow-sm border p-6">
+        <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-semibold text-gray-800">Budget Items</h2>
+                <h2 class="text-lg font-semibold text-primary">Budget Items</h2>
                 <AddBudgetItemsForm ref="addBudgetFormRef" @budget-item-added="handleBudgetItemAdded" />
             </div>
 
             <div v-if="budget.monthlyBudget && budget.monthlyBudget.length > 0" class="space-y-3">
                 <div v-for="item in budget.monthlyBudget" :key="item._id"
-                    class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    class="flex justify-between items-center p-4 bg-secondary rounded-lg">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            <p class="font-medium">{{ item.name }}</p>
-                            <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 capitalize">
+                            <p class="font-medium text-primary">{{ item.name }}</p>
+                            <span class="text-xs px-2 py-1 rounded-full bg-tertiary text-accent-blue capitalize">
                                 {{ item.category }}
                             </span>
                         </div>
-                        <p v-if="item.description" class="text-sm text-gray-600 mb-1">{{ item.description }}</p>
-                        <p class="text-xs text-gray-500">
+                        <p v-if="item.description" class="text-sm text-secondary mb-1">{{ item.description }}</p>
+                        <p class="text-xs text-muted">
                             {{ item.isRecurring ? 'Recurring' : 'One-time' }}
                         </p>
                     </div>
                     <div class="text-right flex items-center gap-2">
-                        <p class="font-semibold text-lg text-blue-600">${{ item.amount }}</p>
-                        <div class="relative">
-                            <Button icon="pi pi-ellipsis-v" severity="secondary" size="small" text
-                                @click="toggleMenu($event, item._id)" :aria-haspopup="true"
-                                :aria-expanded="activeMenuId === item._id" />
-                            <Menu :ref="el => setMenuRef(el, item._id)" :model="getMenuItems(item)" :popup="true" />
-                        </div>
+                        <p class="font-semibold text-lg text-accent-blue">${{ item.amount }}</p>
+                        <DropdownMenu :items="budgetItemMenuItems" :entity="item"
+                            :disabled="deletingItemId === item._id" @action="handleBudgetItemAction" />
                     </div>
                 </div>
 
                 <!-- Budget Summary -->
-                <div class="border-t pt-4 mt-6">
+                <div class="border-t border-default pt-4 mt-6">
                     <div class="flex justify-between items-center font-semibold text-lg">
-                        <span>Total Monthly Budget:</span>
-                        <span class="text-blue-600">${{ budget.totalMonthlyBudget }}</span>
+                        <span class="text-primary">Total Monthly Budget:</span>
+                        <span class="text-accent-blue">${{ budget.totalMonthlyBudget }}</span>
                     </div>
                     <div v-if="budget.expectedMonthlyIncome"
-                        class="flex justify-between items-center text-sm text-gray-600 mt-1">
-                        <span>Planned Savings:</span>
-                        <span :class="budget.plannedSavings >= 0 ? 'text-green-600' : 'text-red-600'">
+                        class="flex justify-between items-center text-sm text-secondary mt-1">
+                        <span>Expected Savings:</span>
+                        <!-- TODO add tooltip "This is what you will save if you stick to your budget"-->
+                        <span :class="budget.plannedSavings >= 0 ? 'text-accent-green' : 'text-accent-red'">
                             ${{ budget.plannedSavings }}
                         </span>
                     </div>
                 </div>
             </div>
-            <div v-else class="text-center py-4 text-gray-500">
+            <div v-else class="text-center py-4 text-muted">
                 No budget items yet. Add some budget categories to get started.
             </div>
         </div>
@@ -86,30 +79,6 @@
         <!-- Edit Budget Item Form (hidden, controlled programmatically) -->
         <AddBudgetItemsForm ref="editBudgetFormRef" :edit-item="editingItem"
             @budget-item-updated="handleBudgetItemUpdated" style="display: none;" />
-
-        <!-- Transactions -->
-        <div class="bg-white rounded-lg shadow-sm border p-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">Transactions</h2>
-            <div v-if="budget.transactions && budget.transactions.length > 0" class="space-y-3">
-                <div v-for="transaction in budget.transactions" :key="transaction._id"
-                    class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <div>
-                        <p class="font-medium">{{ transaction.description }}</p>
-                        <p class="text-sm text-gray-500 capitalize">{{ transaction.category }}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-semibold"
-                            :class="transaction.type === 'expense' ? 'text-red-600' : 'text-green-600'">
-                            {{ transaction.type === 'expense' ? '-' : '+' }}${{ transaction.amount }}
-                        </p>
-                        <p class="text-sm text-gray-500">{{ new Date(transaction.date).toLocaleDateString() }}</p>
-                    </div>
-                </div>
-            </div>
-            <div v-else class="text-center py-4 text-gray-500">
-                No transactions yet.
-            </div>
-        </div>
 
         <!-- Edit Expected Income Dialog -->
         <Dialog v-model:visible="editIncomeVisible" modal header="Edit Expected Income" :style="{ width: '25rem' }">
@@ -139,6 +108,7 @@
 import { ref } from 'vue';
 import api from '@/services/api';
 import AddBudgetItemsForm from './AddBudgetItemsForm.vue';
+import DropdownMenu from '../common/DropdownMenu.vue';
 
 const props = defineProps({
     budget: {
@@ -151,8 +121,6 @@ const emit = defineEmits(['budgetUpdated', 'budgetDeleted']);
 
 // Existing refs
 const deletingItemId = ref(null);
-const activeMenuId = ref(null);
-const menuRefs = ref({});
 
 // Form refs
 const addBudgetFormRef = ref(null);
@@ -160,8 +128,6 @@ const editBudgetFormRef = ref(null);
 const editingItem = ref(null);
 
 // Header menu refs
-const headerMenuRef = ref(null);
-const headerMenuVisible = ref(false);
 const editIncomeVisible = ref(false);
 const newExpectedIncome = ref(0);
 const updatingIncome = ref(false);
@@ -177,12 +143,12 @@ const getMonthName = (monthIndex) => {
     return monthNames[monthIndex] || 'Unknown';
 };
 
-// Header menu items
+// Menu configurations
 const headerMenuItems = [
     {
         label: 'Edit Expected Income',
         icon: 'pi pi-dollar',
-        command: () => openEditIncomeDialog()
+        action: 'edit-income'
     },
     {
         separator: true
@@ -190,23 +156,55 @@ const headerMenuItems = [
     {
         label: 'Delete Budget',
         icon: 'pi pi-trash',
-        command: () => deleteBudget(),
-        class: 'text-red-600'
+        action: 'delete-budget',
+        danger: true
     }
 ];
 
-// Header menu functions
-const toggleHeaderMenu = (event) => {
-    if (headerMenuRef.value) {
-        headerMenuRef.value.toggle(event);
-        headerMenuVisible.value = !headerMenuVisible.value;
+const budgetItemMenuItems = [
+    {
+        label: 'Edit',
+        icon: 'pi pi-pencil',
+        action: 'edit'
+    },
+    {
+        separator: true
+    },
+    {
+        label: 'Delete',
+        icon: 'pi pi-trash',
+        action: 'delete',
+        danger: true
+    }
+];
+
+// Action handlers
+const handleHeaderAction = ({ action, entity }) => {
+    switch (action) {
+        case 'edit-income':
+            openEditIncomeDialog();
+            break;
+        case 'delete-budget':
+            deleteBudget();
+            break;
     }
 };
 
+const handleBudgetItemAction = ({ action, entity }) => {
+    switch (action) {
+        case 'edit':
+            editBudgetItem(entity);
+            break;
+        case 'delete':
+            deleteBudgetItem(entity._id);
+            break;
+    }
+};
+
+// Income functions
 const openEditIncomeDialog = () => {
     newExpectedIncome.value = props.budget.expectedMonthlyIncome || 0;
     editIncomeVisible.value = true;
-    headerMenuVisible.value = false;
     incomeError.value = '';
 };
 
@@ -226,7 +224,6 @@ const updateExpectedIncome = async () => {
     incomeError.value = '';
 
     try {
-        // Use the upsert endpoint - only update expected income, keep existing budget items
         await api.post('/finances', {
             expectedMonthlyIncome: newExpectedIncome.value,
             monthlyBudget: props.budget.monthlyBudget || []
@@ -242,6 +239,7 @@ const updateExpectedIncome = async () => {
     }
 };
 
+// Budget functions
 const deleteBudget = async () => {
     const budgetName = `${getMonthName(props.budget.month)} ${props.budget.year}`;
 
@@ -250,62 +248,20 @@ const deleteBudget = async () => {
     }
 
     deletingBudget.value = true;
-    headerMenuVisible.value = false;
 
     try {
         await api.delete(`/finances/${props.budget.month}/${props.budget.year}`);
-
         console.log('Budget deleted successfully');
-
-        // Emit event to notify parent that budget was deleted
         emit('budgetDeleted');
-
     } catch (error) {
         console.error('Error deleting budget:', error);
-
-        // You could add a toast notification here
         alert('Failed to delete budget. Please try again.');
-
     } finally {
         deletingBudget.value = false;
     }
 };
 
 // Budget item functions
-const setMenuRef = (el, itemId) => {
-    if (el) {
-        menuRefs.value[itemId] = el;
-    }
-};
-
-const toggleMenu = (event, itemId) => {
-    const menu = menuRefs.value[itemId];
-    if (menu) {
-        menu.toggle(event);
-        activeMenuId.value = false;
-        activeMenuId.value = activeMenuId.value === itemId ? null : itemId;
-    }
-};
-
-const getMenuItems = (item) => {
-    return [
-        {
-            label: 'Edit',
-            icon: 'pi pi-pencil',
-            command: () => editBudgetItem(item)
-        },
-        {
-            separator: true
-        },
-        {
-            label: 'Delete',
-            icon: 'pi pi-trash',
-            command: () => deleteBudgetItem(item._id),
-            class: 'text-red-600'
-        }
-    ];
-};
-
 const handleBudgetItemAdded = () => {
     emit('budgetUpdated');
 };
@@ -317,9 +273,7 @@ const handleBudgetItemUpdated = () => {
 
 const editBudgetItem = (item) => {
     editingItem.value = item;
-    activeMenuId.value = null;
 
-    // Open the edit form dialog
     if (editBudgetFormRef.value) {
         editBudgetFormRef.value.openDialog();
     }
@@ -331,7 +285,6 @@ const deleteBudgetItem = async (budgetItemId) => {
     }
 
     deletingItemId.value = budgetItemId;
-    activeMenuId.value = null;
 
     try {
         await api.delete(`/finances/${props.budget.month}/${props.budget.year}/budget/${budgetItemId}`);
