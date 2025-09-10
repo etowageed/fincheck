@@ -30,7 +30,7 @@
         <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-semibold text-primary">Budget Items</h2>
-                <AddBudgetItemsForm ref="addBudgetFormRef" @budget-item-added="handleBudgetItemAdded" />
+                <UnifiedItemForm ref="addBudgetFormRef" formType="budget" @budget-item-added="handleBudgetItemAdded" />
             </div>
 
             <div v-if="budget.monthlyBudget && budget.monthlyBudget.length > 0" class="space-y-3">
@@ -77,7 +77,7 @@
         </div>
 
         <!-- Edit Budget Item Form (hidden, controlled programmatically) -->
-        <AddBudgetItemsForm ref="editBudgetFormRef" :edit-item="editingItem"
+        <UnifiedItemForm ref="editBudgetFormRef" formType="budget" :edit-item="editingItem"
             @budget-item-updated="handleBudgetItemUpdated" style="display: none;" />
 
         <!-- Edit Expected Income Dialog -->
@@ -107,7 +107,7 @@
 <script setup>
 import { ref } from 'vue';
 import api from '@/services/api';
-import AddBudgetItemsForm from './AddBudgetItemsForm.vue';
+import UnifiedItemForm from './UnifiedItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
 
 const props = defineProps({

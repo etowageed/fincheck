@@ -57,6 +57,7 @@ const transactionSchema = new mongoose.Schema({
     enum: ['expense', 'excludedExpense', 'income'],
     default: 'expense',
   }, // 'excluded expenses = savings/investments
+  // date: { type: Date, default: Date.now },
   date: { type: Date, default: Date.now },
 });
 

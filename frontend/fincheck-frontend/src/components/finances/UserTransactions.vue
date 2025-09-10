@@ -1,46 +1,70 @@
 <!-- src/components/dashboard/UserTransactions.vue -->
 <template>
-    <div class="max-w-2xl mx-auto mt-8 shadow rounded p-6">
-        <h2 class="text-xl font-bold mb-4">Recent Transactions</h2>
-        <div v-if="loading" class="text-center py-8">Loading...</div>
-        <div v-else-if="error" class="text-center text-red-500 py-8">{{ error }}</div>
-        <ul v-else>
-            <li v-for="(tx, idx) in transactions" :key="tx._id || idx"
-                class="border-b py-2 flex justify-between items-center">
-                <span>{{ tx.description || 'No description' }}</span>
-                <span class="font-mono">{{ formatCurrency(tx.amount) }}</span>
-            </li>
-            <li v-if="transactions.length === 0" class="text-gray-400 text-center py-4">
-                No transactions found.
-            </li>
-        </ul>
+    <div class="p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Transactions</h1>
+
+        <div v-if="isLoading" class="text-center py-8">
+            <i class="pi pi-spinner pi-spin text-2xl text-blue-600"></i>
+            <p class="mt-2 text-gray-600">Loading transactions...</p>
+        </div>
+
+        <div v-else-if="error" class="text-center text-red-500 py-8">
+            {{ error }}
+        </div>
+
+        <div v-else-if="transactions.length > 0">
+            <TransactionDocument :transactions="transactions" @transactions-updated="fetchTransactions" />
+        </div>
+
+        <div v-else class="text-center py-8">
+            <p class="text-gray-600 mb-4">No transactions found</p>
+            <UnifiedItemForm formType="transaction" @transaction-added="handleTransactionAdded" />
+        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '@/services/api';
+import TransactionDocument from './TransactionDocument.vue';
+import UnifiedItemForm from './UnifiedItemForm.vue';
 
 const transactions = ref([]);
-const loading = ref(true);
+const isLoading = ref(false);
 const error = ref('');
 
-onMounted(async () => {
-    loading.value = true;
+const fetchTransactions = async () => {
+    isLoading.value = true;
     error.value = '';
-    try {
-        const res = await api.get('/users/me');
-        transactions.value = res.data?.data?.dashboard?.transactions || [];
-    } catch (err) {
-        error.value = 'Failed to load transactions';
-        console.error(err);
-    } finally {
-        loading.value = false;
-    }
-});
 
-function formatCurrency(value) {
-    if (typeof value !== 'number') return value;
-    return value.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
-}
+    try {
+        // Get current month and year
+        const currentDate = new Date();
+        const month = currentDate.getMonth();
+        const year = currentDate.getFullYear();
+
+        // Try to get the finance document for current month
+        const res = await api.get(`/finances/${month}/${year}`);
+        transactions.value = res.data.data?.transactions || [];
+        console.log('Transactions:', transactions.value);
+    } catch (err) {
+        console.error('Error fetching transactions:', err);
+        if (err.response?.status === 404) {
+            // No finance document for current month yet
+            transactions.value = [];
+        } else {
+            error.value = 'Failed to load transactions';
+        }
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const handleTransactionAdded = () => {
+    fetchTransactions();
+};
+
+onMounted(() => {
+    fetchTransactions();
+});
 </script>
