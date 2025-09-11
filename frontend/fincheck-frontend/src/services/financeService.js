@@ -236,7 +236,7 @@ export class FinanceService {
         return "Transaction not found or no finance document exists for this month.";
       }
     } else {
-      return `Failed to ${operation} ${itemType}. Please try again.`;
+      return `Failed to ${operation} ${itemType}. Please make sure you've created a budget.`;
     }
   }
 

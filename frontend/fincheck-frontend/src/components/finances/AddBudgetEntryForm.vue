@@ -5,9 +5,7 @@
             <span class="text-surface-500 dark:text-surface-400 block mb-8">First things first, what do you earn in a
                 month?</span>
             <span class="text-surface-500 dark:text-surface-400 block mb-8 italic text-sm">Your expected monthly income
-                creates
-                the
-                foundation for your budget.</span>
+                creates the foundation for your budget.</span>
             <div class="flex items-center gap-4 mb-4">
                 <label for="income" class="font-semibold w-24">Monthly Income</label>
                 <InputText id="income" class="flex-auto" autocomplete="off" type="number" placeholder="e.g 2000"
