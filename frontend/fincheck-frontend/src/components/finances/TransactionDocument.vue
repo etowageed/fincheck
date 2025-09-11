@@ -26,7 +26,7 @@
         <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-semibold text-primary">Recent Transactions</h2>
-                <UnifiedItemForm ref="addTransactionFormRef" formType="transaction"
+                <ItemForm ref="addTransactionFormRef" formType="transaction"
                     @transaction-added="handleTransactionAdded" />
             </div>
 
@@ -73,15 +73,15 @@
         </div>
 
         <!-- Edit Transaction Form (hidden, controlled programmatically) -->
-        <UnifiedItemForm ref="editTransactionFormRef" formType="transaction" :edit-item="editingTransaction"
+        <ItemForm ref="editTransactionFormRef" formType="transaction" :edit-item="editingTransaction"
             @transaction-updated="handleTransactionUpdated" style="display: none;" />
     </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import api from '@/services/api';
-import UnifiedItemForm from './UnifiedItemForm.vue';
+import { FinanceService } from '@/services/financeService';
+import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
 
 const props = defineProps({
@@ -229,7 +229,7 @@ const handleTransactionAction = ({ action, entity }) => {
     }
 };
 
-// Transaction functions
+// Transaction functions (using FinanceService)
 const handleTransactionAdded = () => {
     emit('transactionsUpdated');
 };
@@ -255,12 +255,8 @@ const deleteTransaction = async (transactionId) => {
     deletingTransactionId.value = transactionId;
 
     try {
-        // Get current month and year
-        const currentDate = new Date();
-        const month = currentDate.getMonth();
-        const year = currentDate.getFullYear();
-
-        await api.delete(`/finances/${month}/${year}/transactions/${transactionId}`);
+        const { month, year } = FinanceService._getCurrentMonthYear();
+        await FinanceService.deleteTransaction(month, year, transactionId);
         emit('transactionsUpdated');
     } catch (error) {
         console.error('Error deleting transaction:', error);
@@ -271,7 +267,7 @@ const deleteTransaction = async (transactionId) => {
 };
 
 const exportTransactions = () => {
-    // TODO: Implement export functionality
+    // TODO: Implement export functionality using FinanceService
     console.log('Export transactions functionality not implemented yet');
 };
 </script>

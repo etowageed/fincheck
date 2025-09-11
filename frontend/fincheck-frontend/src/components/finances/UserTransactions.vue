@@ -18,16 +18,16 @@
 
         <div v-else class="text-center py-8">
             <p class="text-gray-600 mb-4">No transactions found</p>
-            <UnifiedItemForm formType="transaction" @transaction-added="handleTransactionAdded" />
+            <ItemForm formType="transaction" @transaction-added="handleTransactionAdded" />
         </div>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import api from '@/services/api';
+import { FinanceService } from '@/services/financeService';
 import TransactionDocument from './TransactionDocument.vue';
-import UnifiedItemForm from './UnifiedItemForm.vue';
+import ItemForm from './ItemForm.vue';
 
 const transactions = ref([]);
 const isLoading = ref(false);
@@ -38,23 +38,12 @@ const fetchTransactions = async () => {
     error.value = '';
 
     try {
-        // Get current month and year
-        const currentDate = new Date();
-        const month = currentDate.getMonth();
-        const year = currentDate.getFullYear();
-
-        // Try to get the finance document for current month
-        const res = await api.get(`/finances/${month}/${year}`);
-        transactions.value = res.data.data?.transactions || [];
+        const { month, year } = FinanceService._getCurrentMonthYear();
+        transactions.value = await FinanceService.getTransactions(month, year);
         console.log('Transactions:', transactions.value);
     } catch (err) {
         console.error('Error fetching transactions:', err);
-        if (err.response?.status === 404) {
-            // No finance document for current month yet
-            transactions.value = [];
-        } else {
-            error.value = 'Failed to load transactions';
-        }
+        error.value = 'Failed to load transactions';
     } finally {
         isLoading.value = false;
     }

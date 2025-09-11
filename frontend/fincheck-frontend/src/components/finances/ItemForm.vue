@@ -82,7 +82,7 @@
                 <div class="flex justify-end gap-2">
                     <Button type="button" label="Cancel" severity="secondary" @click="closeDialog"
                         :disabled="isLoading" />
-                    <Button type="button" :label="submitButtonLabel" @click="saveItem" :loading="isLoading"
+                    <Button type="button" :label="submitButtonLabel" @click="handleSubmit" :loading="isLoading"
                         :disabled="!isFormValid" />
                 </div>
             </template>
@@ -92,7 +92,7 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
-import api from '@/services/api';
+import { FinanceService } from '@/services/financeService';
 
 const props = defineProps({
     formType: {
@@ -117,11 +117,9 @@ const getInitialFormData = () => ({
     description: '',
     category: '',
     amount: 0,
-    // Budget-specific fields
     isRecurring: true,
-    // Transaction-specific fields
     type: '',
-    date: new Date() // Always initialize with current date
+    date: new Date()
 });
 
 const formData = ref(getInitialFormData());
@@ -139,30 +137,18 @@ const emit = defineEmits([
     'transactionUpdated'
 ]);
 
-// Date range for calendar (allow past and future dates)
+// Date range for calendar
 const minDateRange = computed(() => {
     const date = new Date();
-    date.setFullYear(date.getFullYear() - 10); // 10 years ago
+    date.setFullYear(date.getFullYear() - 10);
     return date;
 });
 
 const maxDateRange = computed(() => {
     const date = new Date();
-    date.setFullYear(date.getFullYear() + 5); // 5 years from now
+    date.setFullYear(date.getFullYear() + 5);
     return date;
 });
-
-// Utility function to safely parse dates
-const parseDate = (dateValue) => {
-    if (!dateValue) return new Date();
-
-    if (dateValue instanceof Date) {
-        return isNaN(dateValue.getTime()) ? new Date() : dateValue;
-    }
-
-    const parsed = new Date(dateValue);
-    return isNaN(parsed.getTime()) ? new Date() : parsed;
-};
 
 // Computed properties for dynamic labels and placeholders
 const buttonLabel = computed(() => {
@@ -219,20 +205,13 @@ const submitButtonLabel = computed(() => {
     return `${action} ${itemType}`;
 });
 
-// Form validation
+// Form validation using the service
 const isFormValid = computed(() => {
-    const baseValid = formData.value.name.trim() !== '' &&
-        formData.value.category.trim() !== '' &&
-        formData.value.amount !== 0;
-
-    if (props.formType === 'transaction') {
-        const hasValidDate = formData.value.date &&
-            formData.value.date instanceof Date &&
-            !isNaN(formData.value.date.getTime());
-        return baseValid && formData.value.type !== '' && hasValidDate;
+    if (props.formType === 'budget') {
+        return FinanceService.validateBudgetItem(formData.value).isValid;
+    } else {
+        return FinanceService.validateTransaction(formData.value).isValid;
     }
-
-    return baseValid && formData.value.amount > 0;
 });
 
 // Watch for editItem prop changes to populate form
@@ -256,7 +235,7 @@ watch(() => props.editItem, (newEditItem) => {
                 amount: newEditItem.amount || 0,
                 type: newEditItem.type || '',
                 isRecurring: true,
-                date: parseDate(newEditItem.date)
+                date: FinanceService.parseDate(newEditItem.date)
             };
         }
     }
@@ -264,191 +243,11 @@ watch(() => props.editItem, (newEditItem) => {
 
 const openDialog = () => {
     if (!editMode.value) {
-        // Reset form for add mode
         formData.value = getInitialFormData();
-        // Set isRecurring based on form type
         formData.value.isRecurring = props.formType === 'budget';
     }
     visible.value = true;
     errors.value = {};
-};
-
-const validateForm = () => {
-    errors.value = {};
-
-    if (!formData.value.name.trim()) {
-        errors.value.name = `${nameFieldLabel.value} is required`;
-    }
-
-    if (!formData.value.category.trim()) {
-        errors.value.category = 'Category is required';
-    }
-
-    if (!formData.value.amount || formData.value.amount === 0) {
-        if (props.formType === 'budget') {
-            errors.value.amount = 'Amount must be greater than 0';
-        } else {
-            errors.value.amount = 'Amount cannot be zero';
-        }
-    }
-
-    if (props.formType === 'transaction') {
-        if (!formData.value.type) {
-            errors.value.type = 'Transaction type is required';
-        }
-
-        // Date validation
-        if (!formData.value.date || !(formData.value.date instanceof Date) || isNaN(formData.value.date.getTime())) {
-            errors.value.date = 'Please select a valid date';
-        }
-    } else {
-        // Budget items should always have positive amounts
-        if (formData.value.amount <= 0) {
-            errors.value.amount = 'Amount must be greater than 0';
-        }
-    }
-
-    return Object.keys(errors.value).length === 0;
-};
-
-const saveItem = async () => {
-    if (!validateForm()) {
-        return;
-    }
-
-    isLoading.value = true;
-
-    try {
-        if (props.formType === 'budget') {
-            await saveBudgetItem();
-        } else {
-            await saveTransaction();
-        }
-    } catch (error) {
-        console.error(`Error ${editMode.value ? 'updating' : 'adding'} ${props.formType}:`, error);
-        handleSaveError(error);
-    } finally {
-        isLoading.value = false;
-    }
-};
-
-const saveBudgetItem = async () => {
-    // Get existing budget data first
-    const existingBudgetResponse = await api.get('/finances');
-    const existingBudget = existingBudgetResponse.data.data[0];
-
-    let monthlyBudget = [];
-
-    if (existingBudget && existingBudget.monthlyBudget) {
-        monthlyBudget = [...existingBudget.monthlyBudget];
-    }
-
-    // Prepare the budget item data
-    const budgetItemData = {
-        name: formData.value.name.trim(),
-        category: formData.value.category.trim(),
-        amount: formData.value.amount,
-        isRecurring: formData.value.isRecurring
-    };
-
-    // Only include description if it's not empty
-    if (formData.value.description.trim()) {
-        budgetItemData.description = formData.value.description.trim();
-    }
-
-    if (editMode.value) {
-        // Update existing item
-        const itemIndex = monthlyBudget.findIndex(item => item._id === props.editItem._id);
-        if (itemIndex !== -1) {
-            monthlyBudget[itemIndex] = { ...budgetItemData, _id: props.editItem._id };
-        }
-    } else {
-        // Add new item
-        monthlyBudget.push(budgetItemData);
-    }
-
-    // Use the upsert endpoint
-    const updateData = {
-        monthlyBudget: monthlyBudget
-    };
-
-    // Include existing expected income to preserve it
-    if (existingBudget && existingBudget.expectedMonthlyIncome) {
-        updateData.expectedMonthlyIncome = existingBudget.expectedMonthlyIncome;
-    }
-
-    const response = await api.post('/finances', updateData);
-
-    console.log(`Budget item ${editMode.value ? 'updated' : 'added'} successfully:`, response.data);
-
-    // Emit appropriate event
-    if (editMode.value) {
-        emit('budgetItemUpdated', response.data);
-    } else {
-        emit('budgetItemAdded', response.data);
-    }
-
-    closeDialog();
-};
-
-const saveTransaction = async () => {
-    // Get current month and year
-    const currentDate = new Date();
-    const month = currentDate.getMonth();
-    const year = currentDate.getFullYear();
-
-    // Ensure we have a valid date
-    const transactionDate = parseDate(formData.value.date);
-
-    // Prepare the transaction data according to backend validation
-    const transactionData = {
-        description: formData.value.name.trim(),
-        amount: formData.value.amount,
-        category: formData.value.category.trim(),
-        type: formData.value.type,
-        date: transactionDate.toISOString()
-    };
-
-    // Add notes if provided
-    if (formData.value.description && formData.value.description.trim()) {
-        transactionData.notes = formData.value.description.trim();
-    }
-
-    let response;
-
-    if (editMode.value) {
-        // Update existing transaction using PATCH
-        response = await api.patch(`/finances/${month}/${year}/transactions/${props.editItem._id}`, transactionData);
-    } else {
-        // Add new transaction using POST
-        response = await api.post(`/finances/${month}/${year}/transactions`, transactionData);
-    }
-
-    console.log(`Transaction ${editMode.value ? 'updated' : 'added'} successfully:`, response.data);
-
-    // Emit appropriate event
-    if (editMode.value) {
-        emit('transactionUpdated', response.data);
-    } else {
-        emit('transactionAdded', response.data);
-    }
-
-    closeDialog();
-};
-
-const handleSaveError = (error) => {
-    if (error.response?.status === 400) {
-        errors.value.general = 'Invalid data provided';
-    } else if (error.response?.status === 404) {
-        if (props.formType === 'budget') {
-            errors.value.general = 'No budget found. Please create a budget first.';
-        } else {
-            errors.value.general = 'Transaction not found or no finance document exists for this month.';
-        }
-    } else {
-        const itemType = props.formType === 'budget' ? 'budget item' : 'transaction';
-        errors.value.general = `Failed to ${editMode.value ? 'update' : 'add'} ${itemType}. Please try again.`;
-    }
 };
 
 const closeDialog = () => {
@@ -458,6 +257,52 @@ const closeDialog = () => {
         formData.value.isRecurring = props.formType === 'budget';
     }
     errors.value = {};
+};
+
+const handleSubmit = async () => {
+    // Validate form using service
+    const validation = props.formType === 'budget'
+        ? FinanceService.validateBudgetItem(formData.value)
+        : FinanceService.validateTransaction(formData.value);
+
+    if (!validation.isValid) {
+        errors.value = validation.errors;
+        return;
+    }
+
+    isLoading.value = true;
+    errors.value = {};
+
+    try {
+        let result;
+
+        if (props.formType === 'budget') {
+            if (editMode.value) {
+                result = await FinanceService.updateBudgetItem(props.editItem._id, formData.value);
+                emit('budgetItemUpdated', result);
+            } else {
+                result = await FinanceService.addBudgetItem(formData.value);
+                emit('budgetItemAdded', result);
+            }
+        } else {
+            if (editMode.value) {
+                result = await FinanceService.updateTransaction(props.editItem._id, formData.value);
+                emit('transactionUpdated', result);
+            } else {
+                result = await FinanceService.addTransaction(formData.value);
+                emit('transactionAdded', result);
+            }
+        }
+
+        console.log(`${props.formType} ${editMode.value ? 'updated' : 'added'} successfully:`, result);
+        closeDialog();
+    } catch (error) {
+        console.error(`Error ${editMode.value ? 'updating' : 'adding'} ${props.formType}:`, error);
+        const operation = editMode.value ? 'update' : 'add';
+        errors.value.general = FinanceService.formatErrorMessage(error, operation, props.formType);
+    } finally {
+        isLoading.value = false;
+    }
 };
 
 // Expose openDialog method for parent components

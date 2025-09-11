@@ -30,7 +30,7 @@
         <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-semibold text-primary">Budget Items</h2>
-                <UnifiedItemForm ref="addBudgetFormRef" formType="budget" @budget-item-added="handleBudgetItemAdded" />
+                <ItemForm ref="addBudgetFormRef" formType="budget" @budget-item-added="handleBudgetItemAdded" />
             </div>
 
             <div v-if="budget.monthlyBudget && budget.monthlyBudget.length > 0" class="space-y-3">
@@ -64,7 +64,6 @@
                     <div v-if="budget.expectedMonthlyIncome"
                         class="flex justify-between items-center text-sm text-secondary mt-1">
                         <span>Expected Savings:</span>
-                        <!-- TODO add tooltip "This is what you will save if you stick to your budget"-->
                         <span :class="budget.plannedSavings >= 0 ? 'text-accent-green' : 'text-accent-red'">
                             ${{ budget.plannedSavings }}
                         </span>
@@ -77,7 +76,7 @@
         </div>
 
         <!-- Edit Budget Item Form (hidden, controlled programmatically) -->
-        <UnifiedItemForm ref="editBudgetFormRef" formType="budget" :edit-item="editingItem"
+        <ItemForm ref="editBudgetFormRef" formType="budget" :edit-item="editingItem"
             @budget-item-updated="handleBudgetItemUpdated" style="display: none;" />
 
         <!-- Edit Expected Income Dialog -->
@@ -106,8 +105,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import api from '@/services/api';
-import UnifiedItemForm from './UnifiedItemForm.vue';
+import { FinanceService } from '@/services/financeService';
+import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
 
 const props = defineProps({
@@ -201,7 +200,7 @@ const handleBudgetItemAction = ({ action, entity }) => {
     }
 };
 
-// Income functions
+// Income functions (using FinanceService for future updates)
 const openEditIncomeDialog = () => {
     newExpectedIncome.value = props.budget.expectedMonthlyIncome || 0;
     editIncomeVisible.value = true;
@@ -224,11 +223,15 @@ const updateExpectedIncome = async () => {
     incomeError.value = '';
 
     try {
-        await api.post('/finances', {
-            expectedMonthlyIncome: newExpectedIncome.value,
-            monthlyBudget: props.budget.monthlyBudget || []
-        });
+        // Using existing budget data and updating just the expected income
+        const existingBudget = await FinanceService.getBudgetData();
 
+        const updateData = {
+            expectedMonthlyIncome: newExpectedIncome.value,
+            monthlyBudget: existingBudget?.monthlyBudget || []
+        };
+
+        await FinanceService._updateBudgetData(updateData);
         emit('budgetUpdated');
         closeIncomeDialog();
     } catch (error) {
@@ -239,7 +242,7 @@ const updateExpectedIncome = async () => {
     }
 };
 
-// Budget functions
+// Budget functions (using FinanceService)
 const deleteBudget = async () => {
     const budgetName = `${getMonthName(props.budget.month)} ${props.budget.year}`;
 
@@ -250,7 +253,7 @@ const deleteBudget = async () => {
     deletingBudget.value = true;
 
     try {
-        await api.delete(`/finances/${props.budget.month}/${props.budget.year}`);
+        await FinanceService.deleteBudget(props.budget.month, props.budget.year);
         console.log('Budget deleted successfully');
         emit('budgetDeleted');
     } catch (error) {
@@ -261,7 +264,7 @@ const deleteBudget = async () => {
     }
 };
 
-// Budget item functions
+// Budget item functions (using FinanceService)
 const handleBudgetItemAdded = () => {
     emit('budgetUpdated');
 };
@@ -287,10 +290,11 @@ const deleteBudgetItem = async (budgetItemId) => {
     deletingItemId.value = budgetItemId;
 
     try {
-        await api.delete(`/finances/${props.budget.month}/${props.budget.year}/budget/${budgetItemId}`);
+        await FinanceService.deleteBudgetItem(props.budget.month, props.budget.year, budgetItemId);
         emit('budgetUpdated');
     } catch (error) {
         console.error('Error deleting budget item:', error);
+        alert('Failed to delete budget item. Please try again.');
     } finally {
         deletingItemId.value = null;
     }

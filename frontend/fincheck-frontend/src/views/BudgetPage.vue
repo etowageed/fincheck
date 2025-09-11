@@ -22,7 +22,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import api from '@/services/api';
+import { FinanceService } from '@/services/financeService';
 import BudgetDocument from '@/components/finances/BudgetDocument.vue';
 import AddBudgetEntryForm from '@/components/finances/AddBudgetEntryForm.vue';
 
@@ -42,8 +42,7 @@ const fetchBudget = async () => {
     isLoading.value = true;
 
     try {
-        const res = await api.get('/finances');
-        budget.value = res.data.data[0] || null;
+        budget.value = await FinanceService.getBudgetData();
         console.log('Budget:', budget.value);
     } catch (err) {
         console.error('Error fetching budget:', err);

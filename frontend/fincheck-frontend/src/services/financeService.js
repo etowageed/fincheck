@@ -1,0 +1,305 @@
+import api from "@/services/api";
+
+/**
+ * Service for managing budget items and transactions
+ * Handles all business logic and API interactions
+ */
+export class FinanceService {
+  /**
+   * Budget Item Operations
+   */
+  static async getBudgetData() {
+    try {
+      const response = await api.get("/finances");
+      return response.data.data[0] || null;
+    } catch (error) {
+      throw new Error(`Failed to fetch budget data: ${error.message}`);
+    }
+  }
+
+  static async addBudgetItem(itemData) {
+    try {
+      const existingBudget = await this.getBudgetData();
+      let monthlyBudget = [];
+
+      if (existingBudget && existingBudget.monthlyBudget) {
+        monthlyBudget = [...existingBudget.monthlyBudget];
+      }
+
+      const budgetItemData = this._prepareBudgetItemData(itemData);
+      monthlyBudget.push(budgetItemData);
+
+      const updateData = {
+        monthlyBudget: monthlyBudget,
+      };
+
+      if (existingBudget && existingBudget.expectedMonthlyIncome) {
+        updateData.expectedMonthlyIncome = existingBudget.expectedMonthlyIncome;
+      }
+
+      const response = await api.post("/finances", updateData);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to add budget item: ${error.message}`);
+    }
+  }
+
+  static async updateBudgetItem(itemId, itemData) {
+    try {
+      const existingBudget = await this.getBudgetData();
+
+      if (!existingBudget || !existingBudget.monthlyBudget) {
+        throw new Error("No budget found");
+      }
+
+      let monthlyBudget = [...existingBudget.monthlyBudget];
+      const itemIndex = monthlyBudget.findIndex((item) => item._id === itemId);
+
+      if (itemIndex === -1) {
+        throw new Error("Budget item not found");
+      }
+
+      const budgetItemData = {
+        ...this._prepareBudgetItemData(itemData),
+        _id: itemId,
+      };
+
+      monthlyBudget[itemIndex] = budgetItemData;
+
+      const updateData = {
+        monthlyBudget: monthlyBudget,
+        expectedMonthlyIncome: existingBudget.expectedMonthlyIncome,
+      };
+
+      const response = await api.post("/finances", updateData);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to update budget item: ${error.message}`);
+    }
+  }
+
+  static async deleteBudgetItem(month, year, budgetItemId) {
+    try {
+      const response = await api.delete(
+        `/finances/${month}/${year}/budget/${budgetItemId}`
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to delete budget item: ${error.message}`);
+    }
+  }
+
+  /**
+   * Transaction Operations
+   */
+  static async addTransaction(itemData) {
+    try {
+      const { month, year } = this._getCurrentMonthYear();
+      const transactionData = this._prepareTransactionData(itemData);
+
+      const response = await api.post(
+        `/finances/${month}/${year}/transactions`,
+        transactionData
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to add transaction: ${error.message}`);
+    }
+  }
+
+  static async updateTransaction(itemId, itemData) {
+    try {
+      const { month, year } = this._getCurrentMonthYear();
+      const transactionData = this._prepareTransactionData(itemData);
+
+      const response = await api.patch(
+        `/finances/${month}/${year}/transactions/${itemId}`,
+        transactionData
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to update transaction: ${error.message}`);
+    }
+  }
+
+  static async deleteTransaction(month, year, transactionId) {
+    try {
+      const response = await api.delete(
+        `/finances/${month}/${year}/transactions/${transactionId}`
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to delete transaction: ${error.message}`);
+    }
+  }
+
+  static async getTransactions(month, year) {
+    try {
+      const response = await api.get(`/finances/${month}/${year}`);
+      return response.data.data?.transactions || [];
+    } catch (error) {
+      if (error.response?.status === 404) {
+        return []; // No finance document for this month yet
+      }
+      throw new Error(`Failed to fetch transactions: ${error.message}`);
+    }
+  }
+
+  /**
+   * Budget Operations
+   */
+  static async deleteBudget(month, year) {
+    try {
+      const response = await api.delete(`/finances/${month}/${year}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to delete budget: ${error.message}`);
+    }
+  }
+
+  static async _updateBudgetData(updateData) {
+    try {
+      const response = await api.post("/finances", updateData);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to update budget: ${error.message}`);
+    }
+  }
+
+  /**
+   * Validation Methods
+   */
+  static validateBudgetItem(itemData) {
+    const errors = {};
+
+    if (!itemData.name?.trim()) {
+      errors.name = "Name is required";
+    }
+
+    if (!itemData.category?.trim()) {
+      errors.category = "Category is required";
+    }
+
+    if (!itemData.amount || itemData.amount <= 0) {
+      errors.amount = "Amount must be greater than 0";
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  }
+
+  static validateTransaction(itemData) {
+    const errors = {};
+
+    if (!itemData.name?.trim()) {
+      errors.name = "Description is required";
+    }
+
+    if (!itemData.category?.trim()) {
+      errors.category = "Category is required";
+    }
+
+    if (!itemData.amount || itemData.amount === 0) {
+      errors.amount = "Amount cannot be zero";
+    }
+
+    if (!itemData.type) {
+      errors.type = "Transaction type is required";
+    }
+
+    if (
+      !itemData.date ||
+      !(itemData.date instanceof Date) ||
+      isNaN(itemData.date.getTime())
+    ) {
+      errors.date = "Please select a valid date";
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  }
+
+  /**
+   * Utility Methods
+   */
+  static formatErrorMessage(error, operation, itemType) {
+    if (error.response?.status === 400) {
+      return "Invalid data provided";
+    } else if (error.response?.status === 404) {
+      if (itemType === "budget") {
+        return "No budget found. Please create a budget first.";
+      } else {
+        return "Transaction not found or no finance document exists for this month.";
+      }
+    } else {
+      return `Failed to ${operation} ${itemType}. Please try again.`;
+    }
+  }
+
+  static parseDate(dateValue) {
+    if (!dateValue) return new Date();
+
+    if (dateValue instanceof Date) {
+      return isNaN(dateValue.getTime()) ? new Date() : dateValue;
+    }
+
+    const parsed = new Date(dateValue);
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
+  }
+
+  /**
+   * Private Helper Methods
+   */
+  static _prepareBudgetItemData(itemData) {
+    const budgetItemData = {
+      name: itemData.name.trim(),
+      category: itemData.category.trim(),
+      amount: itemData.amount,
+      isRecurring: itemData.isRecurring,
+    };
+
+    if (itemData.description?.trim()) {
+      budgetItemData.description = itemData.description.trim();
+    }
+
+    return budgetItemData;
+  }
+
+  static _prepareTransactionData(itemData) {
+    const transactionDate = this.parseDate(itemData.date);
+
+    const transactionData = {
+      description: itemData.name.trim(),
+      amount: itemData.amount,
+      category: itemData.category.trim(),
+      type: itemData.type,
+      date: transactionDate.toISOString(),
+    };
+
+    if (itemData.description?.trim()) {
+      transactionData.notes = itemData.description.trim();
+    }
+
+    return transactionData;
+  }
+
+  static _getCurrentMonthYear() {
+    const currentDate = new Date();
+    return {
+      month: currentDate.getMonth(),
+      year: currentDate.getFullYear(),
+    };
+  }
+
+  static getCurrentMonthYear() {
+    const currentDate = new Date();
+    return {
+      month: currentDate.getMonth(),
+      year: currentDate.getFullYear(),
+    };
+  }
+}
