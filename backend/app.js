@@ -78,6 +78,7 @@ app.use(passport.session());
 const authRouter = require('./routes/authRoutes');
 const userRouter = require('./routes/userRoutes');
 const financesRouter = require('./routes/financesRoutes');
+const categoryRouter = require('./routes/categoryRoutes');
 
 app.use(express.json({ limit: '10kb' }));
 
@@ -85,6 +86,7 @@ app.use(express.json({ limit: '10kb' }));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/finances', financesRouter);
+app.use('/api/v1/categories', categoryRouter);
 
 // Handle undefined routes
 app.all('/{*any}', (req, res, next) => {

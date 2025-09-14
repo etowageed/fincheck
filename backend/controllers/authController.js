@@ -5,6 +5,7 @@ const User = require('../models/userModel');
 const EmailService = require('../utils/emails');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const Category = require('../models/categoryModel');
 
 // creating the jwt token
 const createToken = (id) => {
@@ -59,6 +60,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     expenses: [],
     lastKnownIP: ip, // Save the last known IP address
   });
+
   // send welcome email
   const appBaseUrl = `${process.env.FRONTEND_URL}/transactions`;
 

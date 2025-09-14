@@ -31,12 +31,39 @@
                     <small v-if="errors.type" class="p-error">{{ errors.type }}</small>
                 </div>
 
-                <!-- Category Field -->
+                <!-- Category Field - UPDATED -->
                 <div class="flex flex-col gap-2">
                     <label for="category" class="font-semibold">Category</label>
-                    <InputText id="category" v-model="formData.category" :placeholder="categoryPlaceholder"
-                        :disabled="isLoading" :class="{ 'p-invalid': errors.category }" />
+                    <div class="flex gap-2">
+                        <Dropdown id="category" v-model="formData.category" :options="categoryOptions"
+                            optionLabel="label" optionValue="value" placeholder="Select a category"
+                            :disabled="isLoading || isCategoriesLoading" :class="{ 'p-invalid': errors.category }"
+                            filter filterPlaceholder="Search categories..." class="flex-1">
+                            <template #option="{ option }">
+                                <div class="flex items-center gap-2">
+                                    <span>{{ option.label }}</span>
+                                    <div class="flex gap-1">
+                                        <span v-if="option.isGlobal"
+                                            class="px-1.5 py-0.5 text-xs rounded bg-blue-100 text-blue-700">
+                                            Default
+                                        </span>
+                                        <span v-else-if="option.isOverride"
+                                            class="px-1.5 py-0.5 text-xs rounded bg-yellow-100 text-yellow-700">
+                                            Custom
+                                        </span>
+                                    </div>
+                                </div>
+                            </template>
+                        </Dropdown>
+
+                        <!-- Quick Add Category Button -->
+                        <Button icon="pi pi-plus" severity="secondary" outlined size="small"
+                            @click="showQuickAddCategory = true" :disabled="isLoading"
+                            v-tooltip.top="'Add new category'" />
+                    </div>
                     <small v-if="errors.category" class="p-error">{{ errors.category }}</small>
+                    <small v-if="isCategoriesLoading" class="text-gray-500">Loading categories...</small>
+                    <small v-else-if="categoriesError" class="text-red-500">{{ categoriesError }}</small>
                 </div>
 
                 <!-- Date Field (Transactions only) -->
@@ -87,12 +114,43 @@
                 </div>
             </template>
         </Dialog>
+
+        <!-- Quick Add Category Dialog -->
+        <Dialog v-model:visible="showQuickAddCategory" modal header="Quick Add Category" :style="{ width: '400px' }">
+            <div class="space-y-4">
+                <div class="flex flex-col gap-2">
+                    <label for="quickCategoryName" class="font-semibold">Category Name</label>
+                    <InputText id="quickCategoryName" v-model="quickCategoryForm.name" placeholder="Enter category name"
+                        :class="{ 'p-invalid': quickCategoryErrors.name }" @keyup.enter="handleQuickAddCategory" />
+                    <small v-if="quickCategoryErrors.name" class="p-error">{{ quickCategoryErrors.name }}</small>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label for="quickCategoryDescription" class="font-semibold">Description (Optional)</label>
+                    <InputText id="quickCategoryDescription" v-model="quickCategoryForm.description"
+                        placeholder="Brief description" />
+                </div>
+
+                <div v-if="quickCategoryErrors.general" class="p-3 bg-red-50 border border-red-200 rounded-md">
+                    <small class="p-error">{{ quickCategoryErrors.general }}</small>
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <Button label="Cancel" severity="secondary" @click="closeQuickAddCategory"
+                        :disabled="isQuickAddLoading" />
+                    <Button label="Add Category" @click="handleQuickAddCategory" :loading="isQuickAddLoading" />
+                </div>
+            </template>
+        </Dialog>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { FinanceService } from '@/services/financeService';
+import CategoryService from '@/services/categoryService';
 
 const props = defineProps({
     formType: {
@@ -110,6 +168,15 @@ const visible = ref(false);
 const isLoading = ref(false);
 const errors = ref({});
 const editMode = computed(() => !!props.editItem);
+
+// Category-related state
+const categories = ref([]);
+const isCategoriesLoading = ref(false);
+const categoriesError = ref('');
+const showQuickAddCategory = ref(false);
+const isQuickAddLoading = ref(false);
+const quickCategoryForm = ref({ name: '', description: '' });
+const quickCategoryErrors = ref({});
 
 // Initialize form data with proper defaults
 const getInitialFormData = () => ({
@@ -136,6 +203,72 @@ const emit = defineEmits([
     'transactionAdded',
     'transactionUpdated'
 ]);
+
+// Category options for dropdown
+const categoryOptions = computed(() => {
+    return CategoryService.formatCategoriesForDropdown(categories.value);
+});
+
+// Load categories
+const loadCategories = async () => {
+    isCategoriesLoading.value = true;
+    categoriesError.value = '';
+
+    try {
+        const result = await CategoryService.getCategories();
+        if (result.success) {
+            categories.value = result.data;
+        } else {
+            categoriesError.value = result.error;
+        }
+    } catch (error) {
+        categoriesError.value = 'Failed to load categories';
+        console.error('Error loading categories:', error);
+    } finally {
+        isCategoriesLoading.value = false;
+    }
+};
+
+// Quick add category functions
+const handleQuickAddCategory = async () => {
+    if (!quickCategoryForm.value.name?.trim()) {
+        quickCategoryErrors.value.name = 'Category name is required';
+        return;
+    }
+
+    isQuickAddLoading.value = true;
+    quickCategoryErrors.value = {};
+
+    try {
+        const result = await CategoryService.createCategory({
+            name: quickCategoryForm.value.name.trim(),
+            description: quickCategoryForm.value.description?.trim()
+        });
+
+        if (result.success) {
+            // Reload categories
+            await loadCategories();
+
+            // Select the new category
+            formData.value.category = result.data._id;
+
+            closeQuickAddCategory();
+        } else {
+            quickCategoryErrors.value.general = result.error;
+        }
+    } catch (error) {
+        quickCategoryErrors.value.general = 'Failed to create category';
+        console.error('Error creating category:', error);
+    } finally {
+        isQuickAddLoading.value = false;
+    }
+};
+
+const closeQuickAddCategory = () => {
+    showQuickAddCategory.value = false;
+    quickCategoryForm.value = { name: '', description: '' };
+    quickCategoryErrors.value = {};
+};
 
 // Date range for calendar
 const minDateRange = computed(() => {
@@ -179,12 +312,6 @@ const nameFieldPlaceholder = computed(() => {
         : 'e.g., Grocery shopping, Salary payment';
 });
 
-const categoryPlaceholder = computed(() => {
-    return props.formType === 'budget'
-        ? 'e.g., Housing, Food, Transportation, Entertainment'
-        : 'e.g., Food, Transportation, Salary, Entertainment';
-});
-
 const descriptionFieldId = computed(() => {
     return props.formType === 'budget' ? 'description' : 'notes';
 });
@@ -221,7 +348,7 @@ watch(() => props.editItem, (newEditItem) => {
             formData.value = {
                 name: newEditItem.name || '',
                 description: newEditItem.description || '',
-                category: newEditItem.category || '',
+                category: newEditItem.category?._id || newEditItem.category || '',
                 amount: newEditItem.amount || 0,
                 isRecurring: newEditItem.isRecurring ?? true,
                 type: '',
@@ -231,7 +358,7 @@ watch(() => props.editItem, (newEditItem) => {
             formData.value = {
                 name: newEditItem.description || '',
                 description: newEditItem.notes || '',
-                category: newEditItem.category || '',
+                category: newEditItem.category?._id || newEditItem.category || '',
                 amount: newEditItem.amount || 0,
                 type: newEditItem.type || '',
                 isRecurring: true,
@@ -248,6 +375,11 @@ const openDialog = () => {
     }
     visible.value = true;
     errors.value = {};
+
+    // Load categories when dialog opens
+    if (categories.value.length === 0) {
+        loadCategories();
+    }
 };
 
 const closeDialog = () => {
@@ -304,6 +436,11 @@ const handleSubmit = async () => {
         isLoading.value = false;
     }
 };
+
+// Load categories on component mount
+onMounted(() => {
+    loadCategories();
+});
 
 // Expose openDialog method for parent components
 defineExpose({
