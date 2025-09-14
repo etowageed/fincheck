@@ -122,7 +122,7 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
   }
 
   const { month, year } = req.params; // Expect month and year from URL parameters
-  const { description, amount, category, type } = req.body;
+  const { description, amount, category, type, date } = req.body;
 
   let expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
 
@@ -149,6 +149,7 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
     amount,
     category,
     type: type || 'actual',
+    date: req.body.date ? new Date(req.body.date) : Date.now(),
   });
 
   await expenseDoc.save({ validateBeforeSave: true });
@@ -175,6 +176,10 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
   if (req.body.category !== undefined) {
     // Assuming category might also be updated partially
     updateFields.category = req.body.category;
+  }
+  if (req.body.date !== undefined) {
+    // Assuming date might also be updated partially
+    updateFields.date = req.body.date ? new Date(req.body.date) : Date.now();
   }
   if (req.body.type !== undefined) {
     // Assuming type might also be updated partially

@@ -58,7 +58,10 @@ const transactionSchema = new mongoose.Schema({
     default: 'expense',
   }, // 'excluded expenses = savings/investments
   // date: { type: Date, default: Date.now },
-  date: { type: Date, default: Date.now },
+  date: {
+    type: Date,
+    default: Date.now, // Default to current date if not provided
+  },
 });
 
 // main expense schema
