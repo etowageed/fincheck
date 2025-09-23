@@ -6,59 +6,32 @@
                 <h1 class="text-xl font-bold text-blue-600">FinCheck</h1>
             </div>
 
-            <!-- Add ProfileSettings here -->
+            <!-- User Profile Section -->
             <div class="flex items-center space-x-4">
-                <!-- Always show button for testing -->
-                <ProfileSettings :user="testUser" @profile-updated="handleProfileUpdate"
+                <ProfileSettings :user="authStore.userProfile" @profile-updated="handleProfileUpdate"
                     @user-logout="handleUserLogout" />
-
-                <!-- Debug button to load user manually -->
-                <Button label="Load User" @click="loadUser" size="small" />
             </div>
         </div>
     </header>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 import ProfileSettings from '@/components/profile/ProfileSettings.vue';
-import { getCurrentUser } from '@/services/auth';
 
-const currentUser = ref({});
+const authStore = useAuthStore();
 
-// Test user data for debugging
-const testUser = ref({
-    id: '123',
-    name: 'Test User',
-    email: 'test@example.com'
-});
-
-const handleProfileUpdate = (updatedUser) => {
-    currentUser.value = { ...currentUser.value, ...updatedUser };
-    console.log('Profile updated:', updatedUser);
-};
-
-const handleUserLogout = () => {
-    currentUser.value = {};
-    console.log('User logged out');
-};
-
-const loadUser = async () => {
-    try {
-        console.log('Manual user load...');
-        const res = await getCurrentUser();
-        console.log('Response:', res);
-
-        if (res.data?.data?.user) {
-            currentUser.value = res.data.data.user;
-            testUser.value = res.data.data.user; // Update test user too
-        }
-    } catch (err) {
-        console.error('Load user error:', err);
+const handleProfileUpdate = async (updatedUser) => {
+    const result = await authStore.updateProfile(updatedUser);
+    if (!result.success) {
+        console.error('Profile update failed:', result.error);
     }
 };
 
-onMounted(async () => {
-    await loadUser();
-});
+const handleUserLogout = async () => {
+    const result = await authStore.logout();
+    if (!result.success) {
+        console.error('Logout failed:', result.error);
+    }
+};
 </script>

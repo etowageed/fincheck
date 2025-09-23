@@ -30,22 +30,18 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // CORS Configuration
-// In development, you might allow all origins or specific development origins.
-// In production, always restrict to your frontend's domain(s).
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || '*', // Replace with your frontend's URL in production
-  credentials: true, // Allow cookies to be sent with requests
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+  origin:
+    process.env.NODE_ENV === 'production'
+      ? process.env.FRONTEND_URL
+      : 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie'],
 };
-app.use(
-  cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-  })
-);
 
-//TODO setup proper cors structure with .env for production
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
 

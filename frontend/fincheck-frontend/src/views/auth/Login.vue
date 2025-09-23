@@ -9,17 +9,17 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import LoginForm from '@/components/auth/LoginForm.vue';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
-const handleLogin = (data) => {
-    // On successful login, redirect to /transactions (token is now in httpOnly cookie)
-    if (data?.status === 'success') {
+const handleLogin = async (result) => {
+    if (result.success) {
         router.push('/transactions');
     } else {
-        // Show error or toast
-        console.error('Login failed', data);
+        console.error('Login failed:', result.message);
     }
 };
 </script>

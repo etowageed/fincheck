@@ -1,22 +1,22 @@
 <template>
-    <Button @click="logout" icon="pi pi-sign-out" label="Logout"
+    <Button @click="handleLogout" icon="pi pi-sign-out" label="Logout"
         class="w-full !justify-start !text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600" severity="secondary"
-        text />
+        :loading="authStore.isLoading" text />
 </template>
 
 <script setup>
-import api from '@/services/api';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
-const logout = async () => {
+const handleLogout = async () => {
     try {
-        await api.get('/auth/logout'); // Use GET to match your backend
-        router.push('/login');
+        await authStore.logout();
+        router.replace('/login');
     } catch (error) {
-        // Optionally show an error message
-        console.error('Logout failed', error);
+        console.error('Logout failed:', error);
     }
 };
 </script>

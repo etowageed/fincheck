@@ -1,6 +1,6 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from "vue-router";
-import { isLoggedIn } from "@/services/auth"; // import the function
+import { useAuthStore } from "@/stores/auth";
 
 const routes = [
   {
@@ -73,16 +73,41 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  if (to.meta.requiresAuth) {
-    // Allow navigation if coming directly from login after successful login
-    if (from.name === "Login" && from.fullPath === "/login") {
-      return next();
+  const authStore = useAuthStore();
+
+  // Skip auth check for public routes
+  const publicRoutes = [
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+  ];
+  if (publicRoutes.includes(to.path)) {
+    if (authStore.isAuthenticated) {
+      return next("/transactions");
     }
-    const loggedIn = await isLoggedIn();
-    if (!loggedIn) {
+    return next();
+  }
+
+  // For protected routes
+  if (to.meta.requiresAuth) {
+    try {
+      // Always check with backend first
+      const isAuthenticated = await authStore.checkAuth();
+      if (isAuthenticated) {
+        return next();
+      }
+
+      return next({
+        path: "/login",
+        query: { redirect: to.fullPath },
+      });
+    } catch (error) {
+      console.error("Auth check failed:", error);
       return next("/login");
     }
   }
+
   next();
 });
 
