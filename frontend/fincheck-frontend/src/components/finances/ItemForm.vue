@@ -37,7 +37,7 @@
                     <div class="flex gap-2">
                         <Dropdown id="category" v-model="formData.category" :options="categoryOptions"
                             optionLabel="label" optionValue="value" placeholder="Select a category"
-                            :disabled="isLoading || isCategoriesLoading" :class="{ 'p-invalid': errors.category }"
+                            :disabled="isLoading || categoriesStore.isLoading" :class="{ 'p-invalid': errors.category }"
                             filter filterPlaceholder="Search categories..." class="flex-1">
                             <template #option="{ option }">
                                 <div class="flex items-center gap-2">
@@ -62,8 +62,8 @@
                             v-tooltip.top="'Add new category'" />
                     </div>
                     <small v-if="errors.category" class="p-error">{{ errors.category }}</small>
-                    <small v-if="isCategoriesLoading" class="text-gray-500">Loading categories...</small>
-                    <small v-else-if="categoriesError" class="text-red-500">{{ categoriesError }}</small>
+                    <small v-if="categoriesStore.isLoading" class="text-gray-500">Loading categories...</small>
+                    <small v-else-if="categoriesStore.error" class="text-red-500">{{ categoriesStore.error }}</small>
                 </div>
 
                 <!-- Date Field (Transactions only) -->
@@ -150,7 +150,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { FinanceService } from '@/services/financeService';
-import CategoryService from '@/services/categoryService';
+import { useCategoriesStore } from '@/stores/categories';
 
 const props = defineProps({
     formType: {
@@ -169,14 +169,51 @@ const isLoading = ref(false);
 const errors = ref({});
 const editMode = computed(() => !!props.editItem);
 
-// Category-related state
-const categories = ref([]);
-const isCategoriesLoading = ref(false);
-const categoriesError = ref('');
+// Replace local category state with store
+const categoriesStore = useCategoriesStore();
 const showQuickAddCategory = ref(false);
-const isQuickAddLoading = ref(false);
 const quickCategoryForm = ref({ name: '', description: '' });
 const quickCategoryErrors = ref({});
+
+// Update the categoryOptions computed property
+const categoryOptions = computed(() => {
+    return categoriesStore.getAllCategories.map(cat => ({
+        label: cat.name,
+        value: cat._id || cat.id,
+        isGlobal: cat.isGlobalDefault,
+        isOverride: cat.overridesGlobalDefault
+    }));
+});
+
+// Quick add category functions using store
+const handleQuickAddCategory = async () => {
+    if (!quickCategoryForm.value.name?.trim()) {
+        quickCategoryErrors.value.name = 'Category name is required';
+        return;
+    }
+
+    quickCategoryErrors.value = {};
+
+    try {
+        const result = await categoriesStore.createCategory({
+            name: quickCategoryForm.value.name.trim(),
+            description: quickCategoryForm.value.description?.trim()
+        });
+
+        if (result.success) {
+            // Refresh categories
+            await categoriesStore.fetchCategories();
+            // Select the new category
+            formData.value.category = result.data?._id || result.category?._id;
+            closeQuickAddCategory();
+        } else {
+            quickCategoryErrors.value.general = result.error;
+        }
+    } catch (error) {
+        quickCategoryErrors.value.general = 'Failed to create category';
+        console.error('Error creating category:', error);
+    }
+};
 
 // Initialize form data with proper defaults
 const getInitialFormData = () => ({
@@ -203,72 +240,6 @@ const emit = defineEmits([
     'transactionAdded',
     'transactionUpdated'
 ]);
-
-// Category options for dropdown
-const categoryOptions = computed(() => {
-    return CategoryService.formatCategoriesForDropdown(categories.value);
-});
-
-// Load categories
-const loadCategories = async () => {
-    isCategoriesLoading.value = true;
-    categoriesError.value = '';
-
-    try {
-        const result = await CategoryService.getCategories();
-        if (result.success) {
-            categories.value = result.data;
-        } else {
-            categoriesError.value = result.error;
-        }
-    } catch (error) {
-        categoriesError.value = 'Failed to load categories';
-        console.error('Error loading categories:', error);
-    } finally {
-        isCategoriesLoading.value = false;
-    }
-};
-
-// Quick add category functions
-const handleQuickAddCategory = async () => {
-    if (!quickCategoryForm.value.name?.trim()) {
-        quickCategoryErrors.value.name = 'Category name is required';
-        return;
-    }
-
-    isQuickAddLoading.value = true;
-    quickCategoryErrors.value = {};
-
-    try {
-        const result = await CategoryService.createCategory({
-            name: quickCategoryForm.value.name.trim(),
-            description: quickCategoryForm.value.description?.trim()
-        });
-
-        if (result.success) {
-            // Reload categories
-            await loadCategories();
-
-            // Select the new category
-            formData.value.category = result.data._id;
-
-            closeQuickAddCategory();
-        } else {
-            quickCategoryErrors.value.general = result.error;
-        }
-    } catch (error) {
-        quickCategoryErrors.value.general = 'Failed to create category';
-        console.error('Error creating category:', error);
-    } finally {
-        isQuickAddLoading.value = false;
-    }
-};
-
-const closeQuickAddCategory = () => {
-    showQuickAddCategory.value = false;
-    quickCategoryForm.value = { name: '', description: '' };
-    quickCategoryErrors.value = {};
-};
 
 // Date range for calendar
 const minDateRange = computed(() => {
@@ -376,9 +347,9 @@ const openDialog = () => {
     visible.value = true;
     errors.value = {};
 
-    // Load categories when dialog opens
-    if (categories.value.length === 0) {
-        loadCategories();
+    // Load categories if not already loaded
+    if (!categoriesStore.categories.length) {
+        categoriesStore.fetchCategories();
     }
 };
 
@@ -437,10 +408,17 @@ const handleSubmit = async () => {
     }
 };
 
-// Load categories on component mount
-onMounted(() => {
-    loadCategories();
+// Initialize categories on mount
+onMounted(async () => {
+    await categoriesStore.fetchCategories();
 });
+
+// Add method to close quick add dialog
+const closeQuickAddCategory = () => {
+    showQuickAddCategory.value = false;
+    quickCategoryForm.value = { name: '', description: '' };
+    quickCategoryErrors.value = {};
+};
 
 // Expose openDialog method for parent components
 defineExpose({

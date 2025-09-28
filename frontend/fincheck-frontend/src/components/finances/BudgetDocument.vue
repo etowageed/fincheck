@@ -40,7 +40,7 @@
                         <div class="flex items-center gap-2 mb-1">
                             <p class="font-medium text-primary">{{ item.name }}</p>
                             <span class="text-xs px-2 py-1 rounded-full bg-tertiary text-accent-blue capitalize">
-                                {{ item.category }}
+                                {{ getCategoryName(item.category) }}
                             </span>
                         </div>
                         <p v-if="item.description" class="text-sm text-secondary mb-1">{{ item.description }}</p>
@@ -106,6 +106,7 @@
 <script setup>
 import { ref } from 'vue';
 import { FinanceService } from '@/services/financeService';
+import { useCategoriesStore } from '@/stores/categories';
 import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
 
@@ -298,5 +299,14 @@ const deleteBudgetItem = async (budgetItemId) => {
     } finally {
         deletingItemId.value = null;
     }
+};
+
+// Add categories store
+const categoriesStore = useCategoriesStore();
+
+// Add category name getter
+const getCategoryName = (categoryId) => {
+    const category = categoriesStore.getCategoryById(categoryId);
+    return category?.name || 'Uncategorized';
 };
 </script>

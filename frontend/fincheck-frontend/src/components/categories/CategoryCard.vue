@@ -41,6 +41,10 @@
 </template>
 
 <script setup>
+import { useCategoriesStore } from '@/stores/categories';
+
+const categoriesStore = useCategoriesStore();
+
 defineProps({
     category: {
         type: Object,

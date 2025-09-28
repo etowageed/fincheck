@@ -9,11 +9,11 @@ export class CategoryService {
       const response = await api.get("/categories");
       return {
         success: true,
-        data: response.data.data || [],
-        count: response.data.results || 0,
+        data: response.data.data,
+        message: "Categories fetched successfully",
       };
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      console.error("CategoryService: Error fetching categories:", error);
       return {
         success: false,
         error: error.response?.data?.message || "Failed to fetch categories",
@@ -70,10 +70,12 @@ export class CategoryService {
    */
   static async deleteCategory(categoryId) {
     try {
-      const response = await api.delete(`/categories/${categoryId}`);
+      // For a 204 response, we don't need to inspect the response body.
+      // If this line doesn't throw an error, it was successful.
+      await api.delete(`/categories/${categoryId}`);
       return {
         success: true,
-        message: response.data.message || "Category deleted successfully",
+        message: "Category deleted successfully",
       };
     } catch (error) {
       console.error("Error deleting category:", error);

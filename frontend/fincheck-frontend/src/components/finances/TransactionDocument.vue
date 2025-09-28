@@ -37,7 +37,7 @@
                         <div class="flex items-center gap-2 mb-1">
                             <p class="font-medium text-primary">{{ transaction.description || 'No description' }}</p>
                             <span class="text-xs px-2 py-1 rounded-full bg-tertiary text-accent-blue capitalize">
-                                {{ transaction.category || 'Uncategorized' }}
+                                {{ getCategoryName(transaction.category) }}
                             </span>
                             <span v-if="transaction.type" class="text-xs px-2 py-1 rounded-full capitalize"
                                 :class="getTypeClass(transaction.type)">
@@ -81,6 +81,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { FinanceService } from '@/services/financeService';
+import { useCategoriesStore } from '@/stores/categories';
 import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
 
@@ -147,6 +148,15 @@ const transactionMenuItems = [
         danger: true
     }
 ];
+
+// Add categories store
+const categoriesStore = useCategoriesStore();
+
+// Add category name getter
+const getCategoryName = (categoryId) => {
+    const category = categoriesStore.getCategoryById(categoryId);
+    return category?.name || 'Uncategorized';
+};
 
 // Utility functions
 const formatCurrency = (value) => {

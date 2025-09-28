@@ -1,4 +1,3 @@
-<!-- filepath: /home/gideon-etowa/workspace/code/fincheck/frontend/fincheck-frontend/src/components/categories/CategoryFormDialog.vue -->
 <template>
     <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" modal
         :header="isEdit ? 'Edit Category' : 'Add Category'" :style="{ width: '500px' }">
@@ -34,11 +33,16 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Add submit error display -->
+            <small v-if="errors.submit" class="block text-accent-red mt-2">
+                {{ errors.submit }}
+            </small>
         </form>
 
         <template #footer>
             <div class="flex gap-2">
-                <Button label="Cancel" severity="secondary" outlined @click="handleCancel" />
+                <Button label="Cancel" severity="secondary" outlined @click="handleCancel" :disabled="isSubmitting" />
                 <Button :label="isEdit ? 'Update' : 'Create'" :loading="isSubmitting" @click="handleSubmit" />
             </div>
         </template>
@@ -47,6 +51,9 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
+import { useCategoriesStore } from '@/stores/categories';
+
+const categoriesStore = useCategoriesStore();
 
 const props = defineProps({
     visible: {
@@ -71,7 +78,7 @@ const form = ref({
 });
 
 const errors = ref({});
-const isSubmitting = ref(false);
+const isSubmitting = computed(() => categoriesStore.isLoading);
 
 // Watch for category changes to populate form
 watch(() => props.category, (newCategory) => {
@@ -105,17 +112,36 @@ const validateForm = () => {
 const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    isSubmitting.value = true;
-
     try {
         const categoryData = {
             name: form.value.name.trim(),
             description: form.value.description?.trim() || undefined
         };
 
-        emit('save', categoryData);
-    } finally {
-        isSubmitting.value = false;
+        let result;
+        if (props.isEdit) {
+            result = await categoriesStore.updateCategory(props.category._id, categoryData);
+        } else {
+            result = await categoriesStore.createCategory(categoryData);
+        }
+
+        // Check both possible success response formats
+        if (result.success && (result.data || result.category)) {
+            // Emit the category data
+            emit('save', result.data || result.category);
+            // Close the dialog
+            emit('update:visible', false);
+            // Reset the form
+            resetForm();
+            // Refresh the categories list
+            await categoriesStore.fetchCategories();
+        } else {
+            console.error('Category save failed:', result);
+            errors.value.submit = result.error || 'Failed to save category';
+        }
+    } catch (error) {
+        console.error('Category save error:', error);
+        errors.value.submit = 'Failed to save category';
     }
 };
 
@@ -129,6 +155,5 @@ const resetForm = () => {
         description: ''
     };
     errors.value = {};
-    isSubmitting.value = false;
 };
 </script>
