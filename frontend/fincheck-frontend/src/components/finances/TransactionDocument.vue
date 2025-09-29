@@ -1,6 +1,5 @@
 <template>
     <div class="space-y-6">
-        <!-- Transactions Header -->
         <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-primary">Transactions Overview</h3>
@@ -9,29 +8,29 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                     <p class="text-sm text-muted">Total Transactions</p>
-                    <p class="font-medium text-primary">{{ transactions.length }}</p>
+                    <p class="font-medium text-primary">{{ transactionsStore.recentTransactions.length }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-muted">Total Income</p>
-                    <p class="font-medium text-accent-green">${{ totalIncome.toFixed(2) }}</p>
+                    <p class="font-medium text-accent-green">${{ transactionsStore.totalIncome.toFixed(2) }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-muted">Total Expenses</p>
-                    <p class="font-medium text-accent-red">${{ Math.abs(totalExpenses).toFixed(2) }}</p>
+                    <p class="font-medium text-accent-red">${{ Math.abs(transactionsStore.totalExpenses).toFixed(2) }}
+                    </p>
                 </div>
             </div>
         </div>
 
-        <!-- Transactions List -->
         <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-semibold text-primary">Recent Transactions</h2>
-                <ItemForm ref="addTransactionFormRef" formType="transaction"
-                    @transaction-added="handleTransactionAdded" />
+                <ItemForm ref="addTransactionFormRef" formType="transaction" />
             </div>
 
-            <div v-if="transactions && transactions.length > 0" class="space-y-3">
-                <div v-for="transaction in transactions" :key="transaction._id"
+            <div v-if="transactionsStore.recentTransactions && transactionsStore.recentTransactions.length > 0"
+                class="space-y-3">
+                <div v-for="transaction in transactionsStore.recentTransactions" :key="transaction._id"
                     class="flex justify-between items-center p-4 bg-secondary rounded-lg">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
@@ -57,12 +56,11 @@
                     </div>
                 </div>
 
-                <!-- Net Total -->
                 <div class="border-t border-default pt-4 mt-6">
                     <div class="flex justify-between items-center font-semibold text-lg">
                         <span class="text-primary">Net Total:</span>
-                        <span :class="netTotal >= 0 ? 'text-accent-green' : 'text-accent-red'">
-                            {{ formatCurrency(netTotal) }}
+                        <span :class="transactionsStore.netTotal >= 0 ? 'text-accent-green' : 'text-accent-red'">
+                            {{ formatCurrency(transactionsStore.netTotal) }}
                         </span>
                     </div>
                 </div>
@@ -72,56 +70,26 @@
             </div>
         </div>
 
-        <!-- Edit Transaction Form (hidden, controlled programmatically) -->
         <ItemForm ref="editTransactionFormRef" formType="transaction" :edit-item="editingTransaction"
-            @transaction-updated="handleTransactionUpdated" style="display: none;" />
+            style="display: none;" />
     </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { FinanceService } from '@/services/financeService';
+import { ref } from 'vue';
+import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoriesStore } from '@/stores/categories';
 import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
 
-const props = defineProps({
-    transactions: {
-        type: Array,
-        required: true
-    }
-});
-
-const emit = defineEmits(['transactionsUpdated']);
+const transactionsStore = useTransactionsStore();
+const categoriesStore = useCategoriesStore();
 
 // Refs
 const deletingTransactionId = ref(null);
 const addTransactionFormRef = ref(null);
 const editTransactionFormRef = ref(null);
 const editingTransaction = ref(null);
-
-// Computed values
-const totalIncome = computed(() => {
-    return props.transactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-});
-
-const totalExpenses = computed(() => {
-    return props.transactions
-        .filter(t => t.type === 'expense' || t.type === 'excludedExpense')
-        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-});
-
-const netTotal = computed(() => {
-    return props.transactions.reduce((sum, t) => {
-        if (t.type === 'income') {
-            return sum + Math.abs(t.amount);
-        } else {
-            return sum - Math.abs(t.amount);
-        }
-    }, 0);
-});
 
 // Menu configurations
 const headerMenuItems = [
@@ -149,44 +117,22 @@ const transactionMenuItems = [
     }
 ];
 
-// Add categories store
-const categoriesStore = useCategoriesStore();
-
-// Add category name getter
+// Utility functions
 const getCategoryName = (categoryId) => {
     const category = categoriesStore.getCategoryById(categoryId);
     return category?.name || 'Uncategorized';
 };
 
-// Utility functions
 const formatCurrency = (value) => {
     if (typeof value !== 'number') return '$0.00';
     return Math.abs(value).toLocaleString(undefined, { style: 'currency', currency: 'USD' });
 };
 
 const formatDate = (dateValue) => {
-    if (!dateValue) {
-        return 'No date';
-    }
-
+    if (!dateValue) return 'No date';
     try {
-        let date;
-
-        // Handle different date formats
-        if (dateValue instanceof Date) {
-            date = dateValue;
-        } else if (typeof dateValue === 'string' || typeof dateValue === 'number') {
-            date = new Date(dateValue);
-        } else {
-            return 'Invalid date';
-        }
-
-        // Check if date is valid
-        if (isNaN(date.getTime())) {
-            return 'Invalid date';
-        }
-
-        // Format the date
+        const date = new Date(dateValue);
+        if (isNaN(date.getTime())) return 'Invalid date';
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
@@ -212,46 +158,27 @@ const getTypeClass = (type) => {
 };
 
 const getAmountClass = (amount, type) => {
-    if (type === 'income') {
-        return 'text-accent-green';
-    } else {
-        return 'text-accent-red';
-    }
+    return type === 'income' ? 'text-accent-green' : 'text-accent-red';
 };
 
 // Action handlers
 const handleHeaderAction = ({ action }) => {
-    switch (action) {
-        case 'export':
-            exportTransactions();
-            break;
+    if (action === 'export') {
+        exportTransactions();
     }
 };
 
 const handleTransactionAction = ({ action, entity }) => {
-    switch (action) {
-        case 'edit':
-            editTransaction(entity);
-            break;
-        case 'delete':
-            deleteTransaction(entity._id);
-            break;
+    if (action === 'edit') {
+        editTransaction(entity);
+    } else if (action === 'delete') {
+        deleteTransaction(entity._id);
     }
 };
 
-// Transaction functions (using FinanceService)
-const handleTransactionAdded = () => {
-    emit('transactionsUpdated');
-};
-
-const handleTransactionUpdated = () => {
-    editingTransaction.value = null;
-    emit('transactionsUpdated');
-};
-
+// Transaction functions
 const editTransaction = (transaction) => {
     editingTransaction.value = transaction;
-
     if (editTransactionFormRef.value) {
         editTransactionFormRef.value.openDialog();
     }
@@ -261,23 +188,13 @@ const deleteTransaction = async (transactionId) => {
     if (!confirm('Are you sure you want to delete this transaction?')) {
         return;
     }
-
     deletingTransactionId.value = transactionId;
-
-    try {
-        const { month, year } = FinanceService._getCurrentMonthYear();
-        await FinanceService.deleteTransaction(month, year, transactionId);
-        emit('transactionsUpdated');
-    } catch (error) {
-        console.error('Error deleting transaction:', error);
-        alert('Failed to delete transaction. Please try again.');
-    } finally {
-        deletingTransactionId.value = null;
-    }
+    await transactionsStore.deleteTransaction(transactionId);
+    deletingTransactionId.value = null;
 };
 
 const exportTransactions = () => {
-    // TODO: Implement export functionality using FinanceService
+    // TODO: Implement export functionality
     console.log('Export transactions functionality not implemented yet');
 };
 </script>

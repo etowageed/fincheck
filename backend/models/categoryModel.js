@@ -71,25 +71,29 @@ categorySchema.statics.getCategoriesForUser = async function (userId) {
     isActive: true,
   });
 
-  // 2. Get user's custom categories and overrides
-  const userCategories = await this.find({
+  // 2. Get ALL of the user's categories and overrides (both active and inactive)
+  const allUserCategories = await this.find({
     userId: userId,
-    isActive: true,
   });
 
-  // 3. Get IDs of overridden global defaults
-  const overriddenIds = userCategories
-    .filter((cat) => cat.overridesGlobalDefault)
-    .map((cat) => cat.overridesGlobalDefault.toString());
+  // 3. Create a Set of all global category IDs that the user has an override for
+  const overriddenGlobalIds = new Set();
+  for (const cat of allUserCategories) {
+    if (cat.overridesGlobalDefault) {
+      overriddenGlobalIds.add(cat.overridesGlobalDefault.toString());
+    }
+  }
 
-  // 4. Filter out overridden defaults
-  const activeDefaults = globalDefaults.filter(
-    (def) => !overriddenIds.includes(def._id.toString())
+  // 4. Filter the main list of global defaults, removing any that have an override
+  const visibleDefaults = globalDefaults.filter(
+    (def) => !overriddenGlobalIds.has(def._id.toString())
   );
 
-  // 5. Combine active defaults + user categories
-  return [...activeDefaults, ...userCategories].sort((a, b) => {
-    // Sort: global defaults first, then user categories, alphabetically
+  // 5. From the user's categories, only take the ones that are active to be displayed
+  const visibleUserCategories = allUserCategories.filter((cat) => cat.isActive);
+
+  // 6. Combine the visible defaults with the visible user categories and sort
+  return [...visibleDefaults, ...visibleUserCategories].sort((a, b) => {
     if (a.isGlobalDefault && !b.isGlobalDefault) return -1;
     if (!a.isGlobalDefault && b.isGlobalDefault) return 1;
     return a.name.localeCompare(b.name);

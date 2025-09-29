@@ -3,7 +3,6 @@
         <Button :label="buttonLabel" :icon="buttonIcon" @click="openDialog" />
         <Dialog v-model:visible="visible" modal :header="dialogHeader" :style="{ width: '35rem' }">
             <div class="space-y-4">
-                <!-- Name/Description Field -->
                 <div class="flex flex-col gap-2">
                     <label :for="nameFieldId" class="font-semibold">{{ nameFieldLabel }}</label>
                     <InputText :id="nameFieldId" v-model="formData.name" :placeholder="nameFieldPlaceholder"
@@ -11,18 +10,13 @@
                     <small v-if="errors.name" class="p-error">{{ errors.name }}</small>
                 </div>
 
-                <!-- Amount Field -->
                 <div class="flex flex-col gap-2">
                     <label for="amount" class="font-semibold">Amount</label>
                     <InputNumber id="amount" v-model="formData.amount" mode="currency" currency="USD" locale="en-US"
                         placeholder="0.00" :disabled="isLoading" :class="{ 'p-invalid': errors.amount }" />
                     <small v-if="errors.amount" class="p-error">{{ errors.amount }}</small>
-                    <small v-if="formType === 'transaction'" class="text-gray-500">
-                        Enter positive amounts for income, negative for expenses
-                    </small>
                 </div>
 
-                <!-- Transaction Type Field (Transactions only) -->
                 <div v-if="formType === 'transaction'" class="flex flex-col gap-2">
                     <label for="type" class="font-semibold">Type</label>
                     <Dropdown id="type" v-model="formData.type" :options="transactionTypes" optionLabel="label"
@@ -31,7 +25,6 @@
                     <small v-if="errors.type" class="p-error">{{ errors.type }}</small>
                 </div>
 
-                <!-- Category Field - UPDATED -->
                 <div class="flex flex-col gap-2">
                     <label for="category" class="font-semibold">Category</label>
                     <div class="flex gap-2">
@@ -56,7 +49,6 @@
                             </template>
                         </Dropdown>
 
-                        <!-- Quick Add Category Button -->
                         <Button icon="pi pi-plus" severity="secondary" outlined size="small"
                             @click="showQuickAddCategory = true" :disabled="isLoading"
                             v-tooltip.top="'Add new category'" />
@@ -66,17 +58,14 @@
                     <small v-else-if="categoriesStore.error" class="text-red-500">{{ categoriesStore.error }}</small>
                 </div>
 
-                <!-- Date Field (Transactions only) -->
                 <div v-if="formType === 'transaction'" class="flex flex-col gap-2">
                     <label for="date" class="font-semibold">Date</label>
                     <Calendar id="date" v-model="formData.date" dateFormat="mm/dd/yy" placeholder="Select date"
                         :disabled="isLoading" :class="{ 'p-invalid': errors.date }" showIcon :manualInput="true"
                         :showOnFocus="false" :minDate="minDateRange" :maxDate="maxDateRange" />
                     <small v-if="errors.date" class="p-error">{{ errors.date }}</small>
-                    <small class="text-gray-500">Select a date or type it manually (defaults to today)</small>
                 </div>
 
-                <!-- Description/Notes Field -->
                 <div class="flex flex-col gap-2">
                     <label :for="descriptionFieldId" class="font-semibold">
                         {{ descriptionFieldLabel }} <span class="text-gray-400">(Optional)</span>
@@ -87,7 +76,6 @@
                     <small v-if="errors.description" class="p-error">{{ errors.description }}</small>
                 </div>
 
-                <!-- Recurring Field (Budget items only) -->
                 <div v-if="formType === 'budget'" class="flex flex-col gap-2">
                     <label for="isRecurring" class="font-semibold">Recurring Expense</label>
                     <div class="flex items-center gap-2">
@@ -99,7 +87,6 @@
                     </div>
                 </div>
 
-                <!-- General Error -->
                 <div v-if="errors.general" class="p-3 bg-red-50 border border-red-200 rounded-md">
                     <small class="p-error">{{ errors.general }}</small>
                 </div>
@@ -109,13 +96,12 @@
                 <div class="flex justify-end gap-2">
                     <Button type="button" label="Cancel" severity="secondary" @click="closeDialog"
                         :disabled="isLoading" />
-                    <Button type="button" :label="submitButtonLabel" @click="handleSubmit" :loading="isLoading"
+                    <Button type-="button" :label="submitButtonLabel" @click="handleSubmit" :loading="isLoading"
                         :disabled="!isFormValid" />
                 </div>
             </template>
         </Dialog>
 
-        <!-- Quick Add Category Dialog -->
         <Dialog v-model:visible="showQuickAddCategory" modal header="Quick Add Category" :style="{ width: '400px' }">
             <div class="space-y-4">
                 <div class="flex flex-col gap-2">
@@ -149,8 +135,9 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { FinanceService } from '@/services/financeService';
+import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoriesStore } from '@/stores/categories';
+import { FinanceService } from '@/services/financeService';
 
 const props = defineProps({
     formType: {
@@ -164,18 +151,23 @@ const props = defineProps({
     }
 });
 
+const emit = defineEmits([
+    'budgetItemAdded',
+    'budgetItemUpdated',
+]);
+
+const transactionsStore = useTransactionsStore();
+const categoriesStore = useCategoriesStore();
+
 const visible = ref(false);
 const isLoading = ref(false);
+const isQuickAddLoading = ref(false);
 const errors = ref({});
 const editMode = computed(() => !!props.editItem);
-
-// Replace local category state with store
-const categoriesStore = useCategoriesStore();
 const showQuickAddCategory = ref(false);
 const quickCategoryForm = ref({ name: '', description: '' });
 const quickCategoryErrors = ref({});
 
-// Update the categoryOptions computed property
 const categoryOptions = computed(() => {
     return categoriesStore.getAllCategories.map(cat => ({
         label: cat.name,
@@ -185,14 +177,13 @@ const categoryOptions = computed(() => {
     }));
 });
 
-// Quick add category functions using store
 const handleQuickAddCategory = async () => {
     if (!quickCategoryForm.value.name?.trim()) {
         quickCategoryErrors.value.name = 'Category name is required';
         return;
     }
-
     quickCategoryErrors.value = {};
+    isQuickAddLoading.value = true;
 
     try {
         const result = await categoriesStore.createCategory({
@@ -201,28 +192,32 @@ const handleQuickAddCategory = async () => {
         });
 
         if (result.success) {
-            // Refresh categories
             await categoriesStore.fetchCategories();
-            // Select the new category
             formData.value.category = result.data?._id || result.category?._id;
             closeQuickAddCategory();
         } else {
             quickCategoryErrors.value.general = result.error;
         }
     } catch (error) {
-        quickCategoryErrors.value.general = 'Failed to create category';
-        console.error('Error creating category:', error);
+        quickCategoryErrors.value.general = "An error occurred.";
+    } finally {
+        isQuickAddLoading.value = false;
     }
 };
 
-// Initialize form data with proper defaults
+const closeQuickAddCategory = () => {
+    showQuickAddCategory.value = false;
+    quickCategoryForm.value = { name: '', description: '' };
+    quickCategoryErrors.value = {};
+};
+
 const getInitialFormData = () => ({
     name: '',
     description: '',
     category: '',
-    amount: 0,
+    amount: null,
     isRecurring: true,
-    type: '',
+    type: 'expense',
     date: new Date()
 });
 
@@ -234,14 +229,6 @@ const transactionTypes = [
     { label: 'Excluded Expense', value: 'excludedExpense' }
 ];
 
-const emit = defineEmits([
-    'budgetItemAdded',
-    'budgetItemUpdated',
-    'transactionAdded',
-    'transactionUpdated'
-]);
-
-// Date range for calendar
 const minDateRange = computed(() => {
     const date = new Date();
     date.setFullYear(date.getFullYear() - 10);
@@ -254,65 +241,21 @@ const maxDateRange = computed(() => {
     return date;
 });
 
-// Computed properties for dynamic labels and placeholders
 const buttonLabel = computed(() => {
     const itemType = props.formType === 'budget' ? 'Budget Item' : 'Transaction';
     return editMode.value ? `Edit ${itemType}` : `Add ${itemType}`;
 });
 
-const buttonIcon = computed(() => {
-    return editMode.value ? 'pi pi-pencil' : 'pi pi-plus';
-});
+const buttonIcon = computed(() => editMode.value ? 'pi pi-pencil' : 'pi pi-plus');
+const dialogHeader = computed(() => `${editMode.value ? 'Edit' : 'Add'} ${props.formType === 'budget' ? 'Budget Item' : 'Transaction'}`);
+const nameFieldId = computed(() => props.formType === 'budget' ? 'name' : 'description');
+const nameFieldLabel = computed(() => props.formType === 'budget' ? 'Name' : 'Description');
+const nameFieldPlaceholder = computed(() => props.formType === 'budget' ? 'e.g., Monthly Rent' : 'e.g., Grocery shopping');
+const descriptionFieldId = computed(() => props.formType === 'budget' ? 'description' : 'notes');
+const descriptionFieldLabel = computed(() => props.formType === 'budget' ? 'Description' : 'Notes');
+const descriptionFieldPlaceholder = computed(() => props.formType === 'budget' ? 'Brief description...' : 'Additional notes...');
+const submitButtonLabel = computed(() => `${editMode.value ? 'Update' : 'Add'} ${props.formType === 'budget' ? 'Item' : 'Transaction'}`);
 
-const dialogHeader = computed(() => {
-    const itemType = props.formType === 'budget' ? 'Budget Item' : 'Transaction';
-    return editMode.value ? `Edit ${itemType}` : `Add ${itemType}`;
-});
-
-const nameFieldId = computed(() => {
-    return props.formType === 'budget' ? 'name' : 'description';
-});
-
-const nameFieldLabel = computed(() => {
-    return props.formType === 'budget' ? 'Name' : 'Description';
-});
-
-const nameFieldPlaceholder = computed(() => {
-    return props.formType === 'budget'
-        ? 'e.g., Monthly Rent, Weekly Groceries'
-        : 'e.g., Grocery shopping, Salary payment';
-});
-
-const descriptionFieldId = computed(() => {
-    return props.formType === 'budget' ? 'description' : 'notes';
-});
-
-const descriptionFieldLabel = computed(() => {
-    return props.formType === 'budget' ? 'Description' : 'Notes';
-});
-
-const descriptionFieldPlaceholder = computed(() => {
-    return props.formType === 'budget'
-        ? 'Brief description of this budget item...'
-        : 'Additional notes about this transaction...';
-});
-
-const submitButtonLabel = computed(() => {
-    const action = editMode.value ? 'Update' : 'Add';
-    const itemType = props.formType === 'budget' ? 'Item' : 'Transaction';
-    return `${action} ${itemType}`;
-});
-
-// Form validation using the service
-const isFormValid = computed(() => {
-    if (props.formType === 'budget') {
-        return FinanceService.validateBudgetItem(formData.value).isValid;
-    } else {
-        return FinanceService.validateTransaction(formData.value).isValid;
-    }
-});
-
-// Watch for editItem prop changes to populate form
 watch(() => props.editItem, (newEditItem) => {
     if (newEditItem) {
         if (props.formType === 'budget') {
@@ -322,8 +265,6 @@ watch(() => props.editItem, (newEditItem) => {
                 category: newEditItem.category?._id || newEditItem.category || '',
                 amount: newEditItem.amount || 0,
                 isRecurring: newEditItem.isRecurring ?? true,
-                type: '',
-                date: new Date()
             };
         } else {
             formData.value = {
@@ -331,108 +272,79 @@ watch(() => props.editItem, (newEditItem) => {
                 description: newEditItem.notes || '',
                 category: newEditItem.category?._id || newEditItem.category || '',
                 amount: newEditItem.amount || 0,
-                type: newEditItem.type || '',
-                isRecurring: true,
-                date: FinanceService.parseDate(newEditItem.date)
+                type: newEditItem.type || 'expense',
+                date: newEditItem.date ? new Date(newEditItem.date) : new Date(),
             };
         }
     }
-}, { immediate: true });
+}, { immediate: true, deep: true });
+
+const isFormValid = computed(() => {
+    const data = formData.value;
+    if (props.formType === 'transaction') {
+        return data.name?.trim() && data.category?.trim() && data.amount && data.type && data.date;
+    }
+    if (props.formType === 'budget') {
+        return data.name?.trim() && data.category?.trim() && data.amount > 0;
+    }
+    return false;
+});
 
 const openDialog = () => {
     if (!editMode.value) {
         formData.value = getInitialFormData();
-        formData.value.isRecurring = props.formType === 'budget';
     }
     visible.value = true;
     errors.value = {};
-
-    // Load categories if not already loaded
-    if (!categoriesStore.categories.length) {
-        categoriesStore.fetchCategories();
-    }
 };
 
 const closeDialog = () => {
     visible.value = false;
-    if (!editMode.value) {
-        formData.value = getInitialFormData();
-        formData.value.isRecurring = props.formType === 'budget';
-    }
-    errors.value = {};
 };
 
 const handleSubmit = async () => {
-    // Validate form using service
-    const validation = props.formType === 'budget'
-        ? FinanceService.validateBudgetItem(formData.value)
-        : FinanceService.validateTransaction(formData.value);
-
-    if (!validation.isValid) {
-        errors.value = validation.errors;
-        return;
-    }
-
     isLoading.value = true;
     errors.value = {};
 
     try {
         let result;
+        const dataToSubmit = { ...formData.value };
 
-        if (props.formType === 'budget') {
+        if (props.formType === 'transaction') {
             if (editMode.value) {
-                result = await FinanceService.updateBudgetItem(props.editItem._id, formData.value);
-                emit('budgetItemUpdated', result);
+                result = await transactionsStore.updateTransaction(props.editItem._id, dataToSubmit);
             } else {
-                result = await FinanceService.addBudgetItem(formData.value);
-                emit('budgetItemAdded', result);
+                result = await transactionsStore.addTransaction(dataToSubmit);
             }
-        } else {
+        } else if (props.formType === 'budget') {
+            // Note: Budget logic still emits events as its store hasn't been created yet.
             if (editMode.value) {
-                result = await FinanceService.updateTransaction(props.editItem._id, formData.value);
-                emit('transactionUpdated', result);
+                result = await FinanceService.updateBudgetItem(props.editItem._id, dataToSubmit);
+                if (result) emit('budgetItemUpdated', result);
             } else {
-                result = await FinanceService.addTransaction(formData.value);
-                emit('transactionAdded', result);
+                result = await FinanceService.addBudgetItem(dataToSubmit);
+                if (result) emit('budgetItemAdded', result);
             }
         }
 
-        console.log(`${props.formType} ${editMode.value ? 'updated' : 'added'} successfully:`, result);
-        closeDialog();
+        if (result && (result.success || result.status === 'success')) {
+            closeDialog();
+        } else {
+            errors.value.general = result?.error || 'Failed to save item.';
+        }
     } catch (error) {
-        console.error(`Error ${editMode.value ? 'updating' : 'adding'} ${props.formType}:`, error);
-        const operation = editMode.value ? 'update' : 'add';
-        errors.value.general = FinanceService.formatErrorMessage(error, operation, props.formType);
+        console.error(`Error saving ${props.formType}:`, error);
+        errors.value.general = 'An unexpected error occurred.';
     } finally {
         isLoading.value = false;
     }
 };
 
-// Initialize categories on mount
 onMounted(async () => {
-    await categoriesStore.fetchCategories();
+    if (!categoriesStore.categories.length) {
+        await categoriesStore.fetchCategories();
+    }
 });
 
-// Add method to close quick add dialog
-const closeQuickAddCategory = () => {
-    showQuickAddCategory.value = false;
-    quickCategoryForm.value = { name: '', description: '' };
-    quickCategoryErrors.value = {};
-};
-
-// Expose openDialog method for parent components
-defineExpose({
-    openDialog
-});
+defineExpose({ openDialog });
 </script>
-
-<style scoped>
-.p-invalid {
-    border-color: #e24c4c;
-}
-
-.p-error {
-    color: #e24c4c;
-    font-size: 0.875rem;
-}
-</style>
