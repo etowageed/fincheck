@@ -1,11 +1,6 @@
-<!-- src/components/auth/LoginForm.vue -->
 <template>
     <form @submit.prevent="submitLogin" class="space-y-4 w-full max-w-sm mx-auto p-6 bg-white shadow rounded">
         <h2 class="text-xl font-semibold text-center">Log in</h2>
-
-        <div v-if="authStore.error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {{ authStore.error }}
-        </div>
 
         <div>
             <label for="email" class="block text-sm mb-1">Email</label>
@@ -45,23 +40,12 @@ const email = ref('');
 const password = ref('');
 
 const submitLogin = async () => {
-    try {
-        const result = await authStore.login({
-            email: email.value,
-            password: password.value
-        });
+    const result = await authStore.login({
+        email: email.value,
+        password: password.value
+    });
 
-        emit('submit', result);
-
-        if (!result.success) {
-            console.error('Login error:', result.message);
-        }
-    } catch (err) {
-        console.error('Login submission error:', err);
-        emit('submit', {
-            success: false,
-            message: 'Failed to process login request'
-        });
-    }
+    // The component still emits the result for the parent view to handle routing
+    emit('submit', result);
 };
 </script>

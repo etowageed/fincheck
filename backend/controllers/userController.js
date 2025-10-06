@@ -122,6 +122,21 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndDelete(req.user.id);
+
+  // It's good practice to clear the JWT cookie on account deletion
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(0),
+    httpOnly: true,
+  });
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
 // get user profile data plus dashboard
 
 exports.getMe = catchAsync(async (req, res, next) => {

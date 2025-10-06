@@ -1,42 +1,46 @@
 <template>
-    <form class="space-y-4 w-full max-w-sm mx-auto p-6 bg-white shadow rounded">
-
+    <form @submit.prevent="submitSignup" class="space-y-4 w-full max-w-sm mx-auto p-6 bg-white shadow rounded">
         <h2 class="text-xl font-bold text-center">Sign Up</h2>
 
         <div>
-            <label for="email" class="block text-sm mb-1">Username</label>
-            <InputText v-model="name" id="userName" type="text" class="w-full" />
+            <label for="userName" class="block text-sm mb-1">Username</label>
+            <InputText v-model="name" id="userName" type="text" class="w-full" :disabled="authStore.isLoading" />
         </div>
         <div>
             <label for="email" class="block text-sm mb-1">Email</label>
-            <InputText v-model="email" id="email" type="email" class="w-full" />
+            <InputText v-model="email" id="email" type="email" class="w-full" :disabled="authStore.isLoading" />
         </div>
 
         <div>
             <label for="password" class="block text-sm mb-1">Password</label>
-            <Password v-model="password" id="password" toggleMask class="w-full" inputClass="w-full" />
+            <Password v-model="password" id="password" toggleMask class="w-full" inputClass="w-full"
+                :disabled="authStore.isLoading" />
         </div>
 
         <div>
             <label for="confirm" class="block text-sm mb-1">Confirm Password</label>
-            <Password v-model="confirmPassword" id="confirm" toggleMask class="w-full" inputClass="w-full" />
+            <Password v-model="confirmPassword" id="confirm" toggleMask class="w-full" inputClass="w-full"
+                :disabled="authStore.isLoading" />
         </div>
 
-        <Button label="Create Account" class="w-full mt-10" @click="submitSignup" />
+        <Button label="Create Account" class="w-full mt-10" type="submit" :loading="authStore.isLoading"
+            :disabled="authStore.isLoading" />
 
         <Divider />
         <OAuthButtons />
 
     </form>
-
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { signup } from '@/services/auth';
+import { useAuthStore } from '@/stores/auth';
+import { useErrorStore } from '@/stores/error'; // Import error store
 import OAuthButtons from './OAuthButtons.vue';
 
 const emit = defineEmits(['submit']);
+const authStore = useAuthStore();
+const errorStore = useErrorStore(); // Use error store
 
 const email = ref('');
 const password = ref('');
@@ -45,20 +49,17 @@ const name = ref('');
 
 const submitSignup = async () => {
     if (password.value !== confirmPassword.value) {
-        alert('Passwords do not match');
+        errorStore.setError('Passwords do not match'); // Use global error handler
         return;
     }
 
-    try {
-        const result = await signup({ name: name.value, email: email.value, password: password.value, confirmPassword: confirmPassword.value });
-        alert('Signup successful!');
-        // Emit the success event to parent component
-        emit('submit', result);
-    } catch (err) {
-        alert('Signup failed');
-        console.error(err);
-        // Emit the failure event to parent component
-        emit('submit', { status: 'error', error: err });
-    }
+    const result = await authStore.signup({
+        name: name.value,
+        email: email.value,
+        password: password.value,
+        confirmPassword: confirmPassword.value
+    });
+
+    emit('submit', result);
 };
 </script>

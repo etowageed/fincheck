@@ -15,11 +15,10 @@ import LoginForm from '@/components/auth/LoginForm.vue';
 const router = useRouter();
 const authStore = useAuthStore();
 
-const handleLogin = async (result) => {
+const handleLogin = (result) => {
     if (result.success) {
         router.push('/transactions');
-    } else {
-        console.error('Login failed:', result.message);
     }
+    // No 'else' block is needed. Errors are handled globally.
 };
 </script>

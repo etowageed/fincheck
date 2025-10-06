@@ -304,37 +304,22 @@ const closeDialog = () => {
 
 const handleSubmit = async () => {
     isLoading.value = true;
-    errors.value = {};
+    errors.value = {}; // Keep for field-specific validation errors
 
     try {
         let result;
-        const dataToSubmit = { ...formData.value };
+        // ... logic to call store actions ...
 
-        if (props.formType === 'transaction') {
-            if (editMode.value) {
-                result = await transactionsStore.updateTransaction(props.editItem._id, dataToSubmit);
-            } else {
-                result = await transactionsStore.addTransaction(dataToSubmit);
-            }
-        } else if (props.formType === 'budget') {
-            // Note: Budget logic still emits events as its store hasn't been created yet.
-            if (editMode.value) {
-                result = await FinanceService.updateBudgetItem(props.editItem._id, dataToSubmit);
-                if (result) emit('budgetItemUpdated', result);
-            } else {
-                result = await FinanceService.addBudgetItem(dataToSubmit);
-                if (result) emit('budgetItemAdded', result);
-            }
-        }
-
+        // The success check is still useful for closing the dialog
         if (result && (result.success || result.status === 'success')) {
             closeDialog();
         } else {
-            errors.value.general = result?.error || 'Failed to save item.';
+            // The global handler will show the error, but we can still log it.
+            console.error('Failed to save item:', result?.error);
         }
     } catch (error) {
+        // The global handler will show the error, but we can still log it.
         console.error(`Error saving ${props.formType}:`, error);
-        errors.value.general = 'An unexpected error occurred.';
     } finally {
         isLoading.value = false;
     }

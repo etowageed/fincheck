@@ -38,8 +38,11 @@ export const isLoggedIn = async () => {
   }
 };
 
-// ✅ Delete user account
-export const deleteAccount = (userId) => api.delete(`/users/${userId}`);
+// ✅ For an ADMIN to delete a user by their ID
+export const deleteUser = (userId) => api.delete(`/users/${userId}`);
+
+// ✅ For a LOGGED-IN USER to delete their own account
+export const deleteMyAccount = () => api.delete("/users/me");
 
 // ✅ Update user profile
 export const updateProfile = (data) => api.patch("/users/me", data);

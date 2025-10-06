@@ -1,16 +1,17 @@
 <template>
     <div class="p-6">
-        <h1 v-if="budget" class="text-2xl font-bold text-gray-800 mb-6">Budget Overview for {{
-            getMonthName(budget.month) }}, {{ budget.year }}</h1>
+        <h1 v-if="budgetStore.getBudget" class="text-2xl font-bold text-gray-800 mb-6">Budget Overview for {{
+            getMonthName(budgetStore.getBudget.month) }}, {{ budgetStore.getBudget.year }}</h1>
         <h1 v-else class="text-2xl font-bold text-gray-800 mb-6">Budget Overview</h1>
 
-        <div v-if="isLoading" class="text-center py-8">
+        <div v-if="budgetStore.isLoading" class="text-center py-8">
             <i class="pi pi-spinner pi-spin text-2xl text-blue-600"></i>
             <p class="mt-2 text-gray-600">Loading budget...</p>
         </div>
 
-        <div v-else-if="budget">
-            <BudgetDocument :budget="budget" @budget-updated="fetchBudget" @budget-deleted="handleBudgetDeleted" />
+        <div v-else-if="budgetStore.getBudget">
+            <BudgetDocument :budget="budgetStore.getBudget" @budget-updated="fetchBudget"
+                @budget-deleted="handleBudgetDeleted" />
         </div>
 
         <div v-else class="text-center py-8">
@@ -21,13 +22,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { FinanceService } from '@/services/financeService';
+import { onMounted } from 'vue';
+import { useBudgetStore } from '@/stores/budget';
 import BudgetDocument from '@/components/finances/BudgetDocument.vue';
 import AddBudgetEntryForm from '@/components/finances/AddBudgetEntryForm.vue';
 
-const budget = ref(null);
-const isLoading = ref(false);
+const budgetStore = useBudgetStore();
 
 const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -39,31 +39,19 @@ const getMonthName = (monthIndex) => {
 };
 
 const fetchBudget = async () => {
-    isLoading.value = true;
-
-    try {
-        budget.value = await FinanceService.getBudgetData();
-        console.log('Budget:', budget.value);
-    } catch (err) {
-        console.error('Error fetching budget:', err);
-        budget.value = null;
-    } finally {
-        isLoading.value = false;
-    }
+    await budgetStore.fetchBudget();
 };
 
-const handleBudgetCreated = (newBudget) => {
-    fetchBudget();
+const handleBudgetCreated = async (budgetData) => {
+    await budgetStore.createBudget(budgetData);
 };
 
 const handleBudgetDeleted = () => {
-    // Clear the budget and refetch to show the "no budget" state
-    budget.value = null;
-    fetchBudget();
+    budgetStore.fetchBudget();
 };
 
 onMounted(() => {
-    fetchBudget();
+    budgetStore.fetchBudget();
 });
 </script>
 

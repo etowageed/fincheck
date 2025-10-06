@@ -1,11 +1,8 @@
 <template>
     <div>
         <div class="min-h-screen flex items-center justify-center bg-gray-100">
-
             <SignupForm @submit="handleSignup" />
-
         </div>
-
     </div>
 </template>
 
@@ -15,14 +12,14 @@ import SignupForm from '@/components/auth/SignupForm.vue';
 
 const router = useRouter();
 
-const handleSignup = (data) => {
-    // On successful signup, redirect to welcome page for first-time users
-    if (data?.data?.status === 'success') {
-        // New users should go through onboarding
+const handleSignup = (result) => {
+    // On successful signup, redirect to the onboarding page
+    if (result.success) {
         router.push('/onboarding');
     } else {
-        // Show error or toast
-        console.error('Signup failed', data);
+        // The error is now displayed within SignupForm.vue,
+        // so we just log it here for debugging purposes.
+        console.error('Signup failed:', result.error);
     }
 };
 </script>

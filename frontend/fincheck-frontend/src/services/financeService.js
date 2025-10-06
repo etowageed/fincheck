@@ -1,9 +1,7 @@
+// src/services/financeService.js
+
 import api from "@/services/api";
 
-/**
- * Service for managing budget items and transactions
- * Handles all business logic and API interactions
- */
 export class FinanceService {
   /**
    * Budget Item Operations
@@ -14,6 +12,15 @@ export class FinanceService {
       return response.data.data[0] || null;
     } catch (error) {
       throw new Error(`Failed to fetch budget data: ${error.message}`);
+    }
+  }
+
+  static async createBudget(budgetData) {
+    try {
+      const response = await api.post("/finances", budgetData);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to create budget: ${error.message}`);
     }
   }
 
@@ -103,10 +110,14 @@ export class FinanceService {
       );
       return response.data;
     } catch (error) {
+      if (error.response?.status === 404) {
+        throw new Error(
+          "You must create a budget for the current month before adding a transaction."
+        );
+      }
       throw new Error(`Failed to add transaction: ${error.message}`);
     }
   }
-
   static async updateTransaction(itemId, itemData) {
     try {
       const { month, year } = this._getCurrentMonthYear();

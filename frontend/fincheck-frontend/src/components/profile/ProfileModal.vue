@@ -1,103 +1,72 @@
 <template>
-    <Dialog :visible="visible" modal :header="currentView === 'main' ? 'Profile Settings' : getHeaderTitle()"
-        :style="{ width: '500px' }" :closable="true" @update:visible="handleVisibilityChange">
+    <Dialog :visible="props.visible" modal :header="getHeaderTitle()" :style="{ width: '500px' }" :closable="true"
+        @update:visible="handleVisibilityChange">
+        <Toast />
 
-        <!-- Main Profile Menu -->
-        <div v-if="currentView === 'main'" class="space-y-4">
-            <div class="grid grid-cols-1 gap-4">
-                <Button label="Update Profile" icon="pi pi-user" class="w-full justify-start"
-                    @click="currentView = 'profile'" severity="secondary" />
-
-                <Button label="Change Password" icon="pi pi-lock" class="w-full justify-start"
-                    @click="currentView = 'password'" severity="secondary" />
-
-                <Button label="Delete Account" icon="pi pi-trash" class="w-full justify-start"
-                    @click="currentView = 'delete'" severity="danger" />
-            </div>
+        <div v-if="currentView === 'main'" class="space-y-3">
+            <Button label="Update Profile" icon="pi pi-user" @click="currentView = 'profile'"
+                class="w-full !justify-start p-button-secondary p-button-text" />
+            <Button label="Change Password" icon="pi pi-lock" @click="currentView = 'password'"
+                class="w-full !justify-start p-button-secondary p-button-text" />
+            <Button label="Delete Account" icon="pi pi-trash" @click="currentView = 'delete'"
+                class="w-full !justify-start p-button-danger p-button-text" />
         </div>
 
-        <!-- Update Profile Form -->
         <div v-else-if="currentView === 'profile'" class="space-y-4">
-            <div v-if="message" :class="messageClass" class="p-3 rounded text-sm">
-                {{ message }}
-            </div>
-
             <div>
-                <label for="name" class="block text-sm font-medium mb-1">Name</label>
-                <InputText id="name" v-model="profileForm.name" class="w-full" placeholder="Enter your name"
-                    :disabled="loading" />
+                <label for="profileName" class="block text-sm font-medium text-secondary mb-2">Name</label>
+                <InputText id="profileName" v-model="profileForm.name" class="w-full" />
             </div>
-
             <div>
-                <label for="email" class="block text-sm font-medium mb-1">Email</label>
-                <InputText id="email" v-model="profileForm.email" type="email" class="w-full"
-                    placeholder="Enter your email" :disabled="loading" />
+                <label for="profileEmail" class="block text-sm font-medium text-secondary mb-2">Email</label>
+                <InputText id="profileEmail" v-model="profileForm.email" type="email" class="w-full" />
             </div>
-
-            <div class="flex gap-2 pt-4">
-                <Button label="Update" @click="handleUpdateProfile" :loading="loading" class="flex-1" />
-                <Button label="Back" @click="currentView = 'main'" severity="secondary" />
+            <div class="flex justify-end gap-2 pt-4">
+                <Button label="Back" @click="currentView = 'main'" severity="secondary" outlined />
+                <Button label="Save Changes" @click="handleUpdateProfile" :loading="authStore.isLoading" />
             </div>
         </div>
 
-        <!-- Change Password Form -->
         <div v-else-if="currentView === 'password'" class="space-y-4">
-            <div v-if="message" :class="messageClass" class="p-3 rounded text-sm">
-                {{ message }}
-            </div>
-
             <div>
-                <label for="currentPassword" class="block text-sm font-medium mb-1">Current Password</label>
-                <Password id="currentPassword" v-model="passwordForm.currentPassword" class="w-full"
-                    placeholder="Enter current password" :disabled="loading" :feedback="false" toggleMask />
+                <label for="currentPassword" class="block text-sm font-medium text-secondary mb-2">Current
+                    Password</label>
+                <Password id="currentPassword" v-model="passwordForm.currentPassword" class="w-full" :feedback="false"
+                    toggleMask inputClass="w-full" />
             </div>
-
             <div>
-                <label for="newPassword" class="block text-sm font-medium mb-1">New Password</label>
-                <Password id="newPassword" v-model="passwordForm.newPassword" class="w-full"
-                    placeholder="Enter new password" :disabled="loading" toggleMask />
+                <label for="newPassword" class="block text-sm font-medium text-secondary mb-2">New Password</label>
+                <Password id="newPassword" v-model="passwordForm.newPassword" class="w-full" toggleMask
+                    inputClass="w-full" />
             </div>
-
             <div>
-                <label for="confirmNewPassword" class="block text-sm font-medium mb-1">Confirm New Password</label>
+                <label for="confirmNewPassword" class="block text-sm font-medium text-secondary mb-2">Confirm New
+                    Password</label>
                 <Password id="confirmNewPassword" v-model="passwordForm.confirmNewPassword" class="w-full"
-                    placeholder="Confirm new password" :disabled="loading" :feedback="false" toggleMask />
+                    :feedback="false" toggleMask inputClass="w-full" />
             </div>
-
-            <div class="flex gap-2 pt-4">
-                <Button label="Change Password" @click="handleChangePassword" :loading="loading" class="flex-1" />
-                <Button label="Back" @click="currentView = 'main'" severity="secondary" />
+            <div class="flex justify-end gap-2 pt-4">
+                <Button label="Back" @click="currentView = 'main'" severity="secondary" outlined />
+                <Button label="Change Password" @click="handleChangePassword" :loading="authStore.isLoading" />
             </div>
         </div>
 
-        <!-- Delete Account Confirmation -->
         <div v-else-if="currentView === 'delete'" class="space-y-4">
-            <div class="bg-red-50 border border-red-200 p-4 rounded">
-                <div class="flex items-center mb-2">
-                    <i class="pi pi-exclamation-triangle text-red-600 mr-2"></i>
-                    <h4 class="text-red-800 font-semibold">Delete Account</h4>
-                </div>
-                <p class="text-red-700 text-sm">
-                    This action cannot be undone. This will permanently delete your account and all associated data.
+            <div class="p-3 bg-red-50 border border-red-200 rounded">
+                <p class="text-sm text-red-800">
+                    <strong>Warning:</strong> This action is irreversible and will permanently delete all your data.
                 </p>
             </div>
-
-            <div v-if="message" :class="messageClass" class="p-3 rounded text-sm">
-                {{ message }}
-            </div>
-
             <div>
-                <label for="confirmDelete" class="block text-sm font-medium mb-1">
-                    Type "DELETE" to confirm
+                <label for="deleteConfirm" class="block text-sm font-medium text-secondary mb-2">
+                    To confirm, please type <strong>DELETE</strong> into the box below.
                 </label>
-                <InputText id="confirmDelete" v-model="deleteConfirmation" class="w-full" placeholder="DELETE"
-                    :disabled="loading" />
+                <InputText id="deleteConfirm" v-model="deleteConfirmation" class="w-full" />
             </div>
-
-            <div class="flex gap-2 pt-4">
-                <Button label="Delete Account" @click="handleDeleteAccount" :loading="loading"
-                    :disabled="deleteConfirmation !== 'DELETE'" severity="danger" class="flex-1" />
-                <Button label="Back" @click="currentView = 'main'" severity="secondary" />
+            <div class="flex justify-end gap-2 pt-4">
+                <Button label="Back" @click="currentView = 'main'" severity="secondary" outlined />
+                <Button label="Delete My Account" @click="handleDeleteAccount" severity="danger"
+                    :loading="authStore.isLoading" />
             </div>
         </div>
     </Dialog>
@@ -105,9 +74,12 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { updatePassword, updateProfile as updateUserProfile, deleteAccount as deleteUserAccount } from '@/services/auth';
+import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import * as authService from '@/services/auth'; // Added for delete functionality
 
+// 1. Correctly define the props the component receives
 const props = defineProps({
     visible: {
         type: Boolean,
@@ -115,55 +87,43 @@ const props = defineProps({
     },
     user: {
         type: Object,
-        default: () => ({})
+        default: null
     }
 });
 
 const emit = defineEmits(['close', 'updated', 'logout']);
-
 const router = useRouter();
+const authStore = useAuthStore();
+const toast = useToast();
 
 const currentView = ref('main');
-const loading = ref(false);
-const message = ref('');
-const messageClass = ref('');
-
-// Form data
-const profileForm = ref({
-    name: '',
-    email: ''
-});
-
-const passwordForm = ref({
-    currentPassword: '',
-    newPassword: '',
-    confirmNewPassword: ''
-});
-
+const profileForm = ref({ name: '', email: '' });
+const passwordForm = ref({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
 const deleteConfirmation = ref('');
 
-// Handle dialog visibility changes
-const handleVisibilityChange = (newVisible) => {
-    if (!newVisible) {
+// 2. Define the missing function to handle the dialog closing
+const handleVisibilityChange = (value) => {
+    // When the dialog's visibility changes to false (e.g., by clicking the 'X'),
+    // we emit the 'close' event to the parent component.
+    if (!value) {
         emit('close');
     }
 };
 
-// Watch for user prop changes to populate form
+// Watch for prop changes to populate form
 watch(() => props.user, (newUser) => {
     if (newUser) {
-        profileForm.value.name = newUser.name || '';
-        profileForm.value.email = newUser.email || '';
+        profileForm.value = { name: newUser.name, email: newUser.email };
     }
 }, { immediate: true });
 
-// Reset forms when modal is closed
-watch(() => props.visible, (newVisible) => {
-    if (!newVisible) {
-        resetForms();
+// Watch for visibility changes to reset the view
+watch(() => props.visible, (isVisible) => {
+    if (!isVisible) {
         currentView.value = 'main';
     }
 });
+
 
 const getHeaderTitle = () => {
     switch (currentView.value) {
@@ -174,115 +134,52 @@ const getHeaderTitle = () => {
     }
 };
 
-const setMessage = (text, type) => {
-    message.value = text;
-    messageClass.value = type === 'success'
-        ? 'bg-green-100 text-green-700 border border-green-300'
-        : 'bg-red-100 text-red-700 border border-red-300';
-};
-
-const resetForms = () => {
-    profileForm.value = { name: '', email: '' };
-    passwordForm.value = { currentPassword: '', newPassword: '', confirmNewPassword: '' };
-    deleteConfirmation.value = '';
-    message.value = '';
-    messageClass.value = '';
-};
-
 const handleUpdateProfile = async () => {
-    if (!profileForm.value.name || !profileForm.value.email) {
-        setMessage('Please fill in all fields', 'error');
-        return;
-    }
-
-    loading.value = true;
-    message.value = '';
-
-    try {
-        const res = await updateUserProfile(profileForm.value);
-        if (res.data?.success) {
-            setMessage('Profile updated successfully', 'success');
-            emit('updated', res.data.data);
-            setTimeout(() => {
-                currentView.value = 'main';
-            }, 1500);
-        }
-    } catch (err) {
-        console.error('Profile update error:', err);
-        const errorMessage = err.response?.data?.message || 'Failed to update profile';
-        setMessage(errorMessage, 'error');
-    } finally {
-        loading.value = false;
+    const result = await authStore.updateProfile(profileForm.value);
+    if (result.success) {
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Profile updated successfully', life: 3000 });
+        emit('updated', profileForm.value);
+        setTimeout(() => { currentView.value = 'main'; }, 1500);
     }
 };
 
 const handleChangePassword = async () => {
-    if (!passwordForm.value.currentPassword || !passwordForm.value.newPassword || !passwordForm.value.confirmNewPassword) {
-        setMessage('Please fill in all fields', 'error');
-        return;
-    }
-
     if (passwordForm.value.newPassword !== passwordForm.value.confirmNewPassword) {
-        setMessage('New passwords do not match', 'error');
+        toast.add({ severity: 'error', summary: 'Error', detail: 'New passwords do not match', life: 3000 });
         return;
     }
 
-    if (passwordForm.value.newPassword.length < 8) {
-        setMessage('New password must be at least 8 characters long', 'error');
-        return;
-    }
+    const result = await authStore.updatePassword({
+        currentPassword: passwordForm.value.currentPassword,
+        newPassword: passwordForm.value.newPassword
+    });
 
-    loading.value = true;
-    message.value = '';
-
-    try {
-        const res = await updatePassword(props.user.id, {
-            currentPassword: passwordForm.value.currentPassword,
-            newPassword: passwordForm.value.newPassword
-        });
-
-        if (res.data?.success) {
-            setMessage('Password changed successfully', 'success');
-            passwordForm.value = { currentPassword: '', newPassword: '', confirmNewPassword: '' };
-            setTimeout(() => {
-                currentView.value = 'main';
-            }, 1500);
-        }
-    } catch (err) {
-        console.error('Password change error:', err);
-        const errorMessage = err.response?.data?.message || 'Failed to change password';
-        setMessage(errorMessage, 'error');
-    } finally {
-        loading.value = false;
+    if (result.success) {
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Password changed successfully', life: 3000 });
+        passwordForm.value = { currentPassword: '', newPassword: '', confirmNewPassword: '' };
+        setTimeout(() => { currentView.value = 'main'; }, 1500);
     }
 };
 
 const handleDeleteAccount = async () => {
     if (deleteConfirmation.value !== 'DELETE') {
-        setMessage('Please type "DELETE" to confirm', 'error');
+        toast.add({ severity: 'warn', summary: 'Confirmation Needed', detail: 'Please type DELETE to confirm.', life: 3000 });
         return;
     }
 
-    loading.value = true;
-    message.value = '';
+    // Call the store action instead of the service directly
+    const result = await authStore.deleteAccount();
 
-    try {
-        const res = await deleteUserAccount(props.user.id);
-        if (res.data?.success) {
-            setMessage('Account deleted successfully', 'success');
-            setTimeout(() => {
-                // Emit logout event for parent component to handle
-                emit('logout');
-                router.push('/login');
-                emit('close');
-            }, 1500);
-        }
-    } catch (err) {
-        console.error('Account deletion error:', err);
-        const errorMessage = err.response?.data?.message || 'Failed to delete account';
-        setMessage(errorMessage, 'error');
-    } finally {
-        loading.value = false;
+    if (result.success) {
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Account deleted successfully', life: 3000 });
+        setTimeout(() => {
+            // The user state is already cleared by the store, so we just need to redirect.
+            // The emit('logout') and emit('close') are still good practice.
+            emit('logout');
+            router.push('/login');
+            emit('close');
+        }, 1500);
     }
+    // No 'catch' block is needed, as errors are handled globally and by the store.
 };
 </script>

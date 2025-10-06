@@ -6,23 +6,26 @@ const routes = [
   {
     path: "/",
     component: () => import("@/views/Home.vue"), // Add this to redirect root to login, later make it the route for the landing page
+    meta: { hideSidebar: true },
   },
   {
     path: "/login",
     name: "Login",
     component: () => import("@/views/auth/Login.vue"),
+    meta: { hideSidebar: true },
   },
   {
     path: "/signup",
     name: "Signup",
     component: () => import("@/views/auth/Signup.vue"),
+    meta: { hideSidebar: true },
   },
 
   {
     path: "/onboarding",
     name: "Onboarding",
     component: () => import("@/views/auth/OnboardingPage.vue"),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, hideSidebar: true }, // Add meta field to indicate this route requires authentication
   },
 
   {
@@ -48,6 +51,12 @@ const routes = [
     name: "Categories",
     component: () => import("@/views/CategoriesPage.vue"),
     meta: { requiresAuth: true }, // Add meta field to indicate this route requires authentication
+  },
+  {
+    path: "/settings",
+    name: "Settings",
+    component: () => import("@/views/SettingsPage.vue"),
+    meta: { requiresAuth: true },
   },
   {
     path: "/forgot-password",

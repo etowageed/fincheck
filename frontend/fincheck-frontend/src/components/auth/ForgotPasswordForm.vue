@@ -1,4 +1,3 @@
-<!-- src/components/auth/ForgotPasswordForm.vue -->
 <template>
     <div class="min-h-screen flex items-center justify-center bg-gray-100">
         <form @submit.prevent="submitForgotPassword"
@@ -7,18 +6,14 @@
             <p class="text-sm text-gray-600 text-center">Enter your email address and we'll send you a link to reset
                 your password.</p>
 
-            <div v-if="message" :class="messageClass" class="p-3 rounded text-sm">
-                {{ message }}
-            </div>
-
             <div>
                 <label for="email" class="block text-sm mb-1">Email Address</label>
                 <InputText id="email" v-model="email" type="email" class="w-full" placeholder="you@example.com"
-                    :disabled="loading" required />
+                    :disabled="authStore.isLoading" required />
             </div>
 
-            <Button type="submit" :label="loading ? 'Sending...' : 'Send Reset Link'" class="w-full mt-4"
-                :disabled="loading" :loading="loading" />
+            <Button type="submit" :label="authStore.isLoading ? 'Sending...' : 'Send Reset Link'" class="w-full mt-4"
+                :disabled="authStore.isLoading" :loading="authStore.isLoading" />
 
             <div class="text-center mt-4">
                 <router-link to="/login" class="text-sm text-blue-600 hover:text-blue-800">
@@ -31,41 +26,31 @@
 
 <script setup>
 import { ref } from 'vue';
-import { forgotPassword } from '@/services/auth';
+import { useAuthStore } from '@/stores/auth';
+import { useToast } from 'primevue/usetoast';
+
+const authStore = useAuthStore();
+const toast = useToast();
 
 const email = ref('');
-const loading = ref(false);
-const message = ref('');
-const messageClass = ref('');
 
 const submitForgotPassword = async () => {
     if (!email.value) {
-        setMessage('Please enter your email address', 'error');
+        // Use the global error handler via the store if needed for client-side validation
+        // but for now, we rely on the required attribute
         return;
     }
 
-    loading.value = true;
-    message.value = '';
-
-    try {
-        const res = await forgotPassword(email.value);
-        if (res.data?.status === 'success') {
-            setMessage('Password reset link sent to your email address. Please check your inbox.', 'success');
-            email.value = ''; // Clear the form
-        }
-    } catch (err) {
-        console.error('Forgot password error:', err);
-        const errorMessage = err.response?.data?.message || 'Failed to send reset email. Please try again.';
-        setMessage(errorMessage, 'error');
-    } finally {
-        loading.value = false;
+    const result = await authStore.forgotPassword(email.value);
+    if (result.success) {
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Password reset link sent to your email address. Please check your inbox.',
+            life: 3000
+        });
+        email.value = ''; // Clear the form
     }
-};
-
-const setMessage = (text, type) => {
-    message.value = text;
-    messageClass.value = type === 'success'
-        ? 'bg-green-100 text-green-700 border border-green-300'
-        : 'bg-red-100 text-red-700 border border-red-300';
+    // Errors are now handled globally by the toast
 };
 </script>

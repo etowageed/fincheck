@@ -1,12 +1,11 @@
 <template>
   <div id="app">
-    <!-- Header -->
+    <GlobalErrorToast />
+
     <Header />
 
-    <!-- Sidebar (only show on authenticated routes) -->
     <Sidebar v-if="showSidebar" />
 
-    <!-- Main Content -->
     <main :class="{ 'ml-64 pt-20': showSidebar, 'pt-20': !showSidebar }">
       <div class="p-6">
         <router-view />
@@ -19,19 +18,23 @@
 import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCategoriesStore } from '@/stores/categories';
+import { useAuthStore } from '@/stores/auth';
+import GlobalErrorToast from '@/components/common/GlobalErrorToast.vue'; // Import the component
 // import Header from '@/components/layout/Header.vue';
 // import Sidebar from '@/components/layout/Sidebar.vue';
 
 const route = useRoute();
+const authStore = useAuthStore();
 const categoriesStore = useCategoriesStore();
 
 // Show sidebar on all routes except login/register
 const showSidebar = computed(() => {
-  const publicRoutes = ['/login', '/register', '/'];
-  return !publicRoutes.includes(route.path);
+  return !route.meta.hideSidebar;
 });
 
 onMounted(async () => {
-  await categoriesStore.fetchCategories();
+  if (authStore.isAuthenticated) {
+    await categoriesStore.fetchCategories();
+  }
 });
 </script>

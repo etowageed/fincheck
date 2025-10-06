@@ -98,42 +98,32 @@ exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   // 1) check if email and password are entered
-
   if (!email || !password) {
     return next(new AppError('Please provide email and password', 400));
   }
 
-  // 2a) find user by email and check if user exists and pwd is correct
+  // 2a) find user by email
   const user = await User.findOne({ email }).select('+password');
 
-  // Get the user's IP address, handling proxies
+  // 2b) If no user, or if password doesn't match, send error
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return next(new AppError('Incorrect email or password', 401));
+  }
+
+  // 3) If user exists and password is correct, THEN update IP and save
   const forwarded = req.headers['x-forwarded-for'];
   const ip = forwarded ? forwarded.split(',')[0] : req.ip;
   user.lastKnownIP = ip;
   await user.save({ validateBeforeSave: false }); // Save IP without validation
 
-  if (!user) {
-    return res.status(401).json({
-      status: 'error',
-      message: 'Incorrect email or password',
-    });
-  }
-
-  // 2b) verify password
-
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    // Combines user check and password verification for timing attack prevention
-    return next(new AppError('Incorrect email or password', 401));
-  }
-
-  // 3) create and send jwt
+  // 4) create and send jwt
   const token = createToken(user._id);
   user.password = undefined;
 
   // Set HTTP-only cookie
   sendTokenWithCookie(res, token);
 
-  // 4) send user data as before
+  // 5) send user data
   res.status(200).json({
     status: 'success',
     token,

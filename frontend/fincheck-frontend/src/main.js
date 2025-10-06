@@ -7,6 +7,7 @@ import { createPinia } from "pinia";
 import router from "./router";
 import { useDarkMode } from "./composables/useDarkMode";
 import { useAuthStore } from "./stores/auth";
+import ToastService from "primevue/toastservice";
 
 import App from "./App.vue";
 
@@ -20,6 +21,7 @@ app.use(PrimeVue, {
     preset: Aura,
   },
 });
+app.use(ToastService);
 
 // Initialize dark mode
 const { initTheme } = useDarkMode();

@@ -126,21 +126,14 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
 
   let expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
 
-  // If no document exists, create a new one with an empty monthlyBudget
+  // If no document exists, return an error.
   if (!expenseDoc) {
-    expenseDoc = new Finances({
-      user: req.user.id,
-      month,
-      year,
-      monthlyBudget: [
-        {
-          category: category || 'Uncategorized',
-          amount: amount,
-          isRecurring: false,
-        },
-      ],
-      transactions: [],
-    });
+    return next(
+      new AppError(
+        'No budget document found for this month. Please create a budget first.',
+        404
+      )
+    );
   }
 
   // Add the new transaction to the transactions array
@@ -148,7 +141,7 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
     description,
     amount,
     category,
-    type: type || 'actual',
+    type: type || 'expense', // Changed from 'actual' to 'expense' to match schema
     date: req.body.date ? new Date(req.body.date) : Date.now(),
   });
 
