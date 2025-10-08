@@ -6,7 +6,6 @@ export const useBudgetStore = defineStore("budget", () => {
   // State
   const budget = ref(null);
   const isLoading = ref(false);
-  // The local 'error' ref is no longer needed.
 
   // Getters
   const getBudget = computed(() => budget.value);
@@ -19,7 +18,6 @@ export const useBudgetStore = defineStore("budget", () => {
       budget.value = data;
       return { success: true };
     } catch (err) {
-      // Error is now handled by the global interceptor
       return { success: false };
     } finally {
       isLoading.value = false;
@@ -30,7 +28,6 @@ export const useBudgetStore = defineStore("budget", () => {
     isLoading.value = true;
     try {
       const newBudget = await FinanceService.createBudget(budgetData);
-      // After creating, refetch the budget to ensure state is in sync
       await fetchBudget();
       return { success: true, data: newBudget };
     } catch (err) {
@@ -44,7 +41,6 @@ export const useBudgetStore = defineStore("budget", () => {
     isLoading.value = true;
     try {
       await FinanceService._updateBudgetData(incomeData);
-      // Refetch the entire budget to get updated virtual properties
       await fetchBudget();
       return { success: true };
     } catch (err) {
@@ -59,7 +55,60 @@ export const useBudgetStore = defineStore("budget", () => {
     isLoading.value = true;
     try {
       await FinanceService.deleteBudget(budget.value.month, budget.value.year);
-      budget.value = null; // Clear state immediately after deletion
+      budget.value = null;
+      return { success: true };
+    } catch (err) {
+      return { success: false };
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  // --- NEW ACTION TO ADD A BUDGET ITEM ---
+  const addBudgetItem = async (itemData) => {
+    if (!budget.value)
+      return { success: false, error: "No budget exists to add an item to." };
+    isLoading.value = true;
+    try {
+      // Add the new item to the existing budget array
+      const updatedMonthlyBudget = [...budget.value.monthlyBudget, itemData];
+
+      // Send the entire updated budget document to the backend
+      await FinanceService._updateBudgetData({
+        monthlyBudget: updatedMonthlyBudget,
+        expectedMonthlyIncome: budget.value.expectedMonthlyIncome,
+      });
+
+      await fetchBudget(); // Refetch to get the latest state with new IDs
+      return { success: true };
+    } catch (err) {
+      return { success: false };
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  // --- NEW ACTION TO UPDATE A BUDGET ITEM ---
+  const updateBudgetItem = async (itemId, itemData) => {
+    if (!budget.value)
+      return {
+        success: false,
+        error: "No budget exists to update an item in.",
+      };
+    isLoading.value = true;
+    try {
+      // Find and update the specific item in the array
+      const updatedMonthlyBudget = budget.value.monthlyBudget.map((item) =>
+        item._id === itemId ? { ...item, ...itemData } : item
+      );
+
+      // Send the entire updated budget document to the backend
+      await FinanceService._updateBudgetData({
+        monthlyBudget: updatedMonthlyBudget,
+        expectedMonthlyIncome: budget.value.expectedMonthlyIncome,
+      });
+
+      await fetchBudget(); // Refetch to get the latest state
       return { success: true };
     } catch (err) {
       return { success: false };
@@ -76,7 +125,6 @@ export const useBudgetStore = defineStore("budget", () => {
         budget.value.year,
         budgetItemId
       );
-      // Refetch to update the budget and its totals in the state
       await fetchBudget();
       return { success: true };
     } catch (err) {
@@ -85,15 +133,14 @@ export const useBudgetStore = defineStore("budget", () => {
   };
 
   return {
-    // State
     budget,
     isLoading,
-    // Getters
     getBudget,
-    // Actions
     fetchBudget,
     createBudget,
     updateExpectedIncome,
+    addBudgetItem, // <-- Expose new action
+    updateBudgetItem, // <-- Expose new action
     deleteBudget,
     deleteBudgetItem,
   };

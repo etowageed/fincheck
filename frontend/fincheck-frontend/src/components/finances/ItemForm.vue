@@ -137,6 +137,7 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoriesStore } from '@/stores/categories';
+import { useBudgetStore } from '@/stores/budget';
 import { FinanceService } from '@/services/financeService';
 
 const props = defineProps({
@@ -158,6 +159,7 @@ const emit = defineEmits([
 
 const transactionsStore = useTransactionsStore();
 const categoriesStore = useCategoriesStore();
+const budgetStore = useBudgetStore(); // <-- THIS IS THE MISSING LINE THAT IS NOW ADDED
 
 const visible = ref(false);
 const isLoading = ref(false);
@@ -304,22 +306,33 @@ const closeDialog = () => {
 
 const handleSubmit = async () => {
     isLoading.value = true;
-    errors.value = {}; // Keep for field-specific validation errors
+    errors.value = {};
+    let result;
 
     try {
-        let result;
-        // ... logic to call store actions ...
+        if (props.formType === 'transaction') {
+            if (editMode.value) {
+                result = await transactionsStore.updateTransaction(props.editItem._id, formData.value);
+            } else {
+                result = await transactionsStore.addTransaction(formData.value);
+            }
+        } else if (props.formType === 'budget') {
+            if (editMode.value) {
+                result = await budgetStore.updateBudgetItem(props.editItem._id, formData.value);
+            } else {
+                result = await budgetStore.addBudgetItem(formData.value);
+            }
+        }
 
-        // The success check is still useful for closing the dialog
-        if (result && (result.success || result.status === 'success')) {
+        if (result && result.success) {
             closeDialog();
         } else {
-            // The global handler will show the error, but we can still log it.
             console.error('Failed to save item:', result?.error);
+            errors.value.general = result?.error || 'An unexpected error occurred.';
         }
     } catch (error) {
-        // The global handler will show the error, but we can still log it.
         console.error(`Error saving ${props.formType}:`, error);
+        errors.value.general = error.message || 'An unexpected error occurred.';
     } finally {
         isLoading.value = false;
     }

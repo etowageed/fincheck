@@ -1,5 +1,6 @@
 // backend/controllers/financesController.js
 const Finances = require('../models/financesModel');
+const Category = require('../models/categoryModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { body, validationResult } = require('express-validator');
@@ -395,5 +396,340 @@ exports.comparePeriods = catchAsync(async (req, res, next) => {
     currentPeriod: currentPeriodLabel,
     previousPeriod: previousPeriodLabel,
     comparison,
+  });
+});
+
+exports.getMonthlyTrends = catchAsync(async (req, res, next) => {
+  // 1. Define the date range for the trend data (e.g., last 12 months)
+  const toDate = new Date();
+  const fromDate = new Date();
+  fromDate.setFullYear(fromDate.getFullYear() - 1);
+
+  const monthlyTrends = await Finances.aggregate([
+    // 2. Match documents for the logged-in user within the date range
+    {
+      $match: {
+        user: req.user._id,
+        createdAt: { $gte: fromDate, $lte: toDate },
+      },
+    },
+    // 3. Deconstruct the transactions array to process each transaction
+    {
+      $unwind: '$transactions',
+    },
+    // 4. Group transactions by year and month, calculating totals
+    {
+      $group: {
+        _id: {
+          year: { $year: '$transactions.date' },
+          month: { $month: '$transactions.date' },
+        },
+        totalIncome: {
+          $sum: {
+            $cond: [
+              { $eq: ['$transactions.type', 'income'] },
+              '$transactions.amount',
+              0,
+            ],
+          },
+        },
+        totalExpenses: {
+          $sum: {
+            $cond: [
+              { $eq: ['$transactions.type', 'expense'] },
+              '$transactions.amount',
+              0,
+            ],
+          },
+        },
+      },
+    },
+    // 5. Add a field for net savings
+    {
+      $addFields: {
+        netSavings: { $subtract: ['$totalIncome', '$totalExpenses'] },
+      },
+    },
+    // 6. Sort the results chronologically
+    {
+      $sort: {
+        '_id.year': 1,
+        '_id.month': 1,
+      },
+    },
+    // 7. Project for a cleaner output format
+    {
+      $project: {
+        _id: 0,
+        year: '$_id.year',
+        month: '$_id.month',
+        totalIncome: 1,
+        totalExpenses: 1,
+        netSavings: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    results: monthlyTrends.length,
+    data: monthlyTrends,
+  });
+});
+
+// A new temporary function to seed data for testing
+exports.seedData = catchAsync(async (req, res, next) => {
+  // 1. Clean up any existing data for this user to prevent duplicates
+  await Finances.deleteMany({ user: req.user.id });
+
+  // 2. Fetch some default categories to use for transactions
+  const categories = await Category.find({ isGlobalDefault: true });
+  const expenseCategories = categories.filter(
+    (c) =>
+      ![
+        'Salary',
+        'Freelance',
+        'Business Income',
+        'Investment Returns',
+        'Other Income',
+      ].includes(c.name)
+  );
+  const incomeCategories = categories.filter((c) =>
+    ['Salary', 'Other Income'].includes(c.name)
+  );
+
+  if (expenseCategories.length === 0 || incomeCategories.length === 0) {
+    return next(
+      new AppError('Please create global default categories first.', 400)
+    );
+  }
+
+  // 3. Loop for the last 12 months to create historical data
+  for (let i = 11; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    const transactions = [];
+    const numTransactions = Math.floor(Math.random() * 15) + 10; // 10 to 25 transactions per month
+
+    // Add one main income transaction
+    transactions.push({
+      description: 'Monthly Paycheck',
+      amount: Math.floor(Math.random() * 1000) + 4000, // 4000 - 5000
+      category: incomeCategories[0]._id,
+      type: 'income',
+      date: new Date(year, month, 1),
+    });
+
+    // Add random expense transactions
+    for (let j = 0; j < numTransactions; j++) {
+      const randomCategory =
+        expenseCategories[Math.floor(Math.random() * expenseCategories.length)];
+      transactions.push({
+        description: `Random expense for ${randomCategory.name}`,
+        amount: Math.floor(Math.random() * 150) + 5, // 5 - 155
+        category: randomCategory._id,
+        type: 'expense',
+        date: new Date(year, month, Math.floor(Math.random() * 28) + 1),
+      });
+    }
+
+    // 4. Create the Finances document for the month
+    await Finances.create({
+      user: req.user.id,
+      month,
+      year,
+      expectedMonthlyIncome: 4500,
+      monthlyBudget: [], // Keeping this simple for now
+      transactions,
+    });
+  }
+
+  res.status(201).json({
+    status: 'success',
+    message: '12 months of sample data have been generated successfully.',
+  });
+});
+
+// Get a breakdown of expenses by category over a specified period
+exports.getCategoryBreakdown = catchAsync(async (req, res, next) => {
+  // 1. Define the date range. Default to the last 90 days.
+  const periodInDays = req.query.days || 90;
+  const fromDate = new Date();
+  fromDate.setDate(fromDate.getDate() - periodInDays);
+
+  const categoryData = await Finances.aggregate([
+    // 2. Match documents for the logged-in user
+    {
+      $match: {
+        user: req.user._id,
+      },
+    },
+    // 3. Deconstruct the transactions array to process each transaction
+    {
+      $unwind: '$transactions',
+    },
+    // 4. Filter for only 'expense' type transactions within the date range
+    {
+      $match: {
+        'transactions.type': 'expense',
+        'transactions.date': { $gte: fromDate },
+      },
+    },
+    // 5. Group by the category ID string
+    {
+      $group: {
+        _id: '$transactions.category',
+        totalSpent: { $sum: '$transactions.amount' },
+        count: { $sum: 1 },
+      },
+    },
+    //
+    // --- FIX: Convert the string ID to an ObjectId before the lookup ---
+    //
+    {
+      $addFields: {
+        convertedCategoryId: { $toObjectId: '$_id' },
+      },
+    },
+    // 6. Look up category names from the Categories collection
+    {
+      $lookup: {
+        from: 'categories',
+        localField: 'convertedCategoryId', // Use the newly converted ObjectId field
+        foreignField: '_id',
+        as: 'categoryInfo',
+      },
+    },
+    // 7. Deconstruct the categoryInfo array
+    {
+      $unwind: {
+        path: '$categoryInfo',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    // 8. Sort by the total amount spent in descending order
+    {
+      $sort: {
+        totalSpent: -1,
+      },
+    },
+    // 9. Project for a cleaner output format
+    {
+      $project: {
+        _id: 0,
+        categoryId: '$_id',
+        categoryName: { $ifNull: ['$categoryInfo.name', 'Uncategorized'] },
+        totalSpent: '$totalSpent',
+        transactionCount: '$count',
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    results: categoryData.length,
+    data: categoryData,
+  });
+});
+
+// Get a user's largest expense transactions over a specified period
+exports.getTopTransactions = catchAsync(async (req, res, next) => {
+  // 1. Define query parameters
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const days = parseInt(req.query.days, 10) || 365; // Default to the last year
+
+  const fromDate = new Date();
+  fromDate.setDate(fromDate.getDate() - days);
+
+  const topTransactions = await Finances.aggregate([
+    // 2. Match documents for the logged-in user
+    {
+      $match: {
+        user: req.user._id,
+      },
+    },
+    // 3. Deconstruct the transactions array
+    {
+      $unwind: '$transactions',
+    },
+    // 4. Filter for only 'expense' type transactions within the date range
+    {
+      $match: {
+        'transactions.type': 'expense',
+        'transactions.date': { $gte: fromDate },
+      },
+    },
+    // 5. Sort all transactions by amount, descending
+    {
+      $sort: {
+        'transactions.amount': -1,
+      },
+    },
+    // 6. Limit to the top N results
+    {
+      $limit: limit,
+    },
+    // 7. Convert string category ID to ObjectId for lookup
+    {
+      $addFields: {
+        'transactions.convertedCategoryId': {
+          $toObjectId: '$transactions.category',
+        },
+      },
+    },
+    // 8. Look up category names for better display
+    {
+      $lookup: {
+        from: 'categories',
+        localField: 'transactions.convertedCategoryId',
+        foreignField: '_id',
+        as: 'categoryInfo',
+      },
+    },
+    // 9. Project for a final, clean output
+    {
+      $project: {
+        _id: '$transactions._id',
+        description: '$transactions.description',
+        amount: '$transactions.amount',
+        date: '$transactions.date',
+        categoryName: {
+          $ifNull: [
+            { $arrayElemAt: ['$categoryInfo.name', 0] },
+            'Uncategorized',
+          ],
+        },
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    results: topTransactions.length,
+    data: topTransactions,
+  });
+});
+
+// Get all transactions for a user within a specified date range
+exports.getAllTransactionsReport = catchAsync(async (req, res, next) => {
+  const days = parseInt(req.query.days, 10) || 30; // Default to 30 days
+  const fromDate = new Date();
+  fromDate.setDate(fromDate.getDate() - days);
+
+  const transactions = await Finances.aggregate([
+    { $match: { user: req.user._id } },
+    { $unwind: '$transactions' },
+    { $match: { 'transactions.date': { $gte: fromDate } } },
+    { $sort: { 'transactions.date': -1 } },
+    { $replaceRoot: { newRoot: '$transactions' } },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    results: transactions.length,
+    data: transactions,
   });
 });

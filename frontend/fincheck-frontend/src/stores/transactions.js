@@ -7,7 +7,11 @@ export const useTransactionsStore = defineStore("transactions", () => {
   const transactions = ref([]);
   const isLoading = ref(false);
 
-  const recentTransactions = computed(() => transactions.value);
+  const recentTransactions = computed(() => {
+    // Create a reversed copy of the array so the newest items appear first.
+    // Using [...transactions.value] creates a copy to avoid mutating the original state.
+    return [...transactions.value].reverse();
+  });
 
   const totalIncome = computed(() => {
     return transactions.value
@@ -23,14 +27,17 @@ export const useTransactionsStore = defineStore("transactions", () => {
 
   const netTotal = computed(() => totalIncome.value - totalExpenses.value);
 
-  const fetchTransactions = async () => {
+  // MODIFIED: This action now accepts a 'days' parameter
+  const fetchTransactions = async (params = { days: 30 }) => {
     isLoading.value = true;
     try {
-      const { month, year } = FinanceService.getCurrentMonthYear();
-      const data = await FinanceService.getTransactions(month, year);
-      transactions.value = data;
+      const response = await FinanceService.getAllTransactions(params);
+      if (response.status === "success") {
+        transactions.value = response.data || [];
+      }
     } catch (err) {
       // Error handled by global interceptor
+      transactions.value = [];
     } finally {
       isLoading.value = false;
     }

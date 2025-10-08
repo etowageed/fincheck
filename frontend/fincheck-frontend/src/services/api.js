@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 import { useErrorStore } from "@/stores/error";
-import router from "@/router";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,

@@ -1,6 +1,9 @@
 <template>
     <div class="p-6">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Transactions</h1>
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Transactions</h1>
+            <TimelineFilter @period-changed="handlePeriodChange" />
+        </div>
 
         <div v-if="transactionsStore.isLoading" class="text-center py-8">
             <i class="pi pi-spinner pi-spin text-2xl text-blue-600"></i>
@@ -16,18 +19,27 @@
         </div>
 
         <div v-else class="text-center py-8">
-            <p class="text-gray-600 mb-4">No transactions found for this month.</p>
+            <p class="text-gray-600 mb-4">No transactions found for this period.</p>
             <ItemForm formType="transaction" />
         </div>
     </div>
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import TransactionDocument from './TransactionDocument.vue';
 import ItemForm from './ItemForm.vue';
+import TimelineFilter from '../common/TimelineFilter.vue';
 
-// The component's only job is to use the store.
-// All logic is now handled by Pinia.
 const transactionsStore = useTransactionsStore();
+
+const handlePeriodChange = (newPeriod) => {
+    transactionsStore.fetchTransactions({ days: newPeriod.value });
+};
+
+onMounted(() => {
+    // Fetch initial data for the default period (1M/30 days)
+    transactionsStore.fetchTransactions();
+});
 </script>

@@ -1,5 +1,4 @@
 // src/services/financeService.js
-
 import api from "@/services/api";
 
 export class FinanceService {
@@ -7,10 +6,23 @@ export class FinanceService {
    * Budget Item Operations
    */
   static async getBudgetData() {
+    // 1. Get the current month (0-indexed) and year
+    const now = new Date();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+
     try {
-      const response = await api.get("/finances");
-      return response.data.data[0] || null;
+      // 2. Make a specific request for the current month's document
+      const response = await api.get(`/finances/${month}/${year}`);
+      // The backend returns a single document, not an array
+      return response.data.data || null;
     } catch (error) {
+      // 3. If the backend returns a 404 error, it means no budget exists for this month.
+      // We'll treat this as a normal case and return null.
+      if (error.response?.status === 404) {
+        return null;
+      }
+      // For any other errors, we still throw them to be handled globally.
       throw new Error(`Failed to fetch budget data: ${error.message}`);
     }
   }
@@ -118,6 +130,7 @@ export class FinanceService {
       throw new Error(`Failed to add transaction: ${error.message}`);
     }
   }
+
   static async updateTransaction(itemId, itemData) {
     try {
       const { month, year } = this._getCurrentMonthYear();
@@ -174,6 +187,18 @@ export class FinanceService {
       return response.data;
     } catch (error) {
       throw new Error(`Failed to update budget: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get historical monthly trends for charts
+   */
+  static async getMonthlyTrends() {
+    try {
+      const response = await api.get("/finances/trends");
+      return response.data; // The backend returns { status, results, data }
+    } catch (error) {
+      throw new Error(`Failed to fetch monthly trends: ${error.message}`);
     }
   }
 
@@ -312,5 +337,42 @@ export class FinanceService {
       month: currentDate.getMonth(),
       year: currentDate.getFullYear(),
     };
+  }
+
+  /**
+   * Get category spending breakdown for charts
+   */
+  static async getCategoryBreakdown() {
+    try {
+      const response = await api.get("/finances/reports/category-breakdown");
+      return response.data; // The backend returns { status, results, data }
+    } catch (error) {
+      throw new Error(`Failed to fetch category breakdown: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get the user's largest transactions
+   */
+  static async getTopTransactions(limit = 10) {
+    try {
+      const response = await api.get(
+        `/finances/reports/top-transactions?limit=${limit}`
+      );
+      return response.data; // Backend returns { status, results, data }
+    } catch (error) {
+      throw new Error(`Failed to fetch top transactions: ${error.message}`);
+    }
+  }
+
+  static async getAllTransactions(params = { days: 30 }) {
+    try {
+      const response = await api.get("/finances/reports/all-transactions", {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to fetch transactions: ${error.message}`);
+    }
   }
 }

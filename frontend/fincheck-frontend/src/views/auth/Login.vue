@@ -9,6 +9,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { nextTick } from 'vue'; // <-- 1. Import nextTick
 import { useAuthStore } from '@/stores/auth';
 import LoginForm from '@/components/auth/LoginForm.vue';
 
@@ -17,8 +18,10 @@ const authStore = useAuthStore();
 
 const handleLogin = (result) => {
     if (result.success) {
-        router.push('/transactions');
+        // 2. Wrap the navigation in nextTick
+        nextTick(() => {
+            router.push('/transactions');
+        });
     }
-    // No 'else' block is needed. Errors are handled globally.
 };
 </script>

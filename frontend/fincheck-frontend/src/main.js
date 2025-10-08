@@ -28,7 +28,7 @@ const { initTheme } = useDarkMode();
 initTheme();
 
 // Initialize auth before mounting
-const authStore = useAuthStore();
-await authStore.initializeAuth();
+// const authStore = useAuthStore();
+// await authStore.initializeAuth();
 
 app.mount("#app");
