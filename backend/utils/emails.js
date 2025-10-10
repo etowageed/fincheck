@@ -100,7 +100,8 @@ class EmailService {
     <br />
     <a href="${
       this.url
-    }/api/v1/users/me" style="padding: 10px 20px; background: #00b894; color: white; text-decoration: none; border-radius: 5px;">📈 See full insights</a>
+    }/dashboard" style="padding: 10px 20px; background: #00b894; color: white; text-decoration: none; border-radius: 5px;">📈 See full insights</a>
+
   `;
 
     await this.send('Your Weekly Fincheck Summary 🌟', summaryHtml);

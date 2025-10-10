@@ -166,6 +166,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '@/services/api';
+import { FinanceService } from '@/services/financeService';
 
 const metrics = ref({});
 const isLoading = ref(true);
@@ -175,8 +176,9 @@ const loadMetrics = async () => {
     isLoading.value = true;
     error.value = '';
     try {
-        const res = await api.get('/users/me');
-        metrics.value = res.data?.data?.dashboard?.metrics || {};
+        // Call the new service method
+        const res = await FinanceService.getDashboardMetrics();
+        metrics.value = res.data?.metrics || {};
     } catch (err) {
         error.value = 'Failed to load financial metrics';
         console.error(err);

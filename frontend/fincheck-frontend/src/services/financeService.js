@@ -375,4 +375,14 @@ export class FinanceService {
       throw new Error(`Failed to fetch transactions: ${error.message}`);
     }
   }
+
+  static async getDashboardMetrics(params) {
+    // params for date ranges later
+    try {
+      const response = await api.get("/finances/dashboard", { params });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to fetch dashboard metrics: ${error.message}`);
+    }
+  }
 }

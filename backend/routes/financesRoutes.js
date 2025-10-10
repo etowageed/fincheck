@@ -7,6 +7,7 @@ const router = express.Router();
 router.use(authController.protect); // protects all routes below
 
 // --- GENERAL & REPORTING ROUTES (specific) ---
+
 // These should come BEFORE routes with parameters.
 router.get('/trends', financesController.getMonthlyTrends);
 router.get('/compare', financesController.comparePeriods);
@@ -21,6 +22,7 @@ router.get(
   '/reports/all-transactions',
   financesController.getAllTransactionsReport
 );
+router.get('/dashboard', financesController.getDashboardMetrics);
 
 // --- DOCUMENT-LEVEL ROUTES (less specific) ---
 router

@@ -733,3 +733,45 @@ exports.getAllTransactionsReport = catchAsync(async (req, res, next) => {
     data: transactions,
   });
 });
+
+exports.getDashboardMetrics = catchAsync(async (req, res, next) => {
+  // We will enhance this with date ranges later, for now, it gets the current month.
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+
+  const finances = await Finances.findOne({ user: req.user.id, month, year });
+
+  // If a finances document exists, populate all metrics from its virtual properties.
+  const metrics = finances
+    ? {
+        incomeTotal: finances.incomeTotal,
+        expensesTotal: finances.expensesTotal,
+        excludedExpensesTotal: finances.excludedExpensesTotal,
+        outflow: finances.outflow,
+        safeToSpend: finances.safeToSpend,
+        totalMonthlyBudget: finances.totalMonthlyBudget,
+        totalRecurringExpenses: finances.totalRecurringExpenses,
+        totalNonRecurringExpenses: finances.totalNonRecurringExpenses,
+        plannedSavings: finances.plannedSavings,
+      }
+    : // If no document exists, return a default object with all metrics set to 0.
+      {
+        incomeTotal: 0,
+        expensesTotal: 0,
+        excludedExpensesTotal: 0,
+        outflow: 0,
+        safeToSpend: 0,
+        totalMonthlyBudget: 0,
+        totalRecurringExpenses: 0,
+        totalNonRecurringExpenses: 0,
+        plannedSavings: 0,
+      };
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      metrics,
+    },
+  });
+});

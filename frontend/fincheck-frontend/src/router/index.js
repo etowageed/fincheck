@@ -81,32 +81,81 @@ const router = createRouter({
   routes,
 });
 
+// router.beforeEach(async (to, from, next) => {
+//   const authStore = useAuthStore();
+
+//   // Skip auth check for public routes
+//   const publicRoutes = [
+//     "/login",
+//     "/signup",
+//     "/forgot-password",
+//     "/reset-password",
+//   ];
+//   if (publicRoutes.includes(to.path)) {
+//     if (authStore.isAuthenticated) {
+//       return next("/transactions");
+//     }
+//     return next();
+//   }
+
+//   // For protected routes
+//   if (to.meta.requiresAuth) {
+//     try {
+//       // Always check with backend first
+//       const isAuthenticated = await authStore.checkAuth();
+//       if (isAuthenticated) {
+//         return next();
+//       }
+
+//       return next({
+//         path: "/login",
+//         query: { redirect: to.fullPath },
+//       });
+//     } catch (error) {
+//       console.error("Auth check failed:", error);
+//       return next("/login");
+//     }
+//   }
+
+//   next();
+// });
+
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  // Skip auth check for public routes
+  // Public routes logic remains the same
   const publicRoutes = [
     "/login",
     "/signup",
     "/forgot-password",
     "/reset-password",
   ];
-  if (publicRoutes.includes(to.path)) {
+  const isPublicRoute = publicRoutes.some((path) => to.path.startsWith(path));
+
+  if (isPublicRoute) {
     if (authStore.isAuthenticated) {
       return next("/transactions");
     }
     return next();
   }
 
-  // For protected routes
+  // --- MODIFICATION FOR PROTECTED ROUTES ---
   if (to.meta.requiresAuth) {
+    // If the auth store already knows the user is authenticated, just proceed.
+    // This prevents the checkAuth() call on every subsequent navigation.
+    if (authStore.isAuthenticated) {
+      return next();
+    }
+
+    // If the store is not authenticated, THEN check with the backend.
+    // This typically runs only on the first page load after login or a full refresh.
     try {
-      // Always check with backend first
-      const isAuthenticated = await authStore.checkAuth();
-      if (isAuthenticated) {
+      const isStillAuthenticated = await authStore.checkAuth();
+      if (isStillAuthenticated) {
         return next();
       }
 
+      // If the backend check fails, redirect to login.
       return next({
         path: "/login",
         query: { redirect: to.fullPath },
@@ -117,7 +166,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  next();
+  return next();
 });
 
 export default router;
