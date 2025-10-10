@@ -385,4 +385,15 @@ export class FinanceService {
       throw new Error(`Failed to fetch dashboard metrics: ${error.message}`);
     }
   }
+
+  static async getPeriodComparison(periodType = "month") {
+    try {
+      const response = await api.get("/finances/compare", {
+        params: { periodType },
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to fetch period comparison: ${error.message}`);
+    }
+  }
 }

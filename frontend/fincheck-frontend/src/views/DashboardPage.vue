@@ -17,5 +17,5 @@
 import UserDashboard from '@/components/finances/UserDashboard.vue';
 import TrendsChart from '@/components/finances/TrendsChart.vue';
 import CategoryBreakdown from '@/components/finances/CategoryBreakdown.vue';
-import TopTransactions from '@/components/finances/TopTransactions.vue'; // Import the new component
+import TopTransactions from '@/components/finances/TopTransactions.vue';
 </script>

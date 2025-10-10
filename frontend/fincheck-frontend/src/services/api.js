@@ -24,7 +24,10 @@ api.interceptors.response.use(
 
     // ** ADD THIS BLOCK TO HIDE THE SPECIFIC ERROR **
     // This is a normal state for new users, not a true "error" to be shown.
-    if (errorMessage === "No expense document found for this month and year.") {
+    if (
+      errorMessage === "No expense document found for this month and year." ||
+      errorMessage === "Not enough data to compare the requested periods."
+    ) {
       // Reject the promise without setting a global error
       return Promise.reject(error);
     }
