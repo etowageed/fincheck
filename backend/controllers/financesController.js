@@ -401,10 +401,18 @@ exports.comparePeriods = catchAsync(async (req, res, next) => {
 
 exports.getMonthlyTrends = catchAsync(async (req, res, next) => {
   // 1. Define the date range for the trend data (e.g., last 12 months)
-  const days = parseInt(req.query.days, 10) || 365; // Default to last year
   const toDate = new Date();
-  const fromDate = new Date();
-  fromDate.setDate(fromDate.getDate() - days);
+
+  let fromDate = new Date();
+  let days;
+
+  if (req.query.period === 'currentMonth') {
+    fromDate = new Date(toDate.getFullYear(), toDate.getMonth(), 1);
+    days = toDate.getDate(); // Number of days so far in the month
+  } else {
+    days = parseInt(req.query.days, 10) || 365;
+    fromDate.setDate(toDate.getDate() - days);
+  }
 
   // Determine granularity based on the requested period
   const isDaily = days <= 90;

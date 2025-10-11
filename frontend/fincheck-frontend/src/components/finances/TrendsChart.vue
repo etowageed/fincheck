@@ -41,7 +41,6 @@ const error = ref('');
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const selectedPeriod = ref({ label: '1M', value: 30 }); // Default to 1 month
 
-
 // Reactive references for chart data and options
 const chartData = ref({
     labels: [],
@@ -62,15 +61,51 @@ const fetchTrends = async () => {
     isLoading.value = true;
     error.value = '';
     try {
-        const response = await FinanceService.getMonthlyTrends({ days: selectedPeriod.value.value });
+        const params = {};
+        if (selectedPeriod.value.value === 30) {
+            // For '1M', specifically request the current calendar month's data
+            params.period = 'currentMonth';
+        } else {
+            // For all other periods, use the number of days
+            params.days = selectedPeriod.value.value;
+        }
+        const response = await FinanceService.getMonthlyTrends(params);
+        if (response.status === 'success' && response.data) {
+            let labels, incomeData, expensesData, savingsData;
 
-        if (response.status === 'success' && response.data) { // Process the data for the chart
-            const labels = response.granularity === 'daily'
-                ? response.data.map(d => `${monthNames[d.month - 1]} ${d.day}`)
-                : response.data.map(d => `${monthNames[d.month - 1]} ${d.year}`);
-            const incomeData = response.data.map(d => d.totalIncome);
-            const expensesData = response.data.map(d => d.totalExpenses);
-            const savingsData = response.data.map(d => d.netSavings);
+            // If viewing the current month, build a full monthly calendar view
+            if (params.period === 'currentMonth') {
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+                // Create a map for quick lookup of data by day
+                const dataMap = new Map(response.data.map(d => [d.day, d]));
+
+                labels = Array.from({ length: daysInMonth }, (_, i) => `${monthNames[currentMonth]} ${i + 1}`);
+                incomeData = Array(daysInMonth).fill(0);
+                expensesData = Array(daysInMonth).fill(0);
+                savingsData = Array(daysInMonth).fill(0);
+
+                for (let i = 0; i < daysInMonth; i++) {
+                    const day = i + 1;
+                    if (dataMap.has(day)) {
+                        const dayData = dataMap.get(day);
+                        incomeData[i] = dayData.totalIncome;
+                        expensesData[i] = dayData.totalExpenses;
+                        savingsData[i] = dayData.netSavings;
+                    }
+                }
+            } else {
+                // For other views (3M, 6M, 1Y), use the existing logic
+                labels = response.granularity === 'daily'
+                    ? response.data.map(d => `${monthNames[d.month - 1]} ${d.day}`)
+                    : response.data.map(d => `${monthNames[d.month - 1]} ${d.year}`);
+                incomeData = response.data.map(d => d.totalIncome);
+                expensesData = response.data.map(d => d.totalExpenses);
+                savingsData = response.data.map(d => d.netSavings);
+            }
 
             chartData.value = {
                 labels,
