@@ -401,9 +401,27 @@ exports.comparePeriods = catchAsync(async (req, res, next) => {
 
 exports.getMonthlyTrends = catchAsync(async (req, res, next) => {
   // 1. Define the date range for the trend data (e.g., last 12 months)
+  const days = parseInt(req.query.days, 10) || 365; // Default to last year
   const toDate = new Date();
   const fromDate = new Date();
-  fromDate.setFullYear(fromDate.getFullYear() - 1);
+  fromDate.setDate(fromDate.getDate() - days);
+
+  // Determine granularity based on the requested period
+  const isDaily = days <= 90;
+  const groupBy = isDaily
+    ? {
+        year: { $year: '$transactions.date' },
+        month: { $month: '$transactions.date' },
+        day: { $dayOfMonth: '$transactions.date' },
+      }
+    : {
+        year: { $year: '$transactions.date' },
+        month: { $month: '$transactions.date' },
+      };
+
+  const sortBy = isDaily
+    ? { '_id.year': 1, '_id.month': 1, '_id.day': 1 }
+    : { '_id.year': 1, '_id.month': 1 };
 
   const monthlyTrends = await Finances.aggregate([
     // 2. Match documents for the logged-in user within the date range
@@ -420,10 +438,7 @@ exports.getMonthlyTrends = catchAsync(async (req, res, next) => {
     // 4. Group transactions by year and month, calculating totals
     {
       $group: {
-        _id: {
-          year: { $year: '$transactions.date' },
-          month: { $month: '$transactions.date' },
-        },
+        _id: groupBy,
         totalIncome: {
           $sum: {
             $cond: [
@@ -452,10 +467,7 @@ exports.getMonthlyTrends = catchAsync(async (req, res, next) => {
     },
     // 6. Sort the results chronologically
     {
-      $sort: {
-        '_id.year': 1,
-        '_id.month': 1,
-      },
+      $sort: sortBy,
     },
     // 7. Project for a cleaner output format
     {
@@ -463,6 +475,7 @@ exports.getMonthlyTrends = catchAsync(async (req, res, next) => {
         _id: 0,
         year: '$_id.year',
         month: '$_id.month',
+        day: '$_id.day', // will be null if grouped by month
         totalIncome: 1,
         totalExpenses: 1,
         netSavings: 1,
@@ -473,6 +486,7 @@ exports.getMonthlyTrends = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: monthlyTrends.length,
+    granularity: isDaily ? 'daily' : 'monthly',
     data: monthlyTrends,
   });
 });
@@ -638,8 +652,9 @@ exports.getCategoryBreakdown = catchAsync(async (req, res, next) => {
 // Get a user's largest expense transactions over a specified period
 exports.getTopTransactions = catchAsync(async (req, res, next) => {
   // 1. Define query parameters
-  const limit = parseInt(req.query.limit, 10) || 10;
-  const days = parseInt(req.query.days, 10) || 365; // Default to the last year
+  const limit = parseInt(req.query.limit, 3) || 3;
+  const days = parseInt(req.query.days, 3) || 365; // Default to the last year
+  const transactionType = req.query.type || 'expense'; // New: Default to 'expense'
 
   const fromDate = new Date();
   fromDate.setDate(fromDate.getDate() - days);
@@ -658,7 +673,7 @@ exports.getTopTransactions = catchAsync(async (req, res, next) => {
     // 4. Filter for only 'expense' type transactions within the date range
     {
       $match: {
-        'transactions.type': 'expense',
+        'transactions.type': transactionType,
         'transactions.date': { $gte: fromDate },
       },
     },
@@ -719,13 +734,29 @@ exports.getAllTransactionsReport = catchAsync(async (req, res, next) => {
   const fromDate = new Date();
   fromDate.setDate(fromDate.getDate() - days);
 
-  const transactions = await Finances.aggregate([
+  // NEW: Get optional category filter
+  const categoryId = req.query.category;
+
+  // Build the initial pipeline stages
+  const pipeline = [
     { $match: { user: req.user._id } },
     { $unwind: '$transactions' },
     { $match: { 'transactions.date': { $gte: fromDate } } },
+    // 1. Add sort stage before the final projection
     { $sort: { 'transactions.date': -1 } },
-    { $replaceRoot: { newRoot: '$transactions' } },
-  ]);
+  ];
+
+  // 2. Add category filter if provided
+  if (categoryId) {
+    pipeline.push({
+      $match: { 'transactions.category': categoryId },
+    });
+  }
+
+  // 3. Add the root replacement stage last
+  pipeline.push({ $replaceRoot: { newRoot: '$transactions' } });
+
+  const transactions = await Finances.aggregate(pipeline);
 
   res.status(200).json({
     status: 'success',

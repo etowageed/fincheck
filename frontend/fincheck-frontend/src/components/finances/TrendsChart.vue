@@ -1,6 +1,10 @@
 <template>
     <div class="bg-primary rounded-lg shadow-sm border border-default p-6 mt-6">
-        <h3 class="text-lg font-semibold text-primary mb-4">Financial Trends (Last 12 Months)</h3>
+
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-primary">Financial Trends</h3>
+            <TimelineFilter @period-changed="handlePeriodChange" />
+        </div>
 
         <div v-if="isLoading" class="text-center py-8">
             <i class="pi pi-spinner pi-spin text-2xl text-accent-blue"></i>
@@ -27,6 +31,7 @@ import { ref, onMounted } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js';
 import { FinanceService } from '@/services/financeService';
+import TimelineFilter from '../common/TimelineFilter.vue';
 
 // Register the necessary components for Chart.js
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
@@ -34,6 +39,8 @@ ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale
 const isLoading = ref(true);
 const error = ref('');
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const selectedPeriod = ref({ label: '1M', value: 30 }); // Default to 1 month
+
 
 // Reactive references for chart data and options
 const chartData = ref({
@@ -51,12 +58,16 @@ const chartOptions = ref({
     }
 });
 
-onMounted(async () => {
+const fetchTrends = async () => {
+    isLoading.value = true;
+    error.value = '';
     try {
-        const response = await FinanceService.getMonthlyTrends();
-        if (response.status === 'success' && response.data) {
-            // Process the data for the chart
-            const labels = response.data.map(d => `${monthNames[d.month - 1]} ${d.year}`);
+        const response = await FinanceService.getMonthlyTrends({ days: selectedPeriod.value.value });
+
+        if (response.status === 'success' && response.data) { // Process the data for the chart
+            const labels = response.granularity === 'daily'
+                ? response.data.map(d => `${monthNames[d.month - 1]} ${d.day}`)
+                : response.data.map(d => `${monthNames[d.month - 1]} ${d.year}`);
             const incomeData = response.data.map(d => d.totalIncome);
             const expensesData = response.data.map(d => d.totalExpenses);
             const savingsData = response.data.map(d => d.netSavings);
@@ -94,5 +105,14 @@ onMounted(async () => {
     } finally {
         isLoading.value = false;
     }
+};
+
+const handlePeriodChange = (newPeriod) => {
+    selectedPeriod.value = newPeriod;
+    fetchTrends();
+};
+
+onMounted(() => {
+    fetchTrends();
 });
 </script>

@@ -193,9 +193,9 @@ export class FinanceService {
   /**
    * Get historical monthly trends for charts
    */
-  static async getMonthlyTrends() {
+  static async getMonthlyTrends(params = { days: 365 }) {
     try {
-      const response = await api.get("/finances/trends");
+      const response = await api.get("/finances/trends", { params });
       return response.data; // The backend returns { status, results, data }
     } catch (error) {
       throw new Error(`Failed to fetch monthly trends: ${error.message}`);
@@ -354,11 +354,13 @@ export class FinanceService {
   /**
    * Get the user's largest transactions
    */
-  static async getTopTransactions(limit = 10) {
+  static async getTopTransactions(
+    params = { days: 365, type: "expense", limit: 3 }
+  ) {
     try {
-      const response = await api.get(
-        `/finances/reports/top-transactions?limit=${limit}`
-      );
+      const response = await api.get(`/finances/reports/top-transactions`, {
+        params,
+      });
       return response.data; // Backend returns { status, results, data }
     } catch (error) {
       throw new Error(`Failed to fetch top transactions: ${error.message}`);
@@ -368,7 +370,7 @@ export class FinanceService {
   static async getAllTransactions(params = { days: 30 }) {
     try {
       const response = await api.get("/finances/reports/all-transactions", {
-        params,
+        params, // Pass all parameters (including category) to the backend
       });
       return response.data;
     } catch (error) {

@@ -1,6 +1,10 @@
 <template>
     <div class="bg-primary rounded-lg shadow-sm border border-default p-6 mt-6">
-        <h3 class="text-lg font-semibold text-primary mb-4">Spending by Category (Last 90 Days)</h3>
+        <div class="flex items-center gap-2 mb-4">
+            <h3 class="text-lg font-semibold text-primary">Spending by Category (Last 90 Days)</h3>
+            <i class="pi pi-info-circle text-accent-blue text-sm cursor-pointer"
+                v-tooltip.top="'Click a segment on the chart to view the list of transactions for that category.'"></i>
+        </div>
 
         <div v-if="isLoading" class="text-center py-8">
             <i class="pi pi-spinner pi-spin text-2xl text-accent-blue"></i>
@@ -46,8 +50,15 @@ import { ref, onMounted, computed } from 'vue';
 import { Doughnut } from 'vue-chartjs';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { FinanceService } from '@/services/financeService';
+// NEW IMPORT: Import the PrimeVue Tooltip directive
+import TooltipDirective from 'primevue/tooltip';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+const emit = defineEmits(['category-drilldown']);
+
+// NEW EXPOSURE: Expose the imported directive to be used in the template
+const vTooltip = TooltipDirective;
 
 const isLoading = ref(true);
 const error = ref('');
@@ -70,15 +81,49 @@ const chartData = ref({
     }]
 });
 
+const handleChartSegmentClick = (elements) => {
+    if (elements.length > 0) {
+        const firstElement = elements[0];
+        const dataIndex = firstElement.index;
+        const selectedCategory = categoryData.value[dataIndex];
+
+        if (selectedCategory) {
+            emit('category-drilldown', selectedCategory);
+        }
+    }
+};
+
+
 const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
+
+    onClick: (event, elements, chart) => {
+        handleChartSegmentClick(elements);
+    },
+
     plugins: {
         legend: {
-            display: false // We are creating a custom legend list
+            display: false
+        },
+        tooltip: {
+            callbacks: {
+                label: function (context) {
+                    let label = context.label || '';
+                    if (label) {
+                        label += ': ';
+                    }
+                    if (context.parsed !== null) {
+                        const value = context.parsed;
+                        label += `$${value.toFixed(2)}`;
+                    }
+                    return label;
+                }
+            }
         }
     }
 });
+
 
 onMounted(async () => {
     try {
@@ -88,7 +133,6 @@ onMounted(async () => {
             const labels = response.data.map(d => d.categoryName);
             const data = response.data.map(d => d.totalSpent);
 
-            // Generate dynamic colors for the chart
             const colors = [
                 '#4A90E2', '#50E3C2', '#F5A623', '#F8E71C', '#BD10E0',
                 '#9013FE', '#417505', '#D0021B', '#B8E986', '#7ED321'

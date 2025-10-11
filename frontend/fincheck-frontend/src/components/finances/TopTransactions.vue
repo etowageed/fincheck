@@ -1,7 +1,11 @@
 <template>
     <div class="bg-primary rounded-lg shadow-sm border border-default p-6 mt-6">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-primary">Largest Expenses ({{ selectedPeriod.label }})</h3>
+            <div class="flex items-center gap-4">
+                <h3 class="text-lg font-semibold text-primary">Top Transactions</h3>
+                <SelectButton v-model="selectedType" :options="transactionTypes" optionLabel="label"
+                    aria-labelledby="basic" />
+            </div>
             <TimelineFilter @period-changed="handlePeriodChange" />
         </div>
 
@@ -15,43 +19,64 @@
             <p class="text-accent-red">{{ error }}</p>
         </div>
 
-        <div v-else-if="transactions.length > 0">
-            <ol class="space-y-4">
-                <li v-for="tx in transactions" :key="tx._id"
-                    class="flex justify-between items-center gap-4 p-3 bg-secondary rounded-lg">
-                    <div class="flex-1 min-w-0">
-                        <p class="font-medium text-primary truncate" :title="tx.description">{{ tx.description }}</p>
-                        <p class="text-xs text-muted">{{ tx.categoryName }} &middot; {{ formatDate(tx.date) }}</p>
+        <div v-else-if="transactions.length > 0" class="space-y-3">
+            <div v-for="(tx, index) in transactions" :key="tx._id" class="flex items-center gap-4 p-3">
+                <div
+                    class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-secondary rounded-full font-bold text-primary">
+                    {{ index + 1 }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-medium text-primary truncate" :title="tx.description">{{ tx.description }}</p>
+                    <div class="flex items-center gap-2 text-xs text-muted">
+                        <span class="px-2 py-0.5 rounded-full bg-tertiary text-accent-blue">{{ tx.categoryName
+                        }}</span>
+                        <span>&middot;</span>
+                        <span>{{ formatDate(tx.date) }}</span>
                     </div>
-                    <div class="text-right">
-                        <p class="font-semibold text-lg text-accent-red whitespace-nowrap">{{ formatCurrency(tx.amount)
-                            }}</p>
-                    </div>
-                </li>
-            </ol>
+                </div>
+                <div class="text-right">
+                    <p class="font-semibold text-lg whitespace-nowrap" :class="amountClass">
+                        {{ formatCurrency(tx.amount) }}
+                    </p>
+                </div>
+            </div>
+
         </div>
 
         <div v-else class="text-center py-8 text-muted">
-            <p>No expense transactions found in this period.</p>
+            <p>No {{ selectedType.value }} transactions found in this period.</p>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { FinanceService } from '@/services/financeService';
 import TimelineFilter from '../common/TimelineFilter.vue';
 
 const isLoading = ref(true);
 const error = ref('');
 const transactions = ref([]);
-const selectedPeriod = ref({ label: '1Y', value: 365 }); // Default period
+const selectedPeriod = ref({ label: '3M', value: 90 }); // Default period
+
+const transactionTypes = ref([
+    { label: 'Expenses', value: 'expense' },
+    { label: 'Income', value: 'income' },
+]);
+const selectedType = ref(transactionTypes.value[0]);
+
+const amountClass = computed(() => {
+    return selectedType.value.value === 'income' ? 'text-accent-green' : 'text-accent-red';
+});
 
 const fetchTopTransactions = async () => {
     isLoading.value = true;
     error.value = '';
     try {
-        const response = await FinanceService.getTopTransactions({ days: selectedPeriod.value.value });
+        const response = await FinanceService.getTopTransactions({
+            days: selectedPeriod.value.value,
+            type: selectedType.value.value
+        });
         if (response.status === 'success' && response.data) {
             transactions.value = response.data;
         }
@@ -62,6 +87,10 @@ const fetchTopTransactions = async () => {
         isLoading.value = false;
     }
 };
+
+watch(selectedType, () => {
+    fetchTopTransactions();
+});
 
 const handlePeriodChange = (newPeriod) => {
     selectedPeriod.value = newPeriod;
