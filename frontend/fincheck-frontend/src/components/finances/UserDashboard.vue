@@ -149,7 +149,6 @@
 
                 <div class="space-y-3">
                     <h4 class="font-medium text-secondary">Financial Health</h4>
-
                     <div class="p-4 bg-secondary rounded border border-default">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-sm text-secondary">Budget Utilization</span>
@@ -264,10 +263,18 @@ const getBudgetUtilization = () => {
 
 const getBudgetUtilizationClass = () => {
     const utilization = getBudgetUtilization();
-    if (utilization > 90) return 'text-red-600';
-    if (utilization > 75) return 'text-yellow-600';
-    return 'text-green-600';
+    // > 100% -> Red (Exceeded)
+    if (utilization > 100) return 'bg-accent-red';
+    // > 75% -> Yellow (Warning) - Note: Yellow isn't explicitly defined, using blue as a neutral warning, 
+    // or we can introduce a yellow color logic. Since `bg-accent-red` is already used for danger,
+    // let's use a standard yellow-like class or the accent-blue for warning.
+    // Given the request is yellow, we will use a dedicated class and define it in CSS (Step 2).
+    if (utilization > 75) return 'bg-accent-yellow-warning'; // <-- Using new custom class
+    // <= 75% -> Green (Safe)
+    return 'bg-accent-green';
 };
+
+
 
 const getBudgetHealthMessage = () => {
     const utilization = getBudgetUtilization();
