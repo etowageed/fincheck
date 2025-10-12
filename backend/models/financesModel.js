@@ -158,13 +158,15 @@ financesSchema.virtual('excludedExpensesTotal').get(function () {
     .reduce((sum, tx) => sum + tx.amount, 0);
 });
 
-// safe to spend
-financesSchema.virtual('safeToSpend').get(function () {
-  return this.incomeTotal - this.totalMonthlyBudget - this.outflow;
-});
-
+// total outflow = expenses + excluded expenses
 financesSchema.virtual('outflow').get(function () {
   return this.expensesTotal + this.excludedExpensesTotal;
+});
+
+// NEW VIRTUAL PROPERTY: Budget Balance (Remaining Funds)
+financesSchema.virtual('budgetBalance').get(function () {
+  // Budget Balance = Planned Budget - Actual Expenses (Non-Excluded)
+  return this.totalMonthlyBudget - this.expensesTotal;
 });
 
 // expenses performance

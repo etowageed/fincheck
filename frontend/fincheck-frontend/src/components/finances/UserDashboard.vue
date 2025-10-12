@@ -10,9 +10,6 @@
                 <DashboardInsights :metrics="metrics" :comparison="comparison" />
             </div>
 
-
-
-
             <div v-if="isLoading" class="text-center py-8">
                 <i class="pi pi-spinner pi-spin text-2xl text-accent-blue"></i>
                 <p class="mt-2 text-secondary">Loading your financial metrics...</p>
@@ -25,20 +22,7 @@
                     class="mt-3" />
             </div>
 
-            <!-- Income card -->
             <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="bg-secondary rounded-lg p-4 border border-default">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <i class="pi pi-arrow-up text-accent-green"></i>
-                            <span class="text-sm font-medium text-secondary">Total Income</span>
-                        </div>
-                        <span :class="getComparisonDisplay('incomeTotal').class" class="text-xs font-medium">
-                            {{ getComparisonDisplay('incomeTotal').text }}
-                        </span>
-                    </div>
-                    <p class="text-2xl font-bold text-accent-green">${{ formatCurrency(metrics.incomeTotal) }}</p>
-                </div>
                 <!-- Expense card -->
                 <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
@@ -53,26 +37,26 @@
                     <p class="text-2xl font-bold text-accent-red">${{ formatCurrency(metrics.expensesTotal) }}</p>
                 </div>
 
-                <!-- Safe to Spend card -->
+                <!-- Income card -->
                 <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
-                            <i class="pi pi-wallet text-accent-blue"></i>
-                            <span class="text-sm font-medium text-secondary">Safe to Spend</span>
+                            <i class="pi pi-arrow-up text-accent-green"></i>
+                            <span class="text-sm font-medium text-secondary">Total Income</span>
                         </div>
-                        <span :class="getComparisonDisplay('safeToSpend').class" class="text-xs font-medium">
-                            {{ getComparisonDisplay('safeToSpend').text }}
+                        <span :class="getComparisonDisplay('incomeTotal').class" class="text-xs font-medium">
+                            {{ getComparisonDisplay('incomeTotal').text }}
                         </span>
                     </div>
-                    <p class="text-2xl font-bold text-accent-blue">${{ formatCurrency(metrics.safeToSpend) }}</p>
+                    <p class="text-2xl font-bold text-accent-green">${{ formatCurrency(metrics.incomeTotal) }}</p>
                 </div>
-                <!--  -->
-                <!-- Monthly Budget card -->
+
+                <!-- This Month's Budget card -->
                 <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <i class="pi pi-calendar text-primary"></i>
-                            <span class="text-sm font-medium text-secondary">Monthly Budget</span>
+                            <span class="text-sm font-medium text-secondary">This Month's Budget</span>
                         </div>
                         <span :class="getComparisonDisplay('totalMonthlyBudget', true).class"
                             class="text-xs font-medium">
@@ -82,7 +66,28 @@
                     <p class="text-2xl font-bold text-primary">${{ formatCurrency(metrics.totalMonthlyBudget) }}</p>
                 </div>
 
+                <!-- Budget balance card -->
                 <div class="bg-secondary rounded-lg p-4 border border-default">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-calendar-check text-primary"></i>
+                            <span class="text-sm font-medium text-secondary">Budget Balance</span>
+                        </div>
+                        <span :class="metrics.budgetBalance >= 0 ? 'text-accent-green' : 'text-accent-red'"
+                            class="text-xs font-medium">
+                            {{ metrics.budgetBalance >= 0 ? 'Remaining' : 'Overspent' }}
+                        </span>
+                    </div>
+                    <p class="text-2xl font-bold"
+                        :class="metrics.budgetBalance >= 0 ? 'text-accent-green' : 'text-accent-red'">
+                        ${{ formatCurrency(metrics.budgetBalance) }}
+                    </p>
+                </div>
+
+
+
+                <!-- let's hide the Outflow card for now -->
+                <!-- <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <i class="pi pi-minus-circle text-accent-red"></i>
@@ -90,13 +95,13 @@
                         </div>
                     </div>
                     <p class="text-2xl font-bold text-accent-red">${{ formatCurrency(metrics.outflow) }}</p>
-                </div>
+                </div> -->
 
                 <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <i class="pi pi-piggy-bank text-accent-green"></i>
-                            <span class="text-sm font-medium text-secondary">Planned Savings</span>
+                            <span class="text-sm font-medium text-secondary">Potential Savings</span>
                         </div>
                         <span :class="getComparisonDisplay('plannedSavings').class" class="text-xs font-medium">
                             {{ getComparisonDisplay('plannedSavings').text }}
@@ -124,7 +129,7 @@
                                 <span class="text-sm text-secondary">Recurring Expenses</span>
                             </div>
                             <span class="font-semibold text-primary">${{ formatCurrency(metrics.totalRecurringExpenses)
-                            }}</span>
+                                }}</span>
                         </div>
 
                         <div class="flex justify-between items-center p-3 bg-secondary rounded border border-default">
@@ -142,7 +147,7 @@
                                 <span class="text-sm text-secondary">Excluded Expenses</span>
                             </div>
                             <span class="font-semibold text-primary">${{ formatCurrency(metrics.excludedExpensesTotal)
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -165,7 +170,7 @@
                                 <span class="text-sm text-secondary">Overall Status</span>
                             </div>
                             <span class="font-medium" :style="{ color: getHealthColor() }">{{ getHealthStatus()
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -284,23 +289,21 @@ const getBudgetHealthMessage = () => {
 };
 
 const getHealthStatus = () => {
-    const safeToSpend = metrics.value.safeToSpend || 0;
-    if (safeToSpend > 0) return 'Good';
-    if (safeToSpend === 0) return 'Neutral';
-    return 'Attention Needed';
+    // Focus on whether the user is *over budget*
+    const budgetBalance = metrics.value.budgetBalance || 0;
+    if (budgetBalance >= 0) return 'Healthy';
+    return 'Over Budget';
 };
 
 const getHealthColor = () => {
-    const safeToSpend = metrics.value.safeToSpend || 0;
-    if (safeToSpend > 0) return 'rgb(22, 163, 74)'; // green-600
-    if (safeToSpend === 0) return 'rgb(107, 114, 128)'; // gray-500
-    return 'rgb(220, 38, 38)'; // red-600
+    const budgetBalance = metrics.value.budgetBalance || 0;
+    if (budgetBalance >= 0) return 'rgb(22, 163, 74)'; // green-600
+    return 'rgb(248 113 113)'; // red-400
 };
 
 const getHealthIcon = () => {
-    const safeToSpend = metrics.value.safeToSpend || 0;
-    if (safeToSpend > 0) return 'pi pi-check-circle';
-    if (safeToSpend === 0) return 'pi pi-minus-circle';
+    const budgetBalance = metrics.value.budgetBalance || 0;
+    if (budgetBalance >= 0) return 'pi pi-check-circle';
     return 'pi pi-exclamation-triangle';
 };
 

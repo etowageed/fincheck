@@ -788,11 +788,11 @@ exports.getDashboardMetrics = catchAsync(async (req, res, next) => {
         expensesTotal: finances.expensesTotal,
         excludedExpensesTotal: finances.excludedExpensesTotal,
         outflow: finances.outflow,
-        safeToSpend: finances.safeToSpend,
         totalMonthlyBudget: finances.totalMonthlyBudget,
         totalRecurringExpenses: finances.totalRecurringExpenses,
         totalNonRecurringExpenses: finances.totalNonRecurringExpenses,
         plannedSavings: finances.plannedSavings,
+        budgetBalance: finances.budgetBalance,
       }
     : // If no document exists, return a default object with all metrics set to 0.
       {
@@ -800,11 +800,11 @@ exports.getDashboardMetrics = catchAsync(async (req, res, next) => {
         expensesTotal: 0,
         excludedExpensesTotal: 0,
         outflow: 0,
-        safeToSpend: 0,
         totalMonthlyBudget: 0,
         totalRecurringExpenses: 0,
         totalNonRecurringExpenses: 0,
         plannedSavings: 0,
+        budgetBalance: 0,
       };
 
   res.status(200).json({

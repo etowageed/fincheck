@@ -37,8 +37,9 @@ const insights = computed(() => {
     const list = [];
     const utilization = getBudgetUtilization.value;
     const expenseComparison = props.comparison.expensesTotal;
+    const budgetBalance = props.metrics.budgetBalance || 0; // Use the new metric
 
-    // Insight 1: Budget Utilization Warning
+    // Insight 1: Budget Utilization Warning (KEEP)
     if (utilization >= 90) {
         list.push({
             message: `Attention! You've used ${utilization}% of your budget. Consider reducing spending to stay on track.`,
@@ -51,7 +52,7 @@ const insights = computed(() => {
         });
     }
 
-    // Insight 2: High Spending Change
+    // Insight 2: High Spending Change (KEEP)
     if (expenseComparison?.percentChange > 10 && expenseComparison.direction === 'increase') {
         list.push({
             message: `Your expenses are up ${expenseComparison.displayValue} vs. last month. Review your Top Transactions.`,
@@ -64,15 +65,15 @@ const insights = computed(() => {
         });
     }
 
-    // Insight 3: Safety Net Check
-    if (props.metrics.safeToSpend < 0) {
+    // Insight 3: Safety Net Check -> REPLACED WITH BUDGET HEALTH CHECK
+    if (budgetBalance < 0) {
         list.push({
-            message: `Your Safe to Spend is negative. You may need to allocate more income or reduce expenses.`,
+            message: `You are over budget. Your Budget Balance is negative. Adjust your spending immediately.`,
             iconClass: 'pi pi-info-circle text-accent-red'
         });
-    } else if (props.metrics.safeToSpend > 0 && props.metrics.plannedSavings > 0) {
+    } else if (budgetBalance > 0 && props.metrics.plannedSavings > 0) {
         list.push({
-            message: `You have a healthy Safe to Spend balance. You're meeting your planned savings goal!`,
+            message: `You have a positive Budget Balance. You're meeting your planned savings goal!`,
             iconClass: 'pi pi-check-circle text-accent-green'
         });
     }
