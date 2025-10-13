@@ -311,10 +311,31 @@ const handleSubmit = async () => {
 
     try {
         if (props.formType === 'transaction') {
+            const selectedDate = formData.value.date;
+
+            // 1. Get the local timezone offset in minutes (e.g., BST is -60)
+            const offsetMinutes = selectedDate.getTimezoneOffset();
+
+            // 2. Create a new date that cancels out the offset.
+            const normalizedDate = new Date(selectedDate.getTime() - (offsetMinutes * 60 * 1000));
+
+            // 3. Extract the YYYY-MM-DD string.
+            const dateString = normalizedDate.toISOString().split('T')[0];
+
+            // New Transaction Data Object
+            const transactionData = {
+                name: formData.value.name.trim(),
+                description: formData.value.description?.trim(),
+                category: formData.value.category,
+                amount: formData.value.amount,
+                type: formData.value.type,
+                date: dateString, // Use the fixed date string
+            };
+
             if (editMode.value) {
-                result = await transactionsStore.updateTransaction(props.editItem._id, formData.value);
+                result = await transactionsStore.updateTransaction(props.editItem._id, transactionData);
             } else {
-                result = await transactionsStore.addTransaction(formData.value);
+                result = await transactionsStore.addTransaction(transactionData);
             }
         } else if (props.formType === 'budget') {
             if (editMode.value) {
@@ -328,6 +349,7 @@ const handleSubmit = async () => {
             closeDialog();
         } else {
             console.error('Failed to save item:', result?.error);
+            // FIX: Added the missing semicolon here
             errors.value.general = result?.error || 'An unexpected error occurred.';
         }
     } catch (error) {

@@ -2,7 +2,7 @@
     <div v-if="insights.length > 0" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-6">
         <h3 class="text-sm font-semibold text-accent-blue mb-3 flex items-center gap-2">
             <i class="pi pi-lightbulb text-lg"></i>
-            Financial Insights
+            Insights
         </h3>
         <ul class="space-y-2">
             <li v-for="(insight, index) in insights" :key="index"

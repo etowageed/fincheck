@@ -3,7 +3,7 @@
         <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
             <div class="flex items-center gap-3 mb-4">
                 <i class="pi pi-chart-line text-2xl text-accent-blue"></i>
-                <h2 class="text-xl font-semibold text-primary">Financial Overview</h2>
+                <h2 class="text-xl font-semibold text-primary">Your Financial Overview</h2>
             </div>
 
             <div v-if="!isLoading && !error">

@@ -276,16 +276,16 @@ export class FinanceService {
     }
   }
 
-  static parseDate(dateValue) {
-    if (!dateValue) return new Date();
+  // static parseDate(dateValue) {
+  //   if (!dateValue) return new Date();
 
-    if (dateValue instanceof Date) {
-      return isNaN(dateValue.getTime()) ? new Date() : dateValue;
-    }
+  //   if (dateValue instanceof Date) {
+  //     return isNaN(dateValue.getTime()) ? new Date() : dateValue;
+  //   }
 
-    const parsed = new Date(dateValue);
-    return isNaN(parsed.getTime()) ? new Date() : parsed;
-  }
+  //   const parsed = new Date(dateValue);
+  //   return isNaN(parsed.getTime()) ? new Date() : parsed;
+  // }
 
   /**
    * Private Helper Methods
@@ -306,14 +306,17 @@ export class FinanceService {
   }
 
   static _prepareTransactionData(itemData) {
-    const transactionDate = this.parseDate(itemData.date);
+    // Use the date string as is. It has been pre-processed in the component
+    // to ensure it represents the user's selected day correctly.
+    const transactionDateString = itemData.date;
 
     const transactionData = {
       description: itemData.name.trim(),
       amount: itemData.amount,
       category: itemData.category.trim(),
       type: itemData.type,
-      date: transactionDate.toISOString(),
+      // MODIFIED: Pass the ISO string directly, no parsing needed here.
+      date: transactionDateString,
     };
 
     if (itemData.description?.trim()) {

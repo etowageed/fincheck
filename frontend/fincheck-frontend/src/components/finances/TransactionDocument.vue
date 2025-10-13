@@ -30,40 +30,41 @@
 
             <div v-if="transactionsStore.recentTransactions && transactionsStore.recentTransactions.length > 0"
                 class="space-y-3">
-                <div v-for="transaction in transactionsStore.recentTransactions" :key="transaction._id"
-                    class="flex justify-between items-center p-4 bg-secondary rounded-lg">
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-1">
-                            <p class="font-medium text-primary">{{ transaction.description || 'No description' }}</p>
-                            <span class="text-xs px-2 py-1 rounded-full bg-tertiary text-accent-blue capitalize">
-                                {{ getCategoryName(transaction.category) }}
-                            </span>
-                            <span v-if="transaction.type" class="text-xs px-2 py-1 rounded-full capitalize"
-                                :class="getTypeClass(transaction.type)">
-                                {{ transaction.type }}
-                            </span>
+
+                <div v-for="(transactions, dateKey) in groupedTransactions" :key="dateKey" class="space-y-2">
+                    <h3 class="text-sm font-semibold text-text-secondary pt-3 pb-1">
+                        {{ formatDateHeader(dateKey) }}
+                    </h3>
+
+                    <div v-for="transaction in transactions" :key="transaction._id"
+                        class="flex justify-between items-center p-4 bg-secondary rounded-lg">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <p class="font-medium text-primary">{{ transaction.description || 'No description' }}
+                                </p>
+                                <span class="text-xs px-2 py-1 rounded-full bg-tertiary text-accent-blue capitalize">
+                                    {{ getCategoryName(transaction.category) }}
+                                </span>
+                                <span v-if="transaction.type" class="text-xs px-2 py-1 rounded-full capitalize"
+                                    :class="getTypeClass(transaction.type)">
+                                    {{ transaction.type }}
+                                </span>
+                            </div>
+
                         </div>
-                        <p class="text-xs text-muted">
-                            {{ formatDate(transaction.date || transaction.createdAt) }}
-                        </p>
-                    </div>
-                    <div class="text-right flex items-center gap-2">
-                        <p class="font-semibold text-lg" :class="getAmountClass(transaction.amount, transaction.type)">
-                            {{ formatCurrency(transaction.amount) }}
-                        </p>
-                        <DropdownMenu :items="transactionMenuItems" :entity="transaction"
-                            :disabled="deletingTransactionId === transaction._id" @action="handleTransactionAction" />
+                        <div class="text-right flex items-center gap-2">
+                            <p class="font-semibold text-lg"
+                                :class="getAmountClass(transaction.amount, transaction.type)">
+                                {{ formatCurrency(transaction.amount) }}
+                            </p>
+                            <DropdownMenu :items="transactionMenuItems" :entity="transaction"
+                                :disabled="deletingTransactionId === transaction._id"
+                                @action="handleTransactionAction" />
+                        </div>
                     </div>
                 </div>
 
-                <div class="border-t border-default pt-4 mt-6">
-                    <div class="flex justify-between items-center font-semibold text-lg">
-                        <span class="text-primary">Net Total:</span>
-                        <span :class="transactionsStore.netTotal >= 0 ? 'text-accent-green' : 'text-accent-red'">
-                            {{ formatCurrency(transactionsStore.netTotal) }}
-                        </span>
-                    </div>
-                </div>
+
             </div>
             <div v-else class="text-center py-4 text-muted">
                 No transactions yet. Add some transactions to get started.
@@ -76,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoriesStore } from '@/stores/categories';
 import ItemForm from './ItemForm.vue';
@@ -118,6 +119,54 @@ const transactionMenuItems = [
 ];
 
 // Utility functions
+
+// Utility function to format date for grouping key
+const formatDateKey = (dateValue) => {
+    if (!dateValue) return 'Unknown Date';
+    // Use ISO string to ensure consistent grouping regardless of user's local timezone offset
+    return new Date(dateValue).toISOString().split('T')[0];
+};
+
+// Utility function for display header (e.g., "Oct 1, 2025")
+const formatDateHeader = (dateKey) => {
+    if (!dateKey) return 'Unknown Date';
+    return new Date(dateKey).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+};
+
+// NEW COMPUTED PROPERTY: Groups transactions by day
+const groupedTransactions = computed(() => {
+    if (!transactionsStore.recentTransactions || transactionsStore.recentTransactions.length === 0) {
+        return {};
+    }
+
+    const groups = transactionsStore.recentTransactions.reduce((acc, transaction) => {
+        // Use the transaction's date for grouping
+        const dateKey = formatDateKey(transaction.date || transaction.createdAt);
+
+        if (!acc[dateKey]) {
+            acc[dateKey] = [];
+        }
+        acc[dateKey].push(transaction);
+        return acc;
+    }, {});
+
+    // Sort the keys (dates) in descending order to show newest days first
+    const sortedKeys = Object.keys(groups).sort((a, b) => new Date(b) - new Date(a));
+
+    const sortedGroups = {};
+    for (const key of sortedKeys) {
+        // Sort transactions within each day by time (newest first)
+        sortedGroups[key] = groups[key].sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+    }
+
+    return sortedGroups;
+});
+
+
 const getCategoryName = (categoryId) => {
     const category = categoriesStore.getCategoryById(categoryId);
     return category?.name || 'Uncategorized';
@@ -133,13 +182,9 @@ const formatDate = (dateValue) => {
     try {
         const date = new Date(dateValue);
         if (isNaN(date.getTime())) return 'Invalid date';
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+        // Display only the time or a very simple format within the group item
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     } catch (error) {
-        console.error('Error formatting date:', error, 'for value:', dateValue);
         return 'Invalid date';
     }
 };

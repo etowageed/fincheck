@@ -61,6 +61,14 @@ const transactionSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now, // Default to current date if not provided
+    set: function (val) {
+      if (typeof val === 'string' || val instanceof String) {
+        const date = new Date(val);
+        date.setHours(0, 0, 0, 0); // Set to start of the day
+        return date;
+      }
+      return val;
+    },
   },
 });
 
