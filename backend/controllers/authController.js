@@ -46,9 +46,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   }
   // 3) Hash the password (actually happens in the presave hook)
 
-  // Get the user's IP address, handling proxies
-  const forwarded = req.headers['x-forwarded-for'];
-  const ip = forwarded ? forwarded.split(',')[0] : req.ip;
+  // IP detection REMOVED
 
   //  4) finally create new user
   const newUser = await User.create({
@@ -58,7 +56,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     confirmPassword,
     income: req.body.income || 0,
     expenses: [],
-    lastKnownIP: ip, // Save the last known IP address
+    // lastKnownIP: ip, // REMOVED
   });
 
   // send welcome email
@@ -111,10 +109,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 3) If user exists and password is correct, THEN update IP and save
-  const forwarded = req.headers['x-forwarded-for'];
-  const ip = forwarded ? forwarded.split(',')[0] : req.ip;
-  user.lastKnownIP = ip;
-  await user.save({ validateBeforeSave: false }); // Save IP without validation
+  // IP detection REMOVED
 
   // 4) create and send jwt
   const token = createToken(user._id);

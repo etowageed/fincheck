@@ -6,6 +6,7 @@ class EmailService {
     this.to = user.email;
     this.name = user.name || user.email.split('@')[0];
     this.url = url;
+    this.user = user; // Added user to instance for formatCurrency
     this.from = `Fincheck 💸 <${process.env.EMAIL_FROM}>`;
   }
 
@@ -71,14 +72,12 @@ class EmailService {
     comparisonText,
   }) {
     // Format currency amounts using locale-aware utility
-    const incomeFormatted = await formatCurrency(totalIncome, {
-      lastKnownIP: this.user?.lastKnownIP,
+    const incomeFormatted = formatCurrency(totalIncome, {
       preferredLocale: this.user?.preferredLocale,
       preferredCurrency: this.user?.preferredCurrency,
     });
 
-    const expensesFormatted = await formatCurrency(totalExpenses, {
-      lastKnownIP: this.user?.lastKnownIP,
+    const expensesFormatted = formatCurrency(totalExpenses, {
       preferredLocale: this.user?.preferredLocale,
       preferredCurrency: this.user?.preferredCurrency,
     });

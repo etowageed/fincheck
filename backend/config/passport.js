@@ -35,17 +35,12 @@ passport.use(
     },
     async (req, issuer, profile, cb) => {
       try {
-        // Get the user's IP address, handling proxies
-        const forwarded = req.headers['x-forwarded-for'];
-        const ip = forwarded ? forwarded.split(',')[0] : req.ip;
+        // IP detection REMOVED
 
         let user = await User.findOne({ googleId: profile.id });
 
         if (user) {
-          // Update last known IP address
-          user.lastKnownIP = ip;
-          await user.save({ validateBeforeSave: false });
-
+          // IP update REMOVED
           // Ensure existing users don't get redirected to onboarding
           user.isNewUser = false;
 
@@ -58,7 +53,7 @@ passport.use(
             if (user) {
               // Link existing email user to Google account
               user.googleId = profile.id;
-              user.lastKnownIP = ip; // Update last known IP address
+              // IP update REMOVED
               await user.save();
               return cb(null, user);
             }
@@ -72,7 +67,7 @@ passport.use(
                 ? profile.emails[0].value
                 : null,
             // You might not get a password from social login, so it'll be null or undefined
-            lastKnownIP: ip, // Save the last known IP address
+            // lastKnownIP: ip, // REMOVED
           });
           await newUser.save();
 
@@ -123,14 +118,12 @@ passport.use(
     },
     async (req, accessToken, refreshToken, profile, cb) => {
       try {
-        const forwarded = req.headers['x-forwarded-for'];
-        const ip = forwarded ? forwarded.split(',')[0] : req.ip;
+        // IP detection REMOVED
 
         let user = await User.findOne({ facebookId: profile.id });
 
         if (user) {
-          user.lastKnownIP = ip;
-          await user.save({ validateBeforeSave: false });
+          // IP update REMOVED
           return cb(null, user);
           // eslint-disable-next-line no-else-return
         } else {
@@ -138,7 +131,7 @@ passport.use(
             user = await User.findOne({ email: profile.emails[0].value });
             if (user) {
               user.facebookId = profile.id;
-              user.lastKnownIP = ip;
+              // IP update REMOVED
               await user.save();
               return cb(null, user);
             }
@@ -150,7 +143,7 @@ passport.use(
               profile.emails && profile.emails.length > 0
                 ? profile.emails[0].value
                 : null,
-            lastKnownIP: ip, // Save the last known IP address
+            // lastKnownIP: ip, // REMOVED
           });
           await newUser.save();
 

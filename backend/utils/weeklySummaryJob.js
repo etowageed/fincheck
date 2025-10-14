@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const Finances = require('../models/financesModel');
 const User = require('../models/userModel');
 const EmailService = require('./emails');
-const { getLocaleFromIP } = require('./geoUtils');
+// const { getLocaleFromIP } = require('./geoUtils'); // REMOVED
 
 const sendWeeklySummaries = async () => {
   const users = await User.find({});
@@ -61,9 +61,7 @@ const sendWeeklySummaries = async () => {
 
     const appUrl = process.env.APP_BASE_URL || 'http://localhost:3000';
 
-    // 🌍 Locale detection
-    const ip = user.lastKnownIP || '102.89.0.1';
-    const { locale, currency } = await getLocaleFromIP(ip);
+    // 🌍 IP/Locale detection REMOVED
 
     const emailInstance = new EmailService(user, appUrl);
     await emailInstance.sendWeeklySummary({
@@ -73,8 +71,8 @@ const sendWeeklySummaries = async () => {
       totalExpenses,
       percentUsed,
       comparisonText,
-      locale,
-      currency,
+      // locale, // REMOVED
+      // currency, // REMOVED
     });
   }
 };
