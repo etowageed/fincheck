@@ -1,7 +1,8 @@
 const DEFAULT_LOCALE = 'en-US';
 const DEFAULT_CURRENCY = 'USD';
 
-const formatCurrency = (amount, user) => {
+// Added showDecimals parameter for flexibility in formatting.
+const formatCurrency = (amount, user, showDecimals = false) => {
   let locale = DEFAULT_LOCALE;
   let currency = DEFAULT_CURRENCY;
 
@@ -12,11 +13,23 @@ const formatCurrency = (amount, user) => {
   }
   // Removed IP lookup logic.
 
-  return new Intl.NumberFormat(locale, {
+  const options = {
     style: 'currency',
     currency,
-    minimumFractionDigits: 0,
-  }).format(amount);
+  };
+
+  if (showDecimals) {
+    options.minimumFractionDigits = 2;
+    options.maximumFractionDigits = 2;
+  } else {
+    options.minimumFractionDigits = 0;
+    options.maximumFractionDigits = 0;
+  }
+
+  // If amount is not a number, convert 0 to get the symbol correctly formatted.
+  const value = typeof amount === 'number' ? amount : 0;
+
+  return new Intl.NumberFormat(locale, options).format(value);
 };
 
 module.exports = formatCurrency;

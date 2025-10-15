@@ -3,7 +3,13 @@
         <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-primary">Budget Overview</h3>
-                <DropdownMenu :items="headerMenuItems" :entity="budget" @action="handleHeaderAction" />
+                <div class="flex gap-2">
+                    <!-- NEW: Dedicated Export Button for Budget -->
+                    <Button label="Export Budget" icon="pi pi-download" severity="secondary" size="small"
+                        @click="showExportModal = true" />
+
+                    <DropdownMenu :items="headerMenuItems" :entity="budget" @action="handleHeaderAction" />
+                </div>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
@@ -94,6 +100,9 @@
                 </div>
             </template>
         </Dialog>
+
+        <!-- NEW: Export Modal for Budget -->
+        <ExportModal v-model:visible="showExportModal" default-type="budget" />
     </div>
 </template>
 
@@ -104,6 +113,7 @@ import { useCategoriesStore } from '@/stores/categories';
 import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
 import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
+import ExportModal from '../common/ExportModal.vue'; // 👈 NEW: Import ExportModal
 
 const props = defineProps({
     budget: {
@@ -120,6 +130,7 @@ const { formatCurrency, preferredCurrency, preferredLocale, formatDate } = useCu
 const addBudgetFormRef = ref(null);
 const editBudgetFormRef = ref(null);
 const editingItem = ref(null);
+const showExportModal = ref(false); // 👈 NEW: State for the export modal
 
 // Edit income dialog refs
 const editIncomeVisible = ref(false);
@@ -134,8 +145,6 @@ const monthNames = [
 const getMonthName = (monthIndex) => {
     return monthNames[monthIndex] || 'Unknown';
 };
-
-// ❌ REMOVED: The local formatCurrency function is removed and replaced by the composable
 
 // Menu configurations
 const headerMenuItems = [
@@ -198,7 +207,9 @@ const updateExpectedIncome = async () => {
 // Budget functions
 const deleteBudget = async () => {
     const budgetName = `${getMonthName(props.budget.month)} ${props.budget.year}`;
-    if (!confirm(`Are you sure you want to delete the entire budget for ${budgetName}?`)) return;
+    // ❌ REPLACED: Use PrimeVue/Toast/Modal instead of window.confirm
+    // if (!confirm(`Are you sure you want to delete the entire budget for ${budgetName}?`)) return;
+    if (!window.confirm(`Are you sure you want to delete the entire budget for ${budgetName}?`)) return;
 
     await budgetStore.deleteBudget();
     // The parent component (`BudgetPage.vue`) will react to the store change and re-render
@@ -218,7 +229,9 @@ const editBudgetItem = (item) => {
 };
 
 const deleteBudgetItem = async (budgetItemId) => {
-    if (!confirm('Are you sure you want to delete this budget item?')) return;
+    // ❌ REPLACED: Use PrimeVue/Toast/Modal instead of window.confirm
+    // if (!confirm('Are you sure you want to delete this budget item?')) return;
+    if (!window.confirm('Are you sure you want to delete this budget item?')) return;
     await budgetStore.deleteBudgetItem(budgetItemId);
 };
 

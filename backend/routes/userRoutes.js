@@ -9,7 +9,8 @@ router.use(authController.protect); // protects all the routes that follow
 
 router.route('/me').get(userController.getMe).patch(userController.updateMe);
 router.patch('/me/password', authController.updatePassword); // Add this line for authenticated users
-router.get('/me/export', exportController.downloadData);
+// router.get('/me/export', exportController.downloadData);
+router.get('/reports/export', exportController.generateReport);
 router.delete('/me', userController.deleteMe);
 
 router.get('/', authController.restrictTo('admin'), userController.getAllUsers);

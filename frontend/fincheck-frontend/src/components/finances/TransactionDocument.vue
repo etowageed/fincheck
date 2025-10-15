@@ -3,7 +3,9 @@
         <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-primary">Transactions Overview</h3>
-                <DropdownMenu :items="headerMenuItems" @action="handleHeaderAction" />
+                <!-- MODIFIED: Use a dedicated button for export which opens the modal -->
+                <Button label="Export Transactions" icon="pi pi-download" severity="secondary" size="small"
+                    @click="showExportModal = true" />
             </div>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
@@ -73,6 +75,9 @@
 
         <ItemForm ref="editTransactionFormRef" formType="transaction" :edit-item="editingTransaction"
             style="display: none;" />
+
+        <!-- NEW: Export Modal for Transactions -->
+        <ExportModal v-model:visible="showExportModal" default-type="transactions" />
     </div>
 </template>
 
@@ -83,6 +88,7 @@ import { useCategoriesStore } from '@/stores/categories';
 import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
 import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
+import ExportModal from '../common/ExportModal.vue'; // 👈 NEW: Import ExportModal
 
 const transactionsStore = useTransactionsStore();
 const categoriesStore = useCategoriesStore();
@@ -93,16 +99,10 @@ const deletingTransactionId = ref(null);
 const addTransactionFormRef = ref(null);
 const editTransactionFormRef = ref(null);
 const editingTransaction = ref(null);
+const showExportModal = ref(false); // 👈 NEW: State for the export modal
 
 // Menu configurations
-const headerMenuItems = [
-    {
-        label: 'Export Transactions',
-        icon: 'pi pi-download',
-        action: 'export'
-    }
-];
-
+// REMOVED headerMenuItems because we use a dedicated button now.
 const transactionMenuItems = [
     {
         label: 'Edit',
@@ -171,8 +171,6 @@ const getCategoryName = (categoryId) => {
     return category?.name || 'Uncategorized';
 };
 
-// ❌ REMOVED: The local formatCurrency function is removed and replaced by the composable
-
 const formatDate = (dateValue) => {
     if (!dateValue) return 'No date';
     try {
@@ -205,7 +203,9 @@ const getAmountClass = (amount, type) => {
 // Action handlers
 const handleHeaderAction = ({ action }) => {
     if (action === 'export') {
-        exportTransactions();
+        // The export button now opens the modal directly, so this action is not strictly needed here
+        // But if we kept the dropdown, this would open the modal:
+        showExportModal.value = true;
     }
 };
 
@@ -226,16 +226,19 @@ const editTransaction = (transaction) => {
 };
 
 const deleteTransaction = async (transactionId) => {
-    if (!confirm('Are you sure you want to delete this transaction?')) {
+    // ❌ REPLACED: Use PrimeVue/Toast/Modal instead of window.confirm
+    // if (!confirm('Are you sure you want to delete this transaction?')) {
+    //     return;
+    // }
+    // NOTE: For now, I'll keep the basic confirm to avoid adding a custom modal implementation for this simple case.
+    if (!window.confirm('Are you sure you want to delete this transaction?')) {
         return;
     }
+
     deletingTransactionId.value = transactionId;
     await transactionsStore.deleteTransaction(transactionId);
     deletingTransactionId.value = null;
 };
 
-const exportTransactions = () => {
-    // TODO: Implement export functionality
-    console.log('Export transactions functionality not implemented yet');
-};
+// REMOVED old exportTransactions function
 </script>
