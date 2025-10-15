@@ -46,17 +46,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue'; // Ensure 'watch' is imported
 import { Doughnut } from 'vue-chartjs';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { FinanceService } from '@/services/financeService';
 import TooltipDirective from 'primevue/tooltip';
 import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
+import { useDashboardStore } from '@/stores/dashboard'; // NEW: Import store
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-// 💰 MODIFIED: Destructure formatCurrency and preferred values
 const { formatCurrency, preferredCurrency, preferredLocale } = useCurrencyFormatter();
+const dashboardStore = useDashboardStore(); // NEW: Use store
 
 const emit = defineEmits(['category-drilldown']);
 
@@ -95,7 +96,6 @@ const handleChartSegmentClick = (elements) => {
     }
 };
 
-// 💰 MODIFIED: Chart.js Tooltip callback to use composed formatCurrency
 const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
@@ -127,10 +127,15 @@ const chartOptions = ref({
     }
 });
 
-
-onMounted(async () => {
+// NEW: Wrapped the fetching logic in a reusable function
+const fetchCategoryBreakdown = async () => {
+    isLoading.value = true;
+    error.value = '';
     try {
-        const response = await FinanceService.getCategoryBreakdown();
+        // MODIFIED: Use the days value from the centralized store
+        const days = dashboardStore.getSelectedDays;
+        const response = await FinanceService.getCategoryBreakdown({ days });
+
         if (response.status === 'success' && response.data) {
             categoryData.value = response.data;
             const labels = response.data.map(d => d.categoryName);
@@ -155,5 +160,15 @@ onMounted(async () => {
     } finally {
         isLoading.value = false;
     }
+};
+
+// NEW: Watch the dashboard store for changes in the number of days
+watch(() => dashboardStore.getSelectedDays, () => {
+    fetchCategoryBreakdown();
+});
+
+onMounted(() => {
+    // MODIFIED: Call the new function on mount
+    fetchCategoryBreakdown();
 });
 </script>

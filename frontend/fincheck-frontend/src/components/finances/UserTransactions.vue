@@ -2,7 +2,9 @@
     <div class="p-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Transactions</h1>
-            <TimelineFilter @period-changed="handlePeriodChange" />
+            <div>
+                <SelectButton v-model="selectedPeriod" :options="periods" optionLabel="label" aria-labelledby="basic" />
+            </div>
         </div>
 
         <div v-if="transactionsStore.isLoading" class="text-center py-8">
@@ -26,20 +28,36 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref, watch } from 'vue'; // Import watch and ref
 import { useTransactionsStore } from '@/stores/transactions';
 import TransactionDocument from './TransactionDocument.vue';
 import ItemForm from './ItemForm.vue';
-import TimelineFilter from '../common/TimelineFilter.vue';
+import SelectButton from 'primevue/selectbutton'; // Import SelectButton
 
 const transactionsStore = useTransactionsStore();
 
-const handlePeriodChange = (newPeriod) => {
-    transactionsStore.fetchTransactions({ days: newPeriod.value });
+// 💰 NEW: Local state for transactions timeline filter
+const periods = ref([
+    { label: '1M', value: 30 },
+    { label: '3M', value: 90 },
+    { label: '6M', value: 180 },
+    { label: '1Y', value: 365 },
+]);
+const selectedPeriod = ref(periods.value[0]); // Default to 1M
+
+const fetchTransactions = (days) => {
+    transactionsStore.fetchTransactions({ days });
 };
 
+// 💰 NEW: Watch the local period to trigger transaction fetch
+watch(selectedPeriod, (newValue) => {
+    if (newValue && newValue.value) {
+        fetchTransactions(newValue.value);
+    }
+}, { immediate: false }); // Do not run on mount, let onMounted handle initial fetch
+
 onMounted(() => {
-    // Fetch initial data for the default period (1M/30 days)
-    transactionsStore.fetchTransactions();
+    // Initial fetch uses the default period (1M/30 days)
+    fetchTransactions(selectedPeriod.value.value);
 });
 </script>

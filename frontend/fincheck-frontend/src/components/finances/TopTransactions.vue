@@ -6,7 +6,6 @@
                 <SelectButton v-model="selectedType" :options="transactionTypes" optionLabel="label"
                     aria-labelledby="basic" />
             </div>
-            <TimelineFilter @period-changed="handlePeriodChange" />
         </div>
 
         <div v-if="isLoading" class="text-center py-8">
@@ -29,7 +28,7 @@
                     <p class="font-medium text-primary truncate" :title="tx.description">{{ tx.description }}</p>
                     <div class="flex items-center gap-2 text-xs text-muted">
                         <span class="px-2 py-0.5 rounded-full bg-tertiary text-accent-blue">{{ tx.categoryName
-                            }}</span>
+                        }}</span>
                         <span>&middot;</span>
                         <span>{{ formatDate(tx.date) }}</span>
                     </div>
@@ -52,15 +51,17 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { FinanceService } from '@/services/financeService';
-import TimelineFilter from '../common/TimelineFilter.vue';
-import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
+// REMOVED TimelineFilter import
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
+import { useDashboardStore } from '@/stores/dashboard'; // NEW: Import store
 
-const { formatCurrency } = useCurrencyFormatter(); // 👈 MODIFIED: Destructure function
+const { formatCurrency } = useCurrencyFormatter();
+const dashboardStore = useDashboardStore(); // NEW: Use store
 
 const isLoading = ref(true);
 const error = ref('');
 const transactions = ref([]);
-const selectedPeriod = ref({ label: '3M', value: 90 }); // Default period
+// REMOVED selectedPeriod ref
 
 const transactionTypes = ref([
     { label: 'Expenses', value: 'expense' },
@@ -77,7 +78,8 @@ const fetchTopTransactions = async () => {
     error.value = '';
     try {
         const response = await FinanceService.getTopTransactions({
-            days: selectedPeriod.value.value,
+            // MODIFIED: Use period from store
+            days: dashboardStore.getSelectedDays,
             type: selectedType.value.value
         });
         if (response.status === 'success' && response.data) {
@@ -91,16 +93,12 @@ const fetchTopTransactions = async () => {
     }
 };
 
-watch(selectedType, () => {
+// MODIFIED: Watch both selectedType and the new store period
+watch([selectedType, () => dashboardStore.getSelectedDays], () => {
     fetchTopTransactions();
 });
 
-const handlePeriodChange = (newPeriod) => {
-    selectedPeriod.value = newPeriod;
-    fetchTopTransactions();
-};
-
-// ❌ REMOVED: The local formatCurrency function is removed and replaced by the composable
+// REMOVED handlePeriodChange
 
 const formatDate = (dateValue) => {
     if (!dateValue) return 'No date';

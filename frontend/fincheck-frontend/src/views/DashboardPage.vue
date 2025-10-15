@@ -1,6 +1,9 @@
 <template>
     <div>
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+            <TimelineFilter />
+        </div>
 
         <UserDashboard />
 
@@ -23,13 +26,14 @@ import TrendsChart from '@/components/finances/TrendsChart.vue';
 import CategoryBreakdown from '@/components/finances/CategoryBreakdown.vue';
 import TopTransactions from '@/components/finances/TopTransactions.vue';
 import CategoryTransactionsModal from '@/components/finances/CategoryTransactionsModal.vue';
+import TimelineFilter from '@/components/common/TimelineFilter.vue'; // NEW: Import filter
 
-// NEW State for the modal
+// State for the modal
 const showTransactionsModal = ref(false);
 const selectedCategoryId = ref(null);
 const selectedCategoryName = ref('');
 
-// NEW Handler Method
+// Handler Method
 const handleCategoryDrillDown = (category) => {
     selectedCategoryId.value = category.categoryId;
     selectedCategoryName.value = category.categoryName;

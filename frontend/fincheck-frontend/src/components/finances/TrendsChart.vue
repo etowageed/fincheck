@@ -3,7 +3,6 @@
 
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-primary">Financial Trends</h3>
-            <TimelineFilter @period-changed="handlePeriodChange" />
         </div>
 
         <div v-if="isLoading" class="text-center py-8">
@@ -27,11 +26,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js';
 import { FinanceService } from '@/services/financeService';
-import TimelineFilter from '../common/TimelineFilter.vue';
+import { useDashboardStore } from '@/stores/dashboard'; // NEW: Import store
 
 // Register the necessary components for Chart.js
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
@@ -39,7 +38,9 @@ ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale
 const isLoading = ref(true);
 const error = ref('');
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const selectedPeriod = ref({ label: '1M', value: 30 }); // Default to 1 month
+
+// NEW: Use the dashboard store
+const dashboardStore = useDashboardStore();
 
 // Reactive references for chart data and options
 const chartData = ref({
@@ -62,13 +63,17 @@ const fetchTrends = async () => {
     error.value = '';
     try {
         const params = {};
-        if (selectedPeriod.value.value === 30) {
-            // For '1M', specifically request the current calendar month's data
+        // MODIFIED: Use the new period key to check for 'currentMonth'
+        const selectedKey = dashboardStore.getSelectedPeriodKey;
+
+        if (selectedKey === 'currentMonth') { // MODIFIED condition
+            // For 'Current Month', explicitly request the current calendar month's data
             params.period = 'currentMonth';
         } else {
-            // For all other periods, use the number of days
-            params.days = selectedPeriod.value.value;
+            // For all other periods, use the number of days from the store
+            params.days = dashboardStore.getSelectedDays;
         }
+
         const response = await FinanceService.getMonthlyTrends(params);
         if (response.status === 'success' && response.data) {
             let labels, incomeData, expensesData, savingsData;
@@ -142,10 +147,10 @@ const fetchTrends = async () => {
     }
 };
 
-const handlePeriodChange = (newPeriod) => {
-    selectedPeriod.value = newPeriod;
+// NEW: Watch the period key to trigger fetch
+watch(() => dashboardStore.getSelectedPeriodKey, () => {
     fetchTrends();
-};
+});
 
 onMounted(() => {
     fetchTrends();

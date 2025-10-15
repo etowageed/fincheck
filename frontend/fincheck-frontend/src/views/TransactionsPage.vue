@@ -14,6 +14,6 @@ const transactionsStore = useTransactionsStore();
 
 // Fetch transactions when the component is first loaded
 onMounted(() => {
-    transactionsStore.fetchTransactions();
+    // The fetch is now handled inside UserTransactions.vue
 });
 </script>
