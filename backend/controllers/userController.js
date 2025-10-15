@@ -74,11 +74,15 @@ exports.updateUser = catchAsync(async (req, res, next) => {
 
 // updating me (the logged-in user)
 exports.updateMe = catchAsync(async (req, res, next) => {
-  const { name, email } = req.body;
+  const { name, email, preferredCurrency, preferredLocale } = req.body;
   const updateData = {};
 
   if (name) updateData.name = name;
   if (email) updateData.email = email;
+  // 💰 NEW: Add preferredCurrency and preferredLocale to updateData
+  if (preferredCurrency) updateData.preferredCurrency = preferredCurrency;
+  if (preferredLocale) updateData.preferredLocale = preferredLocale;
+  // ------------------------------------------------------------------
 
   // checking if email being updated and already exists
   if (email) {

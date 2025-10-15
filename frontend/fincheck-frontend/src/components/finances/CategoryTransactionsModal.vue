@@ -19,7 +19,7 @@
                 <div class="text-right">
                     <p class="font-semibold text-lg"
                         :class="tx.type === 'income' ? 'text-accent-green' : 'text-accent-red'">
-                        ${{ Math.abs(tx.amount).toFixed(2) }}
+                        {{ formatCurrency(tx.amount, true) }}
                     </p>
                 </div>
             </div>
@@ -33,6 +33,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { FinanceService } from '@/services/financeService';
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
 
 const props = defineProps({
     visible: Boolean,
@@ -40,6 +41,7 @@ const props = defineProps({
     categoryName: String
 });
 
+const { formatCurrency, formatDate: formatComposedDate } = useCurrencyFormatter(); // 👈 MODIFIED: Destructure function
 const emit = defineEmits(['update:visible']);
 
 const isLoading = ref(false);
@@ -70,9 +72,12 @@ const fetchTransactions = async (categoryId) => {
     }
 };
 
+// ❌ REMOVED: The local formatCurrency function is removed and replaced by the composable
+
 const formatDate = (dateValue) => {
     if (!dateValue) return 'No date';
-    return new Date(dateValue).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    // 🌐 Use the composed date formatter here.
+    return formatComposedDate(dateValue);
 };
 
 // Watch visibility and categoryId to trigger the fetch

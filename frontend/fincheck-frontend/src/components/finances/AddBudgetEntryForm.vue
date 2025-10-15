@@ -8,8 +8,9 @@
                 creates the foundation for your budget.</span>
             <div class="flex items-center gap-4 mb-4">
                 <label for="income" class="font-semibold w-24">Monthly Income</label>
-                <InputText id="income" class="flex-auto" autocomplete="off" type="number" placeholder="e.g 2000"
-                    v-model="monthlyIncome" />
+                <InputNumber id="income" class="flex-auto" autocomplete="off" type="number"
+                    :placeholder="inputPlaceholder" v-model="monthlyIncome" :mode="'currency'"
+                    :currency="currentCurrency" :locale="currentLocale" :min="0" />
             </div>
 
             <div class="flex justify-end gap-2">
@@ -22,12 +23,25 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
 
+// 💰 MODIFIED: Destructure preferred values and the formatter
+const { preferredCurrency: currentCurrency, preferredLocale: currentLocale, formatCurrency } = useCurrencyFormatter();
 const visible = ref(false);
 const monthlyIncome = ref('');
 
 const emit = defineEmits(['budget-created']);
+
+
+// 💰 MODIFIED: Placeholder uses the formatter to get the correct symbol
+const inputPlaceholder = computed(() => {
+    // Format a sample amount (e.g., 2000) with the correct symbol
+    const formattedExample = formatCurrency(2000);
+    // Use the formatted example as the placeholder text
+    return `e.g. ${formattedExample}`;
+});
+
 
 const handleCreateBudget = () => {
     if (!monthlyIncome.value || monthlyIncome.value <= 0) {

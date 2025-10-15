@@ -8,7 +8,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                     <p class="text-sm text-muted">Created At</p>
-                    <p class="font-medium text-primary">{{ new Date(budget.createdAt).toLocaleDateString() }}</p>
+                    <p class="font-medium text-primary">{{ formatDate(budget.createdAt, 'short') }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-muted">Year</p>
@@ -20,7 +20,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-muted">Expected Income</p>
-                    <p class="font-medium text-accent-green">${{ budget.expectedMonthlyIncome }}</p>
+                    <p class="font-medium text-accent-green">{{ formatCurrency(budget.expectedMonthlyIncome) }}</p>
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
                         </p>
                     </div>
                     <div class="text-right flex items-center gap-2">
-                        <p class="font-semibold text-lg text-accent-blue">${{ item.amount }}</p>
+                        <p class="font-semibold text-lg text-accent-blue">{{ formatCurrency(item.amount) }}</p>
                         <DropdownMenu :items="budgetItemMenuItems" :entity="item" @action="handleBudgetItemAction" />
                     </div>
                 </div>
@@ -55,13 +55,13 @@
                 <div class="border-t border-default pt-4 mt-6">
                     <div class="flex justify-between items-center font-semibold text-lg">
                         <span class="text-primary">Total Monthly Budget:</span>
-                        <span class="text-accent-blue">${{ budget.totalMonthlyBudget }}</span>
+                        <span class="text-accent-blue">{{ formatCurrency(budget.totalMonthlyBudget) }}</span>
                     </div>
                     <div v-if="budget.expectedMonthlyIncome"
                         class="flex justify-between items-center text-sm text-secondary mt-1">
-                        <span>Expected Savings:</span>
+                        <span>Planned Savings:</span>
                         <span :class="budget.plannedSavings >= 0 ? 'text-accent-green' : 'text-accent-red'">
-                            ${{ budget.plannedSavings }}
+                            {{ formatCurrency(budget.plannedSavings) }}
                         </span>
                     </div>
                 </div>
@@ -78,9 +78,9 @@
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col gap-2">
                     <label for="newIncome" class="font-semibold">Expected Monthly Income</label>
-                    <InputNumber id="newIncome" v-model="newExpectedIncome" mode="currency" currency="USD"
-                        locale="en-US" placeholder="0.00" :disabled="budgetStore.isLoading"
-                        :class="{ 'p-invalid': incomeError }" />
+                    <InputNumber id="newIncome" v-model="newExpectedIncome" mode="currency"
+                        :currency="preferredCurrency" :locale="preferredLocale" placeholder="0.00"
+                        :disabled="budgetStore.isLoading" :class="{ 'p-invalid': incomeError }" />
                     <small v-if="incomeError" class="p-error">{{ incomeError }}</small>
                 </div>
             </div>
@@ -101,6 +101,7 @@
 import { ref } from 'vue';
 import { useBudgetStore } from '@/stores/budget';
 import { useCategoriesStore } from '@/stores/categories';
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
 import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
 
@@ -113,6 +114,7 @@ const props = defineProps({
 
 const budgetStore = useBudgetStore();
 const categoriesStore = useCategoriesStore();
+const { formatCurrency, preferredCurrency, preferredLocale, formatDate } = useCurrencyFormatter(); // 👈 MODIFIED: Destructure function
 
 // Form refs
 const addBudgetFormRef = ref(null);
@@ -132,6 +134,8 @@ const monthNames = [
 const getMonthName = (monthIndex) => {
     return monthNames[monthIndex] || 'Unknown';
 };
+
+// ❌ REMOVED: The local formatCurrency function is removed and replaced by the composable
 
 // Menu configurations
 const headerMenuItems = [

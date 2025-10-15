@@ -12,11 +12,11 @@
                 </div>
                 <div>
                     <p class="text-sm text-muted">Total Income</p>
-                    <p class="font-medium text-accent-green">${{ transactionsStore.totalIncome.toFixed(2) }}</p>
+                    <p class="font-medium text-accent-green">{{ formatCurrency(transactionsStore.totalIncome) }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-muted">Total Expenses</p>
-                    <p class="font-medium text-accent-red">${{ Math.abs(transactionsStore.totalExpenses).toFixed(2) }}
+                    <p class="font-medium text-accent-red">{{ formatCurrency(transactionsStore.totalExpenses) }}
                     </p>
                 </div>
             </div>
@@ -55,7 +55,7 @@
                         <div class="text-right flex items-center gap-2">
                             <p class="font-semibold text-lg"
                                 :class="getAmountClass(transaction.amount, transaction.type)">
-                                {{ formatCurrency(transaction.amount) }}
+                                {{ formatCurrency(transaction.amount, true) }}
                             </p>
                             <DropdownMenu :items="transactionMenuItems" :entity="transaction"
                                 :disabled="deletingTransactionId === transaction._id"
@@ -80,11 +80,13 @@
 import { ref, computed } from 'vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoriesStore } from '@/stores/categories';
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
 import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
 
 const transactionsStore = useTransactionsStore();
 const categoriesStore = useCategoriesStore();
+const { formatCurrency, formatDate: formatComposedDate } = useCurrencyFormatter(); // 👈 MODIFIED: Destructure function
 
 // Refs
 const deletingTransactionId = ref(null);
@@ -130,11 +132,8 @@ const formatDateKey = (dateValue) => {
 // Utility function for display header (e.g., "Oct 1, 2025")
 const formatDateHeader = (dateKey) => {
     if (!dateKey) return 'Unknown Date';
-    return new Date(dateKey).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    // Use the composed date formatter here.
+    return formatComposedDate(dateKey, 'long');
 };
 
 // NEW COMPUTED PROPERTY: Groups transactions by day
@@ -172,10 +171,7 @@ const getCategoryName = (categoryId) => {
     return category?.name || 'Uncategorized';
 };
 
-const formatCurrency = (value) => {
-    if (typeof value !== 'number') return '$0.00';
-    return Math.abs(value).toLocaleString(undefined, { style: 'currency', currency: 'USD' });
-};
+// ❌ REMOVED: The local formatCurrency function is removed and replaced by the composable
 
 const formatDate = (dateValue) => {
     if (!dateValue) return 'No date';

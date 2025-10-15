@@ -12,8 +12,9 @@
 
                 <div class="flex flex-col gap-2">
                     <label for="amount" class="font-semibold">Amount</label>
-                    <InputNumber id="amount" v-model="formData.amount" mode="currency" currency="USD" locale="en-US"
-                        placeholder="0.00" :disabled="isLoading" :class="{ 'p-invalid': errors.amount }" />
+                    <InputNumber id="amount" v-model="formData.amount" mode="currency" :currency="currentCurrency"
+                        :locale="currentLocale" :placeholder="inputPlaceholder" :disabled="isLoading"
+                        :class="{ 'p-invalid': errors.amount }" />
                     <small v-if="errors.amount" class="p-error">{{ errors.amount }}</small>
                 </div>
 
@@ -139,6 +140,7 @@ import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoriesStore } from '@/stores/categories';
 import { useBudgetStore } from '@/stores/budget';
 import { FinanceService } from '@/services/financeService';
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
 
 const props = defineProps({
     formType: {
@@ -159,7 +161,9 @@ const emit = defineEmits([
 
 const transactionsStore = useTransactionsStore();
 const categoriesStore = useCategoriesStore();
-const budgetStore = useBudgetStore(); // <-- THIS IS THE MISSING LINE THAT IS NOW ADDED
+const budgetStore = useBudgetStore();
+// 💰 MODIFIED: Destructure preferred values and the formatter
+const { preferredCurrency: currentCurrency, preferredLocale: currentLocale, formatCurrency } = useCurrencyFormatter();
 
 const visible = ref(false);
 const isLoading = ref(false);
@@ -169,6 +173,14 @@ const editMode = computed(() => !!props.editItem);
 const showQuickAddCategory = ref(false);
 const quickCategoryForm = ref({ name: '', description: '' });
 const quickCategoryErrors = ref({});
+
+// 💰 NEW: Placeholder uses the formatter to get the correct symbol
+const inputPlaceholder = computed(() => {
+    // Format a sample amount (e.g., 2000) with the correct symbol
+    const formattedExample = formatCurrency(2000);
+    // Use the formatted example as the placeholder text
+    return `e.g. ${formattedExample}`;
+});
 
 const categoryOptions = computed(() => {
     return categoriesStore.getAllCategories.map(cat => ({

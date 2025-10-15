@@ -21,6 +21,21 @@
                 <label for="profileEmail" class="block text-sm font-medium text-secondary mb-2">Email</label>
                 <InputText id="profileEmail" v-model="profileForm.email" type="email" class="w-full" />
             </div>
+            <div>
+                <label for="preferredCurrency" class="block text-sm font-medium text-secondary mb-2">Preferred
+                    Currency</label>
+                <Dropdown id="preferredCurrency" v-model="profileForm.preferredCurrency" :options="currencyOptions"
+                    optionLabel="label" optionValue="value" placeholder="Select Currency" class="w-full" filter
+                    :disabled="authStore.isLoading" />
+            </div>
+            <div>
+                <label for="preferredLocale" class="block text-sm font-medium text-secondary mb-2">Preferred
+                    Locale</label>
+                <Dropdown id="preferredLocale" v-model="profileForm.preferredLocale" :options="localeOptions"
+                    optionLabel="label" optionValue="value" placeholder="Select Locale" class="w-full" filter
+                    :disabled="authStore.isLoading" />
+            </div>
+
             <div class="flex justify-end gap-2 pt-4">
                 <Button label="Back" @click="currentView = 'main'" severity="secondary" outlined />
                 <Button label="Save Changes" @click="handleUpdateProfile" :loading="authStore.isLoading" />
@@ -77,7 +92,6 @@ import { ref, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
-import * as authService from '@/services/auth'; // Added for delete functionality
 
 // 1. Correctly define the props the component receives
 const props = defineProps({
@@ -97,9 +111,26 @@ const authStore = useAuthStore();
 const toast = useToast();
 
 const currentView = ref('main');
-const profileForm = ref({ name: '', email: '' });
+// MODIFIED: Added preferredCurrency and preferredLocale to the form
+const profileForm = ref({ name: '', email: '', preferredCurrency: 'USD', preferredLocale: 'en-US' });
 const passwordForm = ref({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
 const deleteConfirmation = ref('');
+
+// 💰 NEW: Currency and Locale Options (A simplified list)
+const currencyOptions = [
+    { label: 'US Dollar ($) - USD', value: 'USD' },
+    { label: 'Euro (€) - EUR', value: 'EUR' },
+    { label: 'Nigerian Naira (₦) - NGN', value: 'NGN' },
+    { label: 'British Pound (£) - GBP', value: 'GBP' },
+    { label: 'Japanese Yen (¥) - JPY', value: 'JPY' },
+];
+
+const localeOptions = [
+    { label: 'English (US)', value: 'en-US' },
+    { label: 'English (UK)', value: 'en-GB' },
+    { label: 'French (France)', value: 'fr-FR' },
+    { label: 'German (Germany)', value: 'de-DE' },
+];
 
 // 2. Define the missing function to handle the dialog closing
 const handleVisibilityChange = (value) => {
@@ -113,7 +144,13 @@ const handleVisibilityChange = (value) => {
 // Watch for prop changes to populate form
 watch(() => props.user, (newUser) => {
     if (newUser) {
-        profileForm.value = { name: newUser.name, email: newUser.email };
+        // MODIFIED: Populate new fields from user prop
+        profileForm.value = {
+            name: newUser.name,
+            email: newUser.email,
+            preferredCurrency: newUser.preferredCurrency || 'USD',
+            preferredLocale: newUser.preferredLocale || 'en-US'
+        };
     }
 }, { immediate: true });
 
@@ -135,6 +172,12 @@ const getHeaderTitle = () => {
 };
 
 const handleUpdateProfile = async () => {
+    // VALIDATION: Check for required fields (Name/Email are required by Mongoose, but basic check helps UX)
+    if (!profileForm.value.name?.trim() || !profileForm.value.email?.trim()) {
+        toast.add({ severity: 'error', summary: 'Validation Error', detail: 'Name and Email are required.', life: 3000 });
+        return;
+    }
+
     const result = await authStore.updateProfile(profileForm.value);
     if (result.success) {
         toast.add({ severity: 'success', summary: 'Success', detail: 'Profile updated successfully', life: 3000 });

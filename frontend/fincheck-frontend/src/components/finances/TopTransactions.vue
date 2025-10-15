@@ -29,7 +29,7 @@
                     <p class="font-medium text-primary truncate" :title="tx.description">{{ tx.description }}</p>
                     <div class="flex items-center gap-2 text-xs text-muted">
                         <span class="px-2 py-0.5 rounded-full bg-tertiary text-accent-blue">{{ tx.categoryName
-                        }}</span>
+                            }}</span>
                         <span>&middot;</span>
                         <span>{{ formatDate(tx.date) }}</span>
                     </div>
@@ -53,6 +53,9 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { FinanceService } from '@/services/financeService';
 import TimelineFilter from '../common/TimelineFilter.vue';
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
+
+const { formatCurrency } = useCurrencyFormatter(); // 👈 MODIFIED: Destructure function
 
 const isLoading = ref(true);
 const error = ref('');
@@ -97,10 +100,7 @@ const handlePeriodChange = (newPeriod) => {
     fetchTopTransactions();
 };
 
-const formatCurrency = (value) => {
-    if (typeof value !== 'number') return '$0.00';
-    return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-};
+// ❌ REMOVED: The local formatCurrency function is removed and replaced by the composable
 
 const formatDate = (dateValue) => {
     if (!dateValue) return 'No date';

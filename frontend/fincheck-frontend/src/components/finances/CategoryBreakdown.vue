@@ -31,7 +31,7 @@
                             <span class="text-primary">{{ item.categoryName }}</span>
                         </div>
                         <div class="text-right">
-                            <span class="font-semibold text-primary">${{ item.totalSpent.toFixed(2) }}</span>
+                            <span class="font-semibold text-primary">{{ formatCurrency(item.totalSpent, true) }}</span>
                             <span class="text-xs text-muted ml-2">({{ getPercentage(item.totalSpent) }}%)</span>
                         </div>
                     </li>
@@ -50,14 +50,16 @@ import { ref, onMounted, computed } from 'vue';
 import { Doughnut } from 'vue-chartjs';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { FinanceService } from '@/services/financeService';
-// NEW IMPORT: Import the PrimeVue Tooltip directive
 import TooltipDirective from 'primevue/tooltip';
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+// 💰 MODIFIED: Destructure formatCurrency and preferred values
+const { formatCurrency, preferredCurrency, preferredLocale } = useCurrencyFormatter();
+
 const emit = defineEmits(['category-drilldown']);
 
-// NEW EXPOSURE: Expose the imported directive to be used in the template
 const vTooltip = TooltipDirective;
 
 const isLoading = ref(true);
@@ -93,7 +95,7 @@ const handleChartSegmentClick = (elements) => {
     }
 };
 
-
+// 💰 MODIFIED: Chart.js Tooltip callback to use composed formatCurrency
 const chartOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
@@ -115,7 +117,8 @@ const chartOptions = ref({
                     }
                     if (context.parsed !== null) {
                         const value = context.parsed;
-                        label += `$${value.toFixed(2)}`;
+                        // Use the centralized formatter, forcing decimals
+                        label += formatCurrency(value, true);
                     }
                     return label;
                 }

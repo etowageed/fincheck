@@ -97,9 +97,19 @@ export const useAuthStore = defineStore("auth", () => {
 
   const updateProfile = async (profileData) => {
     isLoading.value = true;
+
+    // 💰 MODIFIED: Only send the fields that can be updated
+    const dataToSend = {
+      name: profileData.name,
+      email: profileData.email,
+      preferredCurrency: profileData.preferredCurrency,
+      preferredLocale: profileData.preferredLocale,
+    };
+
     try {
-      const response = await authService.updateProfile(profileData);
+      const response = await authService.updateProfile(dataToSend);
       if (response.data?.success) {
+        // Update the local user object with the new data returned from the API
         user.value = { ...user.value, ...response.data.data };
         return { success: true };
       }

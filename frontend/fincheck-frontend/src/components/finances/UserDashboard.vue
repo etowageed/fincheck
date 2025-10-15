@@ -23,7 +23,6 @@
             </div>
 
             <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Expense card -->
                 <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
@@ -34,10 +33,9 @@
                             {{ getComparisonDisplay('expensesTotal', true).text }}
                         </span>
                     </div>
-                    <p class="text-2xl font-bold text-accent-red">${{ formatCurrency(metrics.expensesTotal) }}</p>
+                    <p class="text-2xl font-bold text-accent-red">{{ formatCurrency(metrics.expensesTotal) }}</p>
                 </div>
 
-                <!-- Income card -->
                 <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
@@ -48,10 +46,9 @@
                             {{ getComparisonDisplay('incomeTotal').text }}
                         </span>
                     </div>
-                    <p class="text-2xl font-bold text-accent-green">${{ formatCurrency(metrics.incomeTotal) }}</p>
+                    <p class="text-2xl font-bold text-accent-green">{{ formatCurrency(metrics.incomeTotal) }}</p>
                 </div>
 
-                <!-- This Month's Budget card -->
                 <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
@@ -63,10 +60,9 @@
                             {{ getComparisonDisplay('totalMonthlyBudget', true).text }}
                         </span>
                     </div>
-                    <p class="text-2xl font-bold text-primary">${{ formatCurrency(metrics.totalMonthlyBudget) }}</p>
+                    <p class="text-2xl font-bold text-primary">{{ formatCurrency(metrics.totalMonthlyBudget) }}</p>
                 </div>
 
-                <!-- Budget balance card -->
                 <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
@@ -80,22 +76,11 @@
                     </div>
                     <p class="text-2xl font-bold"
                         :class="metrics.budgetBalance >= 0 ? 'text-accent-green' : 'text-accent-red'">
-                        ${{ formatCurrency(metrics.budgetBalance) }}
+                        {{ formatCurrency(metrics.budgetBalance) }}
                     </p>
                 </div>
 
 
-
-                <!-- let's hide the Outflow card for now -->
-                <!-- <div class="bg-secondary rounded-lg p-4 border border-default">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <i class="pi pi-minus-circle text-accent-red"></i>
-                            <span class="text-sm font-medium text-secondary">Outflow</span>
-                        </div>
-                    </div>
-                    <p class="text-2xl font-bold text-accent-red">${{ formatCurrency(metrics.outflow) }}</p>
-                </div> -->
 
                 <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
@@ -107,7 +92,7 @@
                             {{ getComparisonDisplay('plannedSavings').text }}
                         </span>
                     </div>
-                    <p class="text-2xl font-bold text-accent-green">${{ formatCurrency(metrics.plannedSavings) }}</p>
+                    <p class="text-2xl font-bold text-accent-green">{{ formatCurrency(metrics.plannedSavings) }}</p>
                 </div>
             </div>
         </div>
@@ -128,8 +113,8 @@
                                 <i class="pi pi-refresh text-accent-blue"></i>
                                 <span class="text-sm text-secondary">Recurring Expenses</span>
                             </div>
-                            <span class="font-semibold text-primary">${{ formatCurrency(metrics.totalRecurringExpenses)
-                                }}</span>
+                            <span class="font-semibold text-primary">{{ formatCurrency(metrics.totalRecurringExpenses)
+                            }}</span>
                         </div>
 
                         <div class="flex justify-between items-center p-3 bg-secondary rounded border border-default">
@@ -137,7 +122,7 @@
                                 <i class="pi pi-stop text-muted"></i>
                                 <span class="text-sm text-secondary">One-time Expenses</span>
                             </div>
-                            <span class="font-semibold text-primary">${{
+                            <span class="font-semibold text-primary">{{
                                 formatCurrency(metrics.totalNonRecurringExpenses) }}</span>
                         </div>
 
@@ -146,8 +131,8 @@
                                 <i class="pi pi-eye-slash text-muted"></i>
                                 <span class="text-sm text-secondary">Excluded Expenses</span>
                             </div>
-                            <span class="font-semibold text-primary">${{ formatCurrency(metrics.excludedExpensesTotal)
-                                }}</span>
+                            <span class="font-semibold text-primary">{{ formatCurrency(metrics.excludedExpensesTotal)
+                            }}</span>
                         </div>
                     </div>
                 </div>
@@ -170,7 +155,7 @@
                                 <span class="text-sm text-secondary">Overall Status</span>
                             </div>
                             <span class="font-medium" :style="{ color: getHealthColor() }">{{ getHealthStatus()
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
                 </div>
@@ -183,13 +168,16 @@
 import { ref, onMounted } from 'vue';
 import { FinanceService } from '@/services/financeService';
 import DashboardInsights from '@/components/finances/DashboardInsights.vue';
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
 
+const { formatCurrency } = useCurrencyFormatter(); // 👈 MODIFIED: Destructure function
 
 const metrics = ref({});
 const comparison = ref({});
 const isLoading = ref(true);
 const error = ref('');
 
+// ... (Rest of the component logic remains the same, except for the removed local formatCurrency function)
 
 const getComparisonDisplay = (metricKey, isExpense = false) => {
     const comparisonData = comparison.value[metricKey];
@@ -254,12 +242,8 @@ const getComparisonClass = (direction, isExpense = false) => {
     return 'text-muted'; // 'same' or 'N/A'
 };
 
-const formatCurrency = (amount) => {
-    return (amount || 0).toLocaleString('en-US', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    });
-};
+
+// ❌ REMOVED: The local formatCurrency function is removed and replaced by the composable
 
 const getBudgetUtilization = () => {
     if (!metrics.value.totalMonthlyBudget || metrics.value.totalMonthlyBudget === 0) return 0;
@@ -270,11 +254,8 @@ const getBudgetUtilizationClass = () => {
     const utilization = getBudgetUtilization();
     // > 100% -> Red (Exceeded)
     if (utilization > 100) return 'bg-accent-red';
-    // > 75% -> Yellow (Warning) - Note: Yellow isn't explicitly defined, using blue as a neutral warning, 
-    // or we can introduce a yellow color logic. Since `bg-accent-red` is already used for danger,
-    // let's use a standard yellow-like class or the accent-blue for warning.
-    // Given the request is yellow, we will use a dedicated class and define it in CSS (Step 2).
-    if (utilization > 75) return 'bg-accent-yellow-warning'; // <-- Using new custom class
+    // > 75% -> Yellow (Warning)
+    if (utilization > 75) return 'bg-accent-yellow-warning';
     // <= 75% -> Green (Safe)
     return 'bg-accent-green';
 };

@@ -66,6 +66,23 @@ const userSchema = new mongoose.Schema(
       default: 'user', // Default role for new users
     },
 
+    // 💰 NEW FIELDS FOR MANUAL PREFERENCES
+    preferredCurrency: {
+      type: String,
+      default: 'USD',
+      trim: true,
+      uppercase: true,
+      minlength: 3,
+      maxlength: 3,
+    },
+    preferredLocale: {
+      type: String,
+      default: 'en-US',
+      trim: true,
+      minlength: 2,
+    },
+    // ----------------------------------
+
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
