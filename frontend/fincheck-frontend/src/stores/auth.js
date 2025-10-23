@@ -16,6 +16,19 @@ export const useAuthStore = defineStore("auth", () => {
     isLoading: isLoading.value,
   }));
 
+  // Getter for quick subscription status
+  const subscriptionStatus = computed(
+    () => user.value?.subscriptionStatus || "free"
+  );
+
+  // Getter for a simple boolean check (delegated decision making)
+  const isPremium = computed(
+    () =>
+      subscriptionStatus.value === "premium" &&
+      (!user.value.subscriptionExpires ||
+        new Date(user.value.subscriptionExpires) > new Date())
+  );
+
   // Actions
   const login = async (credentials) => {
     isLoading.value = true;
@@ -98,7 +111,7 @@ export const useAuthStore = defineStore("auth", () => {
   const updateProfile = async (profileData) => {
     isLoading.value = true;
 
-    // 💰 MODIFIED: Only send the fields that can be updated
+    // Only send the fields that can be updated
     const dataToSend = {
       name: profileData.name,
       email: profileData.email,
@@ -184,6 +197,8 @@ export const useAuthStore = defineStore("auth", () => {
     isLoading,
     userProfile,
     authStatus,
+    subscriptionStatus,
+    isPremium, // Expose the new computed boolean
     login,
     signup,
     logout,

@@ -74,15 +74,15 @@ exports.updateUser = catchAsync(async (req, res, next) => {
 
 // updating me (the logged-in user)
 exports.updateMe = catchAsync(async (req, res, next) => {
+  // note that subscriptionStatus and subscriptionExpires are not updateable by the user
   const { name, email, preferredCurrency, preferredLocale } = req.body;
   const updateData = {};
 
   if (name) updateData.name = name;
   if (email) updateData.email = email;
-  // 💰 NEW: Add preferredCurrency and preferredLocale to updateData
+  // Add preferredCurrency and preferredLocale to updateData
   if (preferredCurrency) updateData.preferredCurrency = preferredCurrency;
   if (preferredLocale) updateData.preferredLocale = preferredLocale;
-  // ------------------------------------------------------------------
 
   // checking if email being updated and already exists
   if (email) {
@@ -99,7 +99,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     // <-- use req.user.id here
     new: true,
     runValidators: true,
-    select: '-password',
+    select:
+      'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name email role _id -password',
   });
 
   if (!user) {
@@ -142,7 +143,9 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 });
 
 exports.getMe = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).select('-password');
+  const user = await User.findById(req.user.id).select(
+    'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name email role _id -password'
+  );
   if (!user) {
     return next(new AppError('User not found', 404));
   }

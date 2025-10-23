@@ -66,7 +66,6 @@ const userSchema = new mongoose.Schema(
       default: 'user', // Default role for new users
     },
 
-    // 💰 NEW FIELDS FOR MANUAL PREFERENCES
     preferredCurrency: {
       type: String,
       default: 'USD',
@@ -81,7 +80,17 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: 2,
     },
-    // ----------------------------------
+
+    subscriptionStatus: {
+      type: String,
+      enum: ['free', 'premium', 'canceled'],
+      default: 'free',
+      index: true,
+    },
+    subscriptionExpires: {
+      type: Date,
+      default: null, // Date when the subscription will expire
+    },
 
     passwordChangedAt: Date,
     passwordResetToken: String,

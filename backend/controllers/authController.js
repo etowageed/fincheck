@@ -23,6 +23,34 @@ function sendTokenWithCookie(res, token) {
   });
 }
 
+// Function to clone user object and strip sensitive data before sending
+const filterUserForResponse = (user) => {
+  const {
+    _id,
+    name,
+    email,
+    income,
+    role,
+    preferredCurrency,
+    preferredLocale,
+    subscriptionStatus, // Include new field
+    subscriptionExpires, // Include new field
+  } = user;
+
+  return {
+    _id,
+    id: _id, // Provide id for consistency
+    name,
+    email,
+    income,
+    role,
+    preferredCurrency,
+    preferredLocale,
+    subscriptionStatus,
+    subscriptionExpires,
+  };
+};
+
 exports.createToken = createToken;
 exports.sendTokenWithCookie = sendTokenWithCookie;
 
@@ -86,7 +114,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     status: 'success',
     token,
     data: {
-      user: newUser,
+      user: filterUserForResponse(newUser),
     },
   });
 });
@@ -101,7 +129,9 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 2a) find user by email
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email }).select(
+    '+password subscriptionStatus subscriptionExpires'
+  );
 
   // 2b) If no user, or if password doesn't match, send error
   if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -123,7 +153,7 @@ exports.login = catchAsync(async (req, res, next) => {
     status: 'success',
     token,
     data: {
-      user,
+      user: filterUserForResponse(user),
     },
   });
 });
@@ -154,7 +184,9 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
   // 3) check if user still exists
-  const user = await User.findById(decoded.id);
+  const user = await User.findById(decoded.id).select(
+    'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name'
+  );
   if (!user) {
     return res.status(200).json({
       status: 'success',
@@ -174,13 +206,7 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
     status: 'success',
     isLoggedIn: true,
     data: {
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        income: user.income,
-        role: user.role,
-      },
+      user: filterUserForResponse(user),
     },
   });
 });
