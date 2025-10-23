@@ -6,15 +6,27 @@
             <!-- 1. Data Type Selection -->
             <div class="flex flex-col gap-2">
                 <label for="dataType" class="font-semibold text-secondary">Data to Include</label>
-                <Dropdown id="dataType" v-model="form.type" :options="typeOptions" optionLabel="label"
-                    optionValue="value" placeholder="Select content type" />
+                <div class="relative">
+                    <Dropdown id="dataType" v-model="form.type" :options="typeOptions" optionLabel="label"
+                        optionValue="value" placeholder="Select content type" :disabled="!authStore.isPremium" />
+                    <!-- PREMIUM LOCK for all export options -->
+                    <i v-if="!authStore.isPremium"
+                        class="pi pi-lock absolute right-3 top-1/2 -translate-y-1/2 text-accent-red"
+                        v-tooltip.top="'Premium required to select data types'" />
+                </div>
             </div>
 
             <!-- 2. Time Range Selection -->
             <div class="flex flex-col gap-2">
                 <label for="timeRange" class="font-semibold text-secondary">Time Range</label>
-                <Dropdown id="timeRange" v-model="form.days" :options="timeRangeOptions" optionLabel="label"
-                    optionValue="value" placeholder="Select time range" />
+                <div class="relative">
+                    <Dropdown id="timeRange" v-model="form.days" :options="timeRangeOptions" optionLabel="label"
+                        optionValue="value" placeholder="Select time range" :disabled="!authStore.isPremium" />
+                    <!-- PREMIUM LOCK for time range -->
+                    <i v-if="!authStore.isPremium"
+                        class="pi pi-lock absolute right-3 top-1/2 -translate-y-1/2 text-accent-red"
+                        v-tooltip.top="'Premium required to select time range'" />
+                </div>
             </div>
 
             <!-- 3. Format Selection -->
@@ -22,24 +34,31 @@
                 <label for="formatType" class="font-semibold text-secondary">File Format</label>
                 <div class="flex gap-4">
                     <div class="flex items-center">
-                        <RadioButton id="formatExcel" value="excel" v-model="form.format" />
+                        <RadioButton id="formatExcel" value="excel" v-model="form.format"
+                            :disabled="!authStore.isPremium" />
                         <label for="formatExcel" class="ml-2 text-primary">Excel (.xlsx)</label>
                     </div>
                     <div class="flex items-center">
-                        <RadioButton id="formatPdf" value="pdf" v-model="form.format" />
+                        <RadioButton id="formatPdf" value="pdf" v-model="form.format"
+                            :disabled="!authStore.isPremium" />
                         <label for="formatPdf" class="ml-2 text-primary">PDF (.pdf)</label>
                     </div>
                 </div>
             </div>
 
             <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
+            <Message v-if="!authStore.isPremium" severity="warn" :closable="false">
+                Upgrade to **Premium** to unlock all export formats and time ranges.
+            </Message>
         </div>
 
         <template #footer>
             <div class="flex justify-end gap-2">
                 <Button label="Cancel" severity="secondary" outlined @click="$emit('update:visible', false)" />
-                <Button label="Download Report" icon="pi pi-download" :loading="isDownloading" @click="handleDownload"
-                    :disabled="!isFormValid" />
+                <Button :label="authStore.isPremium ? 'Download Report' : 'Upgrade to Export'"
+                    :icon="authStore.isPremium ? 'pi pi-download' : 'pi pi-lock'"
+                    :severity="authStore.isPremium ? 'primary' : 'help'" :loading="isDownloading"
+                    @click="handleStrictAction" />
             </div>
         </template>
     </Dialog>
@@ -47,10 +66,13 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { useRouter } from 'vue-router'; // NEW: Import router
 import axios from 'axios';
 import { useToast } from 'primevue/usetoast';
 import Dropdown from 'primevue/dropdown';
 import RadioButton from 'primevue/radiobutton';
+import TooltipDirective from 'primevue/tooltip';
+import { useAuthStore } from '@/stores/auth'; // NEW: Import Auth Store
 
 const props = defineProps({
     visible: Boolean,
@@ -75,8 +97,11 @@ const props = defineProps({
 const emit = defineEmits(['update:visible', 'open-modal']);
 
 const toast = useToast();
+const authStore = useAuthStore();
+const router = useRouter(); // Use router
 const isDownloading = ref(false);
 const error = ref(null);
+const vTooltip = TooltipDirective;
 
 const form = ref({
     type: props.defaultType,
@@ -118,14 +143,31 @@ const timeRangeOptions = ref([
     { label: 'Last 90 Days (3 Months)', value: 90 },
     { label: 'Last 180 Days (6 Months)', value: 180 },
     { label: 'Last 365 Days (1 Year)', value: 365 },
+    { label: 'All Time (Max 10 years)', value: 3650 },
 ]);
 
 const isFormValid = computed(() => {
-    return form.value.type && form.value.days && form.value.format;
+    // For premium users, standard validation applies
+    if (authStore.isPremium) {
+        return form.value.type && form.value.days && form.value.format;
+    }
+    // For free users, the form is functionally locked, but we need to prevent
+    // them from proceeding to download logic if the component wasn't disabled correctly
+    return false;
 });
 
+// NEW: Combined handler for premium action
+const handleStrictAction = () => {
+    if (!authStore.isPremium) {
+        emit('update:visible', false); // Close the modal before redirecting
+        router.push('/pricing');
+    } else {
+        handleDownload();
+    }
+};
+
 const handleDownload = async () => {
-    if (!isFormValid.value) return;
+    if (!isFormValid.value) return; // Should only be reachable by premium users if logic is correct
 
     isDownloading.value = true;
     error.value = null;
@@ -170,7 +212,7 @@ const handleDownload = async () => {
         toast.add({ severity: 'success', summary: 'Success', detail: 'Report generated and download started.', life: 3000 });
         emit('update:visible', false); // Close the modal
     } catch (err) {
-        // Handle API error messages from the backend (which typically return JSON even if responseType is blob)
+        // Handle API error messages from the backend
         if (err.response && err.response.data instanceof Blob) {
             const reader = new FileReader();
             reader.onload = function () {
