@@ -4,15 +4,15 @@ import { ref, computed } from "vue";
 
 // Define the default periods available for the filter
 const periods = [
-  // MODIFIED: Added unique key to identify 'Current Month' for API calls
-  { label: "Current Month", value: 30, key: "currentMonth" },
-  { label: "3M", value: 90, key: "90days" },
-  { label: "6M", value: 180, key: "180days" },
-  { label: "1Y", value: 365, key: "365days" },
+  // MODIFIED: Added isPremium flag
+  { label: "Current Month", value: 30, key: "currentMonth", isPremium: false },
+  { label: "3M", value: 90, key: "90days", isPremium: true },
+  { label: "6M", value: 180, key: "180days", isPremium: true },
+  { label: "1Y", value: 365, key: "365days", isPremium: true },
 ];
 
 export const useDashboardStore = defineStore("dashboard", () => {
-  // MODIFIED: Default to the first option ('Current Month' / 1M)
+  // Default to the first option ('Current Month' / 1M)
   const selectedPeriod = ref(periods[0]);
 
   // Getter: gets the 'days' value from the selected period (used by CategoryBreakdown, TopTransactions)

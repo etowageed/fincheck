@@ -1,6 +1,9 @@
 const express = require('express');
 const financesController = require('../controllers/financesController');
 const authController = require('../controllers/authController');
+const {
+  enforceLookbackLimit,
+} = require('../controllers/subscriptionsController');
 
 const router = express.Router();
 
@@ -9,17 +12,27 @@ router.use(authController.protect); // protects all routes below
 // --- GENERAL & REPORTING ROUTES (specific) ---
 
 // These should come BEFORE routes with parameters.
-router.get('/trends', financesController.getMonthlyTrends);
+router.get(
+  '/trends',
+  enforceLookbackLimit(),
+  financesController.getMonthlyTrends
+);
 router.get('/compare', financesController.comparePeriods);
 router.post('/seed-data', financesController.seedData);
 router.get(
   '/reports/category-breakdown',
+  enforceLookbackLimit(365),
   financesController.getCategoryBreakdown
 );
-router.get('/reports/top-transactions', financesController.getTopTransactions);
+router.get(
+  '/reports/top-transactions',
+  enforceLookbackLimit(365),
+  financesController.getTopTransactions
+);
 // New route for fetching all transactions in a date range
 router.get(
   '/reports/all-transactions',
+  enforceLookbackLimit(3650),
   financesController.getAllTransactionsReport
 );
 router.get('/dashboard', financesController.getDashboardMetrics);

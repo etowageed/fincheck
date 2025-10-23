@@ -11,34 +11,47 @@
                     @user-logout="handleUserLogout" />
             </div>
 
-            <!-- NEW: Data Export Section -->
+            <!--  : Data Export Section -->
             <div class="bg-primary p-6 rounded-lg shadow-sm border border-default">
                 <h2 class="text-lg font-semibold text-primary mb-4">Data Export</h2>
                 <p class="text-sm text-secondary mb-6">
                     Export your full financial history, including all transactions and budget information, as Excel or
                     PDF.
                 </p>
-                <Button label="Export All Data" icon="pi pi-download" severity="help" @click="showExportModal = true" />
+                <!-- MODIFIED: Check subscription status to gate the button -->
+                <Button :label="authStore.isPremium ? 'Export All Data' : 'Upgrade to Export Data'"
+                    :icon="authStore.isPremium ? 'pi pi-download' : 'pi pi-lock'"
+                    :severity="authStore.isPremium ? 'help' : 'secondary'" @click="handleExportClick" />
+                <!-- END  : Data Export Section -->
             </div>
-            <!-- END NEW: Data Export Section -->
         </div>
         <div v-else>
             <p class="text-secondary">Loading user profile...</p>
         </div>
 
-        <!-- NEW: Export Modal for All Data -->
+        <!--  : Export Modal for All Data -->
         <ExportModal v-model:visible="showExportModal" default-type="all" />
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import ProfileSettings from '@/components/profile/ProfileSettings.vue';
-import ExportModal from '@/components/common/ExportModal.vue'; // 👈 NEW: Import ExportModal
+import ExportModal from '@/components/common/ExportModal.vue'; //  Import ExportModal
 
 const authStore = useAuthStore();
-const showExportModal = ref(false); // 👈 NEW: State for the export modal
+const router = useRouter();
+const showExportModal = ref(false); // State for the export modal
+
+const handleExportClick = () => {
+    if (authStore.isPremium) {
+        showExportModal.value = true;
+    } else {
+        router.push('/pricing');
+    }
+};
 
 // These handlers are here to catch the events, though the
 // ProfileSettings component and its modal already handle the core logic.
