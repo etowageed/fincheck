@@ -100,7 +100,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     new: true,
     runValidators: true,
     select:
-      'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name email role _id -password',
+      'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name email role _id',
   });
 
   if (!user) {
@@ -144,7 +144,7 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
 exports.getMe = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select(
-    'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name email role _id -password'
+    'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name email role _id'
   );
   if (!user) {
     return next(new AppError('User not found', 404));
