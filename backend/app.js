@@ -15,7 +15,7 @@ const globalErrorHandler = require('./middleware/errorHandler'); // Import the g
 
 const app = express();
 
-// app.set('trust proxy', true); // uncomment in production
+app.set('trust proxy', true); // uncomment in production
 
 app.use(helmet()); // Set security headers
 // TODO uncomment this code when in production to enforce HTTPS
@@ -75,6 +75,15 @@ const authRouter = require('./routes/authRoutes');
 const userRouter = require('./routes/userRoutes');
 const financesRouter = require('./routes/financesRoutes');
 const categoryRouter = require('./routes/categoryRoutes');
+const paymentRouter = require('./routes/paymentRoutes');
+
+// 4.1 Webhook Body Parser: Must run BEFORE express.json()
+// This middleware processes the raw body for the Stripe webhook route only.
+app.post(
+  '/api/v1/payment/webhook',
+  express.raw({ type: 'application/json' }),
+  (req, res, next) => next() // Pass control to the webhook controller
+);
 
 app.use(express.json({ limit: '10kb' }));
 
@@ -83,6 +92,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/finances', financesRouter);
 app.use('/api/v1/categories', categoryRouter);
+app.use('/api/v1/payment', paymentRouter);
 
 // Handle undefined routes
 app.all('/{*any}', (req, res, next) => {

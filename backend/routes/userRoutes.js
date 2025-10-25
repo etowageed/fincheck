@@ -20,7 +20,7 @@ router.get(
 
 router.delete('/me', userController.deleteMe);
 
-router.get('/', authController.restrictTo('admin'), userController.getAllUsers);
+// router.get('/', authController.restrictTo('admin'), userController.getAllUsers);
 
 router.use(authController.restrictTo('admin')); // restricts the following routes to admin and user roles
 router

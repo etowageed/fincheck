@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores/auth";
 
 const routes = [
   {
-    path: "/",
+    path: "/home",
     component: () => import("@/views/Home.vue"), // Add this to redirect root to login, later make it the route for the landing page
     meta: { hideSidebar: true },
   },
@@ -58,6 +58,13 @@ const routes = [
     component: () => import("@/views/SettingsPage.vue"),
     meta: { requiresAuth: true },
   },
+
+  {
+    path: "/pricing",
+    name: "Pricing",
+    component: () => import("@/views/PricingPage.vue"),
+    meta: { requiresAuth: true },
+  },
   {
     path: "/forgot-password",
     name: "ForgotPassword",
@@ -80,45 +87,6 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 });
-
-// router.beforeEach(async (to, from, next) => {
-//   const authStore = useAuthStore();
-
-//   // Skip auth check for public routes
-//   const publicRoutes = [
-//     "/login",
-//     "/signup",
-//     "/forgot-password",
-//     "/reset-password",
-//   ];
-//   if (publicRoutes.includes(to.path)) {
-//     if (authStore.isAuthenticated) {
-//       return next("/transactions");
-//     }
-//     return next();
-//   }
-
-//   // For protected routes
-//   if (to.meta.requiresAuth) {
-//     try {
-//       // Always check with backend first
-//       const isAuthenticated = await authStore.checkAuth();
-//       if (isAuthenticated) {
-//         return next();
-//       }
-
-//       return next({
-//         path: "/login",
-//         query: { redirect: to.fullPath },
-//       });
-//     } catch (error) {
-//       console.error("Auth check failed:", error);
-//       return next("/login");
-//     }
-//   }
-
-//   next();
-// });
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
