@@ -50,95 +50,91 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
  * Handles Stripe Webhook events to update the user's subscription status.
  * This is the external flipper that changes the source of truth in the database.
  */
-exports.handleWebhook = catchAsync(async (req, res, next) => {
-  const signature = req.headers['stripe-signature'];
+exports.handleWebhook = async (req, res) => {
+  const sig = req.headers['stripe-signature'];
   let event;
 
   try {
-    // 1. Validate the incoming request signature
     event = stripe.webhooks.constructEvent(
       req.body,
-      signature,
-      STRIPE_WEBHOOK_SECRET
+      sig,
+      STRIPE_WEBHOOK_SECRET // use the declared const
     );
   } catch (err) {
-    console.error(`❌ Stripe Webhook Error: ${err.message}`);
-    // Return a 400 response for any verification failure
+    console.error(`❌ Webhook signature verification failed: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   const data = event.data.object;
   const eventType = event.type;
 
-  // 2. Handle specific subscription events
-  switch (eventType) {
-    case 'checkout.session.completed':
-      // Payment successful, subscription created.
-      // We get the user ID from the metadata we sent during session creation.
-      const userId = data.metadata.userId;
-      const statusToSet = data.metadata.statusToSet;
+  // Debugging help (safe in dev)
+  console.log(`Received Stripe event: ${eventType} (id: ${event.id})`);
+  // console.log('Data keys:', Object.keys(data));
+  // console.log('Metadata:', data?.metadata);
 
-      // Ensure we have the user and status before proceeding
-      if (!userId || !statusToSet) {
-        return res.status(400).send('Webhook Error: Missing user metadata.');
-      }
+  try {
+    switch (eventType) {
+      case 'checkout.session.completed': {
+        const userId = data?.metadata?.userId;
+        const statusToSet = data?.metadata?.statusToSet;
 
-      // Retrieve the Subscription object
-      const subscription = await stripe.subscriptions.retrieve(
-        data.subscription
-      );
+        if (!userId || !statusToSet) {
+          console.warn(
+            `checkout.session.completed missing metadata (event: ${event.id}). Ignoring.`
+          );
+          return res
+            .status(200)
+            .json({ received: true, note: 'No metadata, ignored' });
+        }
 
-      // Calculate expiration date
-      const subscriptionExpires = new Date(
-        subscription.current_period_end * 1000
-      );
+        const subscription = await stripe.subscriptions.retrieve(
+          data.subscription
+        );
 
-      // UPDATE the user's source of truth
-      await User.findByIdAndUpdate(
-        userId,
-        {
-          subscriptionStatus: statusToSet,
-          subscriptionExpires: subscriptionExpires,
-          stripeCustomerId: data.customer, // Store Stripe Customer ID for future use
-          stripeSubscriptionId: data.subscription, // Store Subscription ID for managing cancellations
-        },
-        { new: true, runValidators: false }
-      );
+        // ✅ FIX: Safely convert Unix timestamp (seconds) to JS Date object (milliseconds)
+        const expiryTimestamp = subscription.current_period_end;
+        const subscriptionExpires = expiryTimestamp
+          ? new Date(expiryTimestamp * 1000)
+          : null; // Set to null if timestamp is missing or zero
 
-      console.log(
-        `✅ User ${userId} upgraded to ${statusToSet}. Expires: ${subscriptionExpires.toISOString()}`
-      );
-      break;
-
-    case 'customer.subscription.deleted':
-    case 'invoice.payment_failed':
-      // Subscription was canceled or payment failed (soft deletion)
-      const customerId = data.customer;
-
-      // Find the user by the stored Stripe Customer ID
-      const user = await User.findOne({ stripeCustomerId: customerId });
-
-      if (user) {
-        // Soft downgrade/cancel: update the status and expiration
         await User.findByIdAndUpdate(
-          user.id,
+          userId,
           {
-            subscriptionStatus: 'canceled',
-            subscriptionExpires: new Date(), // Set expiration to now or the end of the paid period
+            subscriptionStatus: statusToSet,
+            subscriptionExpires, // Pass the safely converted Date object or null
+            stripeCustomerId: data.customer,
+            stripeSubscriptionId: data.subscription,
           },
           { new: true, runValidators: false }
         );
-        console.log(`⚠️ User ${user.id} subscription canceled.`);
+
+        console.log(`✅ Upgraded user ${userId} to ${statusToSet}`);
+        break;
       }
-      break;
 
-    // Add other event types here (e.g., 'customer.subscription.updated')
+      case 'invoice.payment_failed':
+      case 'customer.subscription.deleted': {
+        const customerId = data.customer;
+        const user = await User.findOne({ stripeCustomerId: customerId });
 
-    default:
-      // Handle other event types
-      console.log(`Unhandled event type: ${eventType}`);
+        if (user) {
+          await User.findByIdAndUpdate(user.id, {
+            subscriptionStatus: 'canceled',
+            subscriptionExpires: new Date(),
+          });
+          console.log(`⚠️ User ${user.id} subscription canceled.`);
+        }
+        break;
+      }
+
+      default:
+        console.log(`Unhandled event type: ${eventType}`);
+    }
+
+    res.status(200).json({ received: true });
+  } catch (err) {
+    console.error(`❌ Error handling webhook: ${err.message}`);
+    res.status(500).send(`Webhook handling failed: ${err.message}`);
   }
-
-  // 3. Send a 200 response back to Stripe
-  res.status(200).json({ received: true });
-});
+};

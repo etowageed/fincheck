@@ -1,12 +1,13 @@
 const path = require('path');
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const enforce = require('express-sslify'); // Add this for HTTPS enforcement
 const session = require('express-session'); // Add this
 require('dotenv').config();
-
+const paymentController = require('./controllers/paymentController');
 const morgan = require('morgan'); // For logging requests in development
 const cors = require('cors'); // For handling CORS
 
@@ -15,7 +16,7 @@ const globalErrorHandler = require('./middleware/errorHandler'); // Import the g
 
 const app = express();
 
-app.set('trust proxy', true); // uncomment in production
+app.set('trust proxy', 'loopback'); // uncomment in production
 
 app.use(helmet()); // Set security headers
 // TODO uncomment this code when in production to enforce HTTPS
@@ -79,10 +80,18 @@ const paymentRouter = require('./routes/paymentRoutes');
 
 // 4.1 Webhook Body Parser: Must run BEFORE express.json()
 // This middleware processes the raw body for the Stripe webhook route only.
+// app.post(
+//   '/api/v1/payment/webhook',
+//   express.raw({ type: 'application/json' }),
+//   (req, res, next) => next() // Pass control to the webhook controller
+// );
+
+// app.use(express.json({ limit: '10kb' }));
+
 app.post(
   '/api/v1/payment/webhook',
-  express.raw({ type: 'application/json' }),
-  (req, res, next) => next() // Pass control to the webhook controller
+  bodyParser.raw({ type: 'application/json' }),
+  paymentController.handleWebhook
 );
 
 app.use(express.json({ limit: '10kb' }));

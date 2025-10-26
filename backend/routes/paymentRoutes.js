@@ -6,7 +6,7 @@ const router = express.Router();
 
 // --- UNPROTECTED ROUTE: Webhook Listener ---
 // Stripe needs to hit this directly without authentication
-router.post('/webhook', paymentController.handleWebhook);
+// router.post('/webhook', paymentController.handleWebhook);
 
 // --- PROTECTED ROUTE: Checkout Session Creation ---
 // Only authenticated users can initiate a checkout session
