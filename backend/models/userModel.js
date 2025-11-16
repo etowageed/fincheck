@@ -81,6 +81,17 @@ const userSchema = new mongoose.Schema(
       minlength: 2,
     },
 
+    stripeCustomerId: {
+      type: String,
+      default: null, // Stores the Stripe Customer ID
+      index: true,
+    },
+    stripeSubscriptionId: {
+      type: String,
+      default: null, // Stores the active Stripe Subscription ID (used for idempotency)
+      index: true,
+    },
+
     subscriptionStatus: {
       type: String,
       enum: ['free', 'premium', 'canceled'],

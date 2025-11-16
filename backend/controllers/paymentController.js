@@ -78,33 +78,52 @@ exports.handleWebhook = async (req, res) => {
       case 'checkout.session.completed': {
         const userId = data?.metadata?.userId;
         const statusToSet = data?.metadata?.statusToSet;
+        const stripeSubscriptionId = data.subscription; // Get subscription ID from checkout session
 
-        if (!userId || !statusToSet) {
+        if (!userId || !statusToSet || !stripeSubscriptionId) {
           console.warn(
-            `checkout.session.completed missing metadata (event: ${event.id}). Ignoring.`
+            `checkout.session.completed missing critical data (event: ${event.id}). Ignoring.`
           );
           return res
             .status(200)
-            .json({ received: true, note: 'No metadata, ignored' });
+            .json({ received: true, note: 'No critical data, ignored' });
         }
 
+        // 1. IDEMPOTENCY CHECK: Find the user and check if they already have this exact subscription ID.
+        // This is necessary to stop Stripe's webhook retries from running the update multiple times.
+        const currentUser = await User.findById(userId);
+        if (
+          currentUser &&
+          currentUser.stripeSubscriptionId === stripeSubscriptionId &&
+          currentUser.subscriptionExpires !== null // <-- NEW CHECK
+        ) {
+          console.log(
+            `⚠️ Webhook event (ID: ${event.id}) ignored: User ${userId} already has a valid expiration date.`
+          );
+          return res.status(200).json({
+            received: true,
+            note: 'Subscription details already fully processed.',
+          });
+        }
+
+        // Retrieve subscription details (this line was already present)
         const subscription = await stripe.subscriptions.retrieve(
-          data.subscription
+          stripeSubscriptionId
         );
 
-        // ✅ FIX: Safely convert Unix timestamp (seconds) to JS Date object (milliseconds)
+        // 2. Date Safety Fix: Safely convert Unix timestamp (seconds) to JS Date object
         const expiryTimestamp = subscription.current_period_end;
         const subscriptionExpires = expiryTimestamp
           ? new Date(expiryTimestamp * 1000)
-          : null; // Set to null if timestamp is missing or zero
+          : null; // Avoids 'Invalid Date' Mongoose error
 
         await User.findByIdAndUpdate(
           userId,
           {
             subscriptionStatus: statusToSet,
-            subscriptionExpires, // Pass the safely converted Date object or null
+            subscriptionExpires,
             stripeCustomerId: data.customer,
-            stripeSubscriptionId: data.subscription,
+            stripeSubscriptionId, // Save the unique ID
           },
           { new: true, runValidators: false }
         );

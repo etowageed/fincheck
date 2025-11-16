@@ -11,9 +11,9 @@ class EmailService {
   }
 
   newTransport() {
-    if (process.env.NODE_ENV === 'production') {
-      // Brevo when in production
+    // uses Brevo in production
 
+    if (process.env.NODE_ENV === 'production') {
       return nodemailer.createTransport({
         service: 'Brevo',
         host: process.env.BREVO_EMAIL_HOST,
