@@ -1,10 +1,12 @@
 const nodemailer = require('nodemailer');
+const pug = require('pug');
+const path = require('path');
 const formatCurrency = require('./formatCurrency');
 
 class EmailService {
   constructor(user, url) {
     this.to = user.email;
-    this.name = user.name || user.email.split('@')[0];
+    this.firstName = user.name.split(' ')[0];
     this.url = url;
     this.user = user; // Added user to instance for formatCurrency
     this.from = `Fincheck 💸 <${process.env.EMAIL_FROM}>`;
@@ -37,29 +39,39 @@ class EmailService {
   }
 
   //   actualy sends the email
-  async send(subject, htmlContent) {
+  async send(template, subject, templateData = {}) {
+    // 1) Render HTML based on a pug template
+    const html = pug.renderFile(
+      path.join(__dirname, `../views/emails/${template}.pug`),
+      {
+        firstName: this.firstName,
+        url: this.url,
+        subject,
+        ...templateData,
+      }
+    );
+
+    // 2) Define email options
     const mailOptions = {
       from: this.from,
       to: this.to,
       subject,
-      html: htmlContent,
+      html,
+      // text: htmlToText.fromString(html) // Optional: convert HTML to text
     };
 
-    // creates a transport and sends the email
+    // 3) Create a transport and send email
     await this.newTransport().sendMail(mailOptions);
   }
 
   async sendWelcome() {
-    await this.send(
-      'Welcome to Fincheck 🎉',
-      `<h1>Hello, ${this.name}! 👋</h1><p>Thanks for signing up. You can start managing your finances <a href="${this.url}">here</a>.</p>`
-    );
+    await this.send('welcome', 'Welcome to the Fincheck Family!');
   }
 
   async sendPasswordReset() {
     await this.send(
-      'Your password reset link (valid for 10 min)',
-      `<p>Hi ${this.name},</p><p>Click below to reset your password:</p><p><a href="${this.url}">${this.url}</a></p><p>If you didn't request this, please ignore.</p>`
+      'passwordReset',
+      'Your password reset token (valid for only 10 minutes)'
     );
   }
 
@@ -87,23 +99,19 @@ class EmailService {
         ? `🎉 Awesome! You're doing great and staying within your budget. Keep it up!`
         : `😬 You've spent more than your monthly budget. Consider reviewing your spending categories.`;
 
-    const summaryHtml = `
-    <h1>Hello, ${this.name}! 👋</h1>
-    <h2>📊 Your Fincheck Weekly Summary</h2>
-    <p>Week of ${startOfWeek.toDateString()} – ${endOfWeek.toDateString()}</p>
-    <p><strong>💰 Income:</strong> ${incomeFormatted}</p>
-    <p><strong>💸 Expenses:</strong> ${expensesFormatted}</p>
-    <p><strong>📊 Change:</strong> ${comparisonText}</p>
-    <p><strong>📉 Budget Used:</strong> ${Math.round(percentUsed)}%</p>
-    <p>${friendlyComment}</p>
-    <br />
-    <a href="${
-      this.url
-    }/dashboard" style="padding: 10px 20px; background: #00b894; color: white; text-decoration: none; border-radius: 5px;">📈 See full insights</a>
+    await this.send('weeklySummary', 'Your Weekly Fincheck Summary 🌟', {
+      startOfWeek: startOfWeek.toDateString(),
+      endOfWeek: endOfWeek.toDateString(),
+      incomeFormatted,
+      expensesFormatted,
+      percentUsed: Math.round(percentUsed),
+      comparisonText,
+      friendlyComment,
+    });
+  }
 
-  `;
-
-    await this.send('Your Weekly Fincheck Summary 🌟', summaryHtml);
+  async sendPremiumWelcome() {
+    await this.send('premiumWelcome', 'Welcome to Fincheck Premium! 🌟');
   }
 }
 

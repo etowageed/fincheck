@@ -2,6 +2,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const EmailService = require('../utils/emails');
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
@@ -129,6 +130,19 @@ exports.handleWebhook = async (req, res) => {
         );
 
         console.log(`✅ Upgraded user ${userId} to ${statusToSet}`);
+
+        // 3. Send Premium Welcome Email
+        try {
+          const user = await User.findById(userId); // Fetch fresh user data
+          const appUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+          await new EmailService(user, appUrl).sendPremiumWelcome();
+        } catch (emailError) {
+          console.error(
+            `Failed to send premium welcome email to user ${userId}:`,
+            emailError
+          );
+          // Don't fail the webhook response just because email failed
+        }
         break;
       }
 
