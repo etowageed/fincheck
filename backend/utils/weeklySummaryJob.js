@@ -5,7 +5,8 @@ const EmailService = require('./emails');
 // const { getLocaleFromIP } = require('./geoUtils'); // REMOVED
 
 const sendWeeklySummaries = async () => {
-  const users = await User.find({});
+  // Use a cursor to stream users one by one instead of loading all into memory
+  const cursor = User.find({}).cursor();
 
   const now = new Date();
   const startOfWeek = new Date(now);
@@ -16,7 +17,7 @@ const sendWeeklySummaries = async () => {
   const month = now.getMonth();
   const year = now.getFullYear();
 
-  for (const user of users) {
+  for await (const user of cursor) {
     const finances = await Finances.findOne({ user: user._id, month, year });
     if (!finances) continue;
 
@@ -78,10 +79,10 @@ const sendWeeklySummaries = async () => {
 };
 
 // Run manually or via cron
-cron.schedule('0 12 * * 1', () => {
-  console.log('⏰ Sending weekly summaries...');
-  sendWeeklySummaries().catch(console.error);
-});
+// cron.schedule('0 12 * * 1', () => {
+//   console.log('⏰ Sending weekly summaries...');
+//   sendWeeklySummaries().catch(console.error);
+// });
 
 // cron.schedule('* * * * *', () => {
 //   console.log('⏰ Sending weekly summaries...');
