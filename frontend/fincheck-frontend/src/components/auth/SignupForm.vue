@@ -1,5 +1,6 @@
 <template>
-    <form @submit.prevent="submitSignup" class="space-y-4 w-full max-w-sm mx-auto p-6 bg-white shadow rounded">
+    <form @submit.prevent="submitSignup"
+        class="space-y-4 w-full max-w-sm mx-auto p-6 bg-primary text-primary shadow rounded border border-default">
         <h2 class="text-xl font-bold text-center">Sign Up</h2>
 
         <div>
@@ -25,6 +26,16 @@
 
         <Button label="Create Account" class="w-full mt-10" type="submit" :loading="authStore.isLoading"
             :disabled="authStore.isLoading" />
+
+        <div class="text-center mt-4">
+            <p class="text-sm text-secondary">
+                Already have an account?
+                <RouterLink to="/login"
+                    class="text-accent-blue hover:text-blue-800 dark:hover:text-blue-400 font-medium">
+                    Log in
+                </RouterLink>
+            </p>
+        </div>
 
         <Divider />
         <OAuthButtons />

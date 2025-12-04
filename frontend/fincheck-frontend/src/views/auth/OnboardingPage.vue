@@ -1,28 +1,28 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-100">
-        <div class="max-w-md mx-auto p-8 bg-white shadow rounded-lg text-center">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6">Welcome to FinCheck!</h1>
+    <div class="min-h-screen flex items-center justify-center bg-tertiary">
+        <div class="max-w-md mx-auto p-8 bg-primary shadow rounded-lg text-center border border-default">
+            <h1 class="text-3xl font-bold text-primary mb-6">Welcome to FinCheck!</h1>
 
             <div class="space-y-4 mb-8">
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                         <span class="text-white text-sm">✓</span>
                     </div>
-                    <span class="text-gray-700">Track your income and expenses</span>
+                    <span class="text-secondary">Track your income and expenses</span>
                 </div>
 
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                         <span class="text-white text-sm">✓</span>
                     </div>
-                    <span class="text-gray-700">Monitor your financial goals</span>
+                    <span class="text-secondary">Monitor your financial goals</span>
                 </div>
 
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                         <span class="text-white text-sm">✓</span>
                     </div>
-                    <span class="text-gray-700">Get weekly summaries</span>
+                    <span class="text-secondary">Get weekly summaries</span>
                 </div>
             </div>
 

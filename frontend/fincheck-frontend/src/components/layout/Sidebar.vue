@@ -1,6 +1,6 @@
 <template>
     <aside 
-        class="bg-white shadow-sm border-r w-64 h-screen fixed left-0 top-0 pt-20 transition-transform duration-300 z-30"
+        class="bg-primary shadow-sm border-r border-default w-64 h-screen fixed left-0 top-0 pt-20 transition-transform duration-300 z-30"
         :class="[
             isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         ]"
@@ -13,8 +13,8 @@
 
 
                     <RouterLink to="/transactions"
-                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                        active-class="bg-blue-50 text-blue-600"
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue"
                         @click="$emit('close-mobile')"
                     >
                         <i class="pi pi-list mr-3"></i>
@@ -22,8 +22,8 @@
                     </RouterLink>
 
                     <RouterLink to="/dashboard"
-                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                        active-class="bg-blue-50 text-blue-600"
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue"
                         @click="$emit('close-mobile')"
                     >
                         <i class="pi pi-home mr-3"></i>
@@ -33,8 +33,8 @@
 
 
                     <RouterLink to="/budget"
-                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                        active-class="bg-blue-50 text-blue-600"
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue"
                         @click="$emit('close-mobile')"
                     >
                         <i class="pi pi-wallet mr-3"></i>
@@ -42,8 +42,8 @@
                     </RouterLink>
 
                     <RouterLink to="/categories"
-                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                        active-class="bg-blue-50 text-blue-600"
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue"
                         @click="$emit('close-mobile')"
                     >
                         <i class="pi pi-tags mr-3"></i>
@@ -53,7 +53,7 @@
             </nav>
 
             <!-- Bottom Section -->
-            <div class="px-4 py-6 border-t">
+            <div class="px-4 py-6 border-t border-default">
                 <div class="space-y-2">
                     <!-- Dark Mode Toggle -->
                     <Button>
@@ -61,8 +61,8 @@
                     </Button>
                     <!-- Settings Link -->
                     <RouterLink to="/settings"
-                        class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                        active-class="bg-blue-50 text-blue-600"
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue"
                         @click="$emit('close-mobile')"
                     >
                         <i class="pi pi-cog mr-3"></i>

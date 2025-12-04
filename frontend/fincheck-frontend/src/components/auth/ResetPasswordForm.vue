@@ -1,9 +1,9 @@
 <!-- src/components/auth/ResetPasswordForm.vue -->
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-100">
-        <form @submit.prevent="submitResetPassword" class="space-y-4 w-full max-w-sm mx-auto p-6 bg-white shadow rounded">
+    <div class="min-h-screen flex items-center justify-center bg-tertiary">
+        <form @submit.prevent="submitResetPassword" class="space-y-4 w-full max-w-sm mx-auto p-6 bg-primary text-primary shadow rounded border border-default">
             <h2 class="text-xl font-semibold text-center">Set New Password</h2>
-            <p class="text-sm text-gray-600 text-center">Enter your new password below.</p>
+            <p class="text-sm text-secondary text-center">Enter your new password below.</p>
 
             <div v-if="message" :class="messageClass" class="p-3 rounded text-sm">
                 {{ message }}
@@ -48,7 +48,7 @@
             />
 
             <div class="text-center mt-4">
-                <router-link to="/login" class="text-sm text-blue-600 hover:text-blue-800">
+                <router-link to="/login" class="text-sm text-accent-blue hover:text-blue-800 dark:hover:text-blue-400">
                     Back to Login
                 </router-link>
             </div>

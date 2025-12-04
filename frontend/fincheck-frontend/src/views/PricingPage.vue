@@ -1,6 +1,6 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-100">
-        <div class="max-w-xl mx-auto p-8 bg-white shadow rounded-lg text-center space-y-6">
+    <div class="min-h-screen flex items-center justify-center bg-tertiary">
+        <div class="max-w-xl mx-auto p-8 bg-primary shadow rounded-lg text-center space-y-6 border border-default">
             <h1 class="text-3xl font-bold text-accent-blue">FinCheck Premium</h1>
             <p class="text-lg text-secondary">Unlock unlimited access to your financial data!</p>
 
@@ -13,7 +13,7 @@
             </Message>
 
             <div class="grid grid-cols-1 gap-4 text-left">
-                <div class="p-4 border rounded-lg bg-blue-50">
+                <div class="p-4 border border-default rounded-lg bg-blue-50 dark:bg-blue-900/20">
                     <h3 class="font-semibold text-accent-blue mb-2">Premium Tier - Unlock Everything</h3>
                     <ul class="text-sm text-secondary space-y-2 mb-4">
                         <li class="flex items-center gap-2"><i class="pi pi-check text-accent-green"></i> Unlimited
@@ -33,7 +33,7 @@
                     <p v-if="!authStore.isAuthenticated" class="text-xs text-muted mt-2">Please log in to upgrade.</p>
                 </div>
 
-                <div class="p-4 border rounded-lg">
+                <div class="p-4 border border-default rounded-lg">
                     <h3 class="font-semibold text-primary mb-2">Free Tier</h3>
                     <ul class="text-sm text-secondary space-y-1">
                         <li class="flex items-center gap-2"><i class="pi pi-check text-accent-green"></i> Transaction
@@ -49,7 +49,7 @@
             </div>
 
 
-            <router-link to="/transactions" class="text-sm text-blue-600 hover:text-blue-800">
+            <router-link to="/transactions" class="text-sm text-accent-blue hover:text-blue-800 dark:hover:text-blue-400">
                 Back to my dashboard
             </router-link>
         </div>

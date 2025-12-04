@@ -1,9 +1,9 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="min-h-screen flex items-center justify-center bg-tertiary">
         <form @submit.prevent="submitForgotPassword"
-            class="space-y-4 w-full max-w-sm mx-auto p-6 bg-white shadow rounded">
+            class="space-y-4 w-full max-w-sm mx-auto p-6 bg-primary text-primary shadow rounded border border-default">
             <h2 class="text-xl font-semibold text-center">Reset Password</h2>
-            <p class="text-sm text-gray-600 text-center">Enter your email address and we'll send you a link to reset
+            <p class="text-sm text-secondary text-center">Enter your email address and we'll send you a link to reset
                 your password.</p>
 
             <div>
@@ -16,7 +16,7 @@
                 :disabled="authStore.isLoading" :loading="authStore.isLoading" />
 
             <div class="text-center mt-4">
-                <router-link to="/login" class="text-sm text-blue-600 hover:text-blue-800">
+                <router-link to="/login" class="text-sm text-accent-blue hover:text-blue-800 dark:hover:text-blue-400">
                     Back to Login
                 </router-link>
             </div>

@@ -1,5 +1,6 @@
 <template>
-    <form @submit.prevent="submitLogin" class="space-y-4 w-full max-w-sm mx-auto p-6 bg-white shadow rounded">
+    <form @submit.prevent="submitLogin"
+        class="space-y-4 w-full max-w-sm mx-auto p-6 bg-primary text-primary shadow rounded border border-default">
         <h2 class="text-xl font-semibold text-center">Log in</h2>
 
         <div>
@@ -17,10 +18,18 @@
         <Button type="submit" :label="authStore.isLoading ? 'Logging in...' : 'Login'" class="w-full mt-10"
             :loading="authStore.isLoading" :disabled="authStore.isLoading" />
 
-        <div class="text-center mt-3">
-            <RouterLink to="/forgot-password" class="text-sm text-blue-600 hover:text-blue-800">
+        <div class="text-center mt-3 space-y-2">
+            <RouterLink to="/forgot-password"
+                class="block text-sm text-accent-blue hover:text-blue-800 dark:hover:text-blue-400">
                 Forgot your password?
             </RouterLink>
+            <p class="text-sm text-secondary">
+                Don't have an account?
+                <RouterLink to="/signup"
+                    class="text-accent-blue hover:text-blue-800 dark:hover:text-blue-400 font-medium">
+                    Sign up
+                </RouterLink>
+            </p>
         </div>
 
         <Divider />
