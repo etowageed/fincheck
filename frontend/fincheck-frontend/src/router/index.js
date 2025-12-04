@@ -69,11 +69,13 @@ const routes = [
     path: "/forgot-password",
     name: "ForgotPassword",
     component: () => import("@/views/auth/ForgotPassword.vue"),
+    meta: { hideSidebar: true },
   },
   {
     path: "/reset-password/:token",
     name: "ResetPassword",
     component: () => import("@/views/auth/ResetPassword.vue"),
+    meta: { hideSidebar: true },
   },
 
   {
