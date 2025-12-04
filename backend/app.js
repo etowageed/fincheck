@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const enforce = require('express-sslify'); // Add this for HTTPS enforcement
 const session = require('express-session'); // Add this
 require('dotenv').config();
+const MongoStore = require('connect-mongo').default;
 const paymentController = require('./controllers/paymentController');
 const morgan = require('morgan'); // For logging requests in development
 const cors = require('cors'); // For handling CORS
@@ -21,9 +22,10 @@ app.set('trust proxy', 'loopback'); // uncomment in production
 app.use(helmet()); // Set security headers
 // TODO uncomment this code when in production to enforce HTTPS
 // Only use this in production where a load balancer/proxy handles SSL termination
-// if (process.env.NODE_ENV === 'production') {
-//   app.use(enforce.HTTPS({ trustProtoHeader: true })); // Important for Heroku, AWS ELB, etc.
-// }
+// Only use this in production where a load balancer/proxy handles SSL termination
+if (process.env.NODE_ENV === 'production') {
+  app.use(enforce.HTTPS({ trustProtoHeader: true })); // Important for Heroku, AWS ELB, etc.
+}
 
 // Morgan for logging requests
 if (process.env.NODE_ENV === 'development') {
@@ -52,6 +54,10 @@ app.use(
     secret: process.env.SESSION_SECRET || 'your-secret-key', // Use a strong, unique secret
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.DATABASE,
+      ttl: 24 * 60 * 60, // 1 day
+    }),
     cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 1 day
   })
 );

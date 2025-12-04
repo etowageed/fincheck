@@ -8,6 +8,10 @@ const {
   createToken,
   sendTokenWithCookie,
 } = require('../controllers/authController');
+const {
+  signupValidator,
+  loginValidator,
+} = require('../middleware/validationMiddleware');
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -15,8 +19,8 @@ const loginLimiter = rateLimit({
   message: 'Too many login attempts from this IP, please try again later.',
 });
 
-router.post('/signup', authController.signup);
-router.post('/login', loginLimiter, authController.login);
+router.post('/signup', signupValidator, authController.signup);
+router.post('/login', loginLimiter, loginValidator, authController.login);
 router.get('/logout', authController.logout);
 router.get('/isLoggedIn', authController.isLoggedIn);
 router.post('/forgotpassword', authController.forgotPassword);
