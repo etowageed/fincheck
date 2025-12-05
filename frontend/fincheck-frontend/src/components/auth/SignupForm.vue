@@ -27,6 +27,13 @@
         <Button label="Create Account" class="w-full mt-10" type="submit" :loading="authStore.isLoading"
             :disabled="authStore.isLoading" />
 
+        <p class="text-xs text-secondary text-center mt-4">
+            By creating an account, you agree to our
+            <RouterLink to="/terms" class="text-accent-blue hover:underline">Terms</RouterLink>
+            and
+            <RouterLink to="/privacy" class="text-accent-blue hover:underline">Privacy Policy</RouterLink>.
+        </p>
+
         <div class="text-center mt-4">
             <p class="text-sm text-secondary">
                 Already have an account?

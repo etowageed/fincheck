@@ -6,76 +6,85 @@ const routes = [
   {
     path: "/",
     component: () => import("@/views/Home.vue"), // Add this to redirect root to login, later make it the route for the landing page
-    meta: { hideSidebar: true },
+    meta: { hideSidebar: true, title: "Home" },
   },
   {
     path: "/login",
     name: "Login",
     component: () => import("@/views/auth/Login.vue"),
-    meta: { hideSidebar: true },
+    meta: { hideSidebar: true, title: "Login" },
   },
   {
     path: "/signup",
     name: "Signup",
     component: () => import("@/views/auth/Signup.vue"),
-    meta: { hideSidebar: true },
+    meta: { hideSidebar: true, title: "Sign Up" },
   },
-
   {
     path: "/onboarding",
     name: "Onboarding",
     component: () => import("@/views/auth/OnboardingPage.vue"),
-    meta: { requiresAuth: true, hideSidebar: true }, // Add meta field to indicate this route requires authentication
+    meta: { requiresAuth: true, hideSidebar: true, title: "Get Started" },
   },
-
   {
     path: "/transactions",
     name: "Transactions",
     component: () => import("@/views/TransactionsPage.vue"),
-    meta: { requiresAuth: true }, // Add meta field to indicate this route requires authentication
+    meta: { requiresAuth: true, title: "Transactions" },
   },
   {
     path: "/dashboard",
     name: "Dashboard",
     component: () => import("@/views/DashboardPage.vue"),
-    meta: { requiresAuth: true }, // Add meta field to indicate this route requires authentication
+    meta: { requiresAuth: true, title: "Dashboard" },
   },
   {
     path: "/budget",
     name: "Budget",
     component: () => import("@/views/BudgetPage.vue"),
-    meta: { requiresAuth: true }, // Add meta field to indicate this route requires authentication
+    meta: { requiresAuth: true, title: "Budget" },
   },
   {
     path: "/categories",
     name: "Categories",
     component: () => import("@/views/CategoriesPage.vue"),
-    meta: { requiresAuth: true }, // Add meta field to indicate this route requires authentication
+    meta: { requiresAuth: true, title: "Categories" },
   },
   {
     path: "/settings",
     name: "Settings",
     component: () => import("@/views/SettingsPage.vue"),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: "Settings" },
   },
-
   {
     path: "/pricing",
     name: "Pricing",
     component: () => import("@/views/PricingPage.vue"),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: "Pricing" },
   },
   {
     path: "/forgot-password",
     name: "ForgotPassword",
     component: () => import("@/views/auth/ForgotPassword.vue"),
-    meta: { hideSidebar: true },
+    meta: { hideSidebar: true, title: "Forgot Password" },
   },
   {
     path: "/reset-password/:token",
     name: "ResetPassword",
     component: () => import("@/views/auth/ResetPassword.vue"),
-    meta: { hideSidebar: true },
+    meta: { hideSidebar: true, title: "Reset Password" },
+  },
+  {
+    path: "/terms",
+    name: "TermsOfService",
+    component: () => import("@/views/legal/TermsOfService.vue"),
+    meta: { hideSidebar: true, title: "Terms of Service" },
+  },
+  {
+    path: "/privacy",
+    name: "PrivacyPolicy",
+    component: () => import("@/views/legal/PrivacyPolicy.vue"),
+    meta: { hideSidebar: true, title: "Privacy Policy" },
   },
 
   {
@@ -99,6 +108,8 @@ router.beforeEach(async (to, from, next) => {
     "/signup",
     "/forgot-password",
     "/reset-password",
+    "/terms",
+    "/privacy",
   ];
   const isPublicRoute = publicRoutes.some((path) => to.path.startsWith(path));
 
@@ -134,6 +145,12 @@ router.beforeEach(async (to, from, next) => {
       console.error("Auth check failed:", error);
       return next("/login");
     }
+  }
+
+  if (to.meta.title) {
+    document.title = `${to.meta.title} - FinCheck`;
+  } else {
+    document.title = "FinCheck";
   }
 
   return next();
