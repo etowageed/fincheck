@@ -20,6 +20,7 @@ export default {
           blue: "rgb(var(--color-accent-blue) / <alpha-value>)",
           green: "rgb(var(--color-accent-green) / <alpha-value>)",
           red: "rgb(var(--color-accent-red) / <alpha-value>)",
+          yellow: "#FCD34D",
         },
         border: {
           default: "rgb(var(--color-border) / <alpha-value>)",

@@ -5,7 +5,8 @@ import { useAuthStore } from "@/stores/auth";
 const routes = [
   {
     path: "/",
-    component: () => import("@/views/Home.vue"), // Add this to redirect root to login, later make it the route for the landing page
+    // component: () => import("@/views/Home.vue"), // Add this to redirect root to login, later make it the route for the landing page
+    component: () => import("@/views/LandingPage.vue"), // Add this to redirect root to login, later make it the route for the landing page
     meta: { hideSidebar: true, title: "Home" },
   },
   {
