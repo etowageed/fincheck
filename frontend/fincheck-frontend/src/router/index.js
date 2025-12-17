@@ -87,6 +87,12 @@ const routes = [
     component: () => import("@/views/legal/PrivacyPolicy.vue"),
     meta: { hideSidebar: true, title: "Privacy Policy" },
   },
+  {
+    path: "/admin",
+    name: "AdminDashboard",
+    component: () => import("@/views/AdminDashboard.vue"),
+    meta: { requiresAuth: true, requiresAdmin: true, title: "Admin Dashboard" },
+  },
 
   {
     path: "/:pathMatch(.*)*",
@@ -126,6 +132,9 @@ router.beforeEach(async (to, from, next) => {
     // If the auth store already knows the user is authenticated, just proceed.
     // This prevents the checkAuth() call on every subsequent navigation.
     if (authStore.isAuthenticated) {
+      if (to.meta.requiresAdmin && authStore.user?.role !== "admin") {
+        return next("/transactions");
+      }
       return next();
     }
 
@@ -134,6 +143,9 @@ router.beforeEach(async (to, from, next) => {
     try {
       const isStillAuthenticated = await authStore.checkAuth();
       if (isStillAuthenticated) {
+        if (to.meta.requiresAdmin && authStore.user?.role !== "admin") {
+          return next("/transactions");
+        }
         return next();
       }
 
