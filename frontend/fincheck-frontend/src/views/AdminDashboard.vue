@@ -34,10 +34,14 @@
           </template>
         </Column>
 
-        <Column header="Actions" style="width: 10%">
+        <Column header="Actions" style="width: 25%">
           <template #body="{ data }">
-            <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Delete" @click="confirmDelete(data)"
-              :disabled="data.role === 'admin'" />
+            <div class="flex gap-2">
+              <DropdownMenu :items="getSubscriptionActions(data)" :entity="data" icon="pi pi-cog"
+                @action="handleMenuAction" />
+              <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Delete" @click="confirmDelete(data)"
+                :disabled="data.role === 'admin'" />
+            </div>
           </template>
         </Column>
       </DataTable>
@@ -60,6 +64,7 @@ import api from '@/services/api';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
+import DropdownMenu from '@/components/common/DropdownMenu.vue';
 import Dialog from 'primevue/dialog';
 import { useToast } from 'primevue/usetoast';
 
@@ -70,6 +75,51 @@ const toast = useToast();
 const deleteDialogVisible = ref(false);
 const deleteLoading = ref(false);
 const userToDelete = ref(null);
+
+const getSubscriptionActions = (user) => {
+  return [
+    {
+      label: 'Upgrade to Premium',
+      icon: 'pi pi-star',
+      action: 'upgrade_premium',
+      disabled: user.subscriptionStatus === 'premium'
+    },
+    {
+      label: 'Downgrade to Free',
+      icon: 'pi pi-arrow-down',
+      action: 'downgrade_free',
+      disabled: user.subscriptionStatus === 'free'
+    }
+  ];
+};
+
+const handleMenuAction = ({ action, entity }) => {
+  if (action === 'upgrade_premium') {
+    updateSubscriptionStatus(entity, 'premium');
+  } else if (action === 'downgrade_free') {
+    updateSubscriptionStatus(entity, 'free');
+  }
+};
+
+const updateSubscriptionStatus = async (user, status) => {
+  try {
+    const response = await api.patch(`/users/${user._id || user.id}`, {
+      subscriptionStatus: status
+    });
+
+    // Update local state
+    const updatedUser = response.data.data;
+    const index = users.value.findIndex(u => (u._id || u.id) === (user._id || user.id));
+    if (index !== -1) {
+      users.value[index] = { ...users.value[index], ...updatedUser };
+    }
+
+    toast.add({ severity: 'success', summary: 'Success', detail: `User subscription updated to ${status}`, life: 3000 });
+  } catch (error) {
+    console.error('Failed to update subscription', error);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update subscription', life: 3000 });
+  }
+};
 
 const fetchUsers = async () => {
   loading.value = true;

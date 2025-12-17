@@ -39,11 +39,13 @@ exports.getUser = catchAsync(async (req, res, next) => {
 // updating a user
 
 exports.updateUser = catchAsync(async (req, res, next) => {
-  const { name, email } = req.body;
+  const { name, email, subscriptionStatus, role } = req.body;
   const updateData = {};
 
   if (name) updateData.name = name;
   if (email) updateData.email = email;
+  if (subscriptionStatus) updateData.subscriptionStatus = subscriptionStatus;
+  if (role) updateData.role = role;
 
   // checking if email being updated and already exists
   if (email) {
