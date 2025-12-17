@@ -41,7 +41,7 @@
                         Categories
                     </RouterLink>
 
-                    <RouterLink v-if="authStore.user?.role === 'admin'" to="/admin"
+                    <RouterLink v-if="isAdmin" to="/admin"
                         class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
                         active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-users mr-3"></i>
@@ -75,12 +75,18 @@
 </template>
 
 <script setup>
+import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
 const authStore = useAuthStore();
+const isAdmin = computed(() => authStore.user?.role === 'admin');
 
 const router = useRouter();
+
+onMounted(async () => {
+    await authStore.checkAuth();
+});
 
 defineProps({
     isMobileOpen: {
