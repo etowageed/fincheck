@@ -51,7 +51,7 @@
             </div>
             <div>
                 <label for="newPassword" class="block text-sm font-medium text-secondary mb-2">New Password</label>
-                <Password id="newPassword" v-model="passwordForm.newPassword" class="w-full" toggleMask
+                <Password id="newPassword" v-model="passwordForm.newPassword" class="w-full" :feedback="true" toggleMask
                     inputClass="w-full" />
             </div>
             <div>

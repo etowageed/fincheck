@@ -20,7 +20,7 @@
 
         <div>
             <label for="confirm" class="block text-sm mb-1">Confirm Password</label>
-            <Password v-model="confirmPassword" id="confirm" toggleMask class="w-full" inputClass="w-full"
+            <Password v-model="confirmPassword" id="confirm" :feedback="false" toggleMask class="w-full" inputClass="w-full"
                 :disabled="authStore.isLoading" />
         </div>
 

@@ -11,7 +11,7 @@
 
         <div>
             <label for="password" class="block text-sm mb-1">Password</label>
-            <Password id="password" v-model="password" toggleMask class="w-full" inputClass="w-full"
+            <Password id="password" v-model="password" :feedback="false" toggleMask class="w-full" inputClass="w-full"
                 :disabled="authStore.isLoading" />
         </div>
 
