@@ -102,7 +102,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     new: true,
     runValidators: true,
     select:
-      'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name email role _id -password',
+      'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name email role _id',
   });
 
   if (!user) {
