@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="">
   <head>
     <meta charset="UTF-8" />
@@ -9,8 +9,11 @@
       name="description"
       content="Track your income, expenses, and budget with FinCheck. The simple, secure way to manage your personal finances."
     />
-
-    <!-- Open Graph / Facebook -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://fincheck.com/" />
     <meta property="og:title" content="FinCheck - Personal Finance Tracker" />
@@ -20,7 +23,7 @@
     />
     <meta property="og:image" content="https://fincheck.com/og-image.jpg" />
 
-    <!-- Twitter -->
+   
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://fincheck.com/" />
     <meta
@@ -40,5 +43,452 @@
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
-</html>
+</html> -->
 <!-- TODO: Add more meta tags for SEO and replace with actual app name and logos-->
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinCheck - Lifestyle Finance Mockup</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', "sans-serif"],
+            },
+            colors: {
+              cream: { 50: "#FDFBF7", 100: "#F7F4EB" },
+              ink: {
+                900: "#0F172A",
+                800: "#1E293B",
+                400: "#94A3B8",
+                100: "#E2E8F0",
+              },
+              pop: {
+                purple: "#8B5CF6",
+                lime: "#84CC16",
+                pink: "#EC4899",
+                yellow: "#FCD34D",
+                cyan: "#06B6D4",
+              },
+            },
+            animation: {
+              float: "float 6s ease-in-out infinite",
+              "float-delayed": "float 6s ease-in-out 3s infinite",
+              "bounce-slow": "bounce 3s infinite",
+            },
+            keyframes: {
+              float: {
+                "0%, 100%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-20px)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-cream-50 text-ink-900 font-sans selection:bg-pop-lime selection:text-ink-900 overflow-x-hidden"
+  >
+    <!-- Static Landing Page Container -->
+    <div id="static-landing" style="display: none">
+      <nav class="fixed w-full z-50 top-0 px-6 py-4">
+        <div
+          class="max-w-7xl mx-auto bg-white/70 backdrop-blur-xl border border-white/40 rounded-full px-6 py-3 flex justify-between items-center shadow-lg shadow-black/5"
+        >
+          <div class="flex items-center gap-2 cursor-pointer">
+            <div
+              class="w-8 h-8 bg-pop-lime rounded-lg flex items-center justify-center text-ink-900 font-black text-xl rotate-3 shadow-sm"
+            >
+              F
+            </div>
+            <span class="font-bold text-xl tracking-tight">FinCheck</span>
+          </div>
+
+          <div
+            class="hidden md:flex items-center gap-8 font-medium text-sm text-ink-800"
+          >
+            <a href="#features" class="hover:text-pop-purple transition-colors"
+              >Features</a
+            >
+            <a href="#pricing" class="hover:text-pop-purple transition-colors"
+              >Pricing</a
+            >
+            <a href="/login" class="hover:text-pop-purple transition-colors"
+              >Log in</a
+            >
+            <a href="/signup">
+              <button
+                class="bg-ink-900 text-white px-6 py-2.5 rounded-full font-bold hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-ink-900/20"
+              >
+                Get Started
+              </button>
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <section class="pt-40 pb-20 px-4 relative overflow-hidden">
+        <div
+          class="absolute top-20 left-10 w-72 h-72 bg-pop-purple/10 rounded-full blur-[100px]"
+        ></div>
+        <div
+          class="absolute bottom-20 right-10 w-96 h-96 bg-pop-lime/10 rounded-full blur-[100px]"
+        ></div>
+
+        <div class="max-w-7xl mx-auto text-center relative z-10">
+          <div
+            class="inline-block mb-6 px-4 py-1.5 rounded-full bg-pop-yellow/10 text-yellow-700 border border-pop-yellow/30 font-bold text-xs uppercase tracking-wider animate-bounce-slow"
+          >
+            ✨ Voted #1 "Adulting" Tool
+          </div>
+
+          <h1
+            class="text-6xl md:text-8xl font-extrabold tracking-tight leading-[1.1] mb-8 text-ink-900"
+          >
+            Money doesn't have<br />
+            to be
+            <span
+              class="text-transparent bg-clip-text bg-gradient-to-r from-pop-purple via-pop-pink to-pop-yellow"
+              >scary.</span
+            >
+          </h1>
+
+          <p
+            class="text-xl md:text-2xl text-ink-400 max-w-2xl mx-auto mb-12 font-medium"
+          >
+            Stop wondering where your salary went. FinCheck is the colorful,
+            non-judgmental way to track transactions, crush budgets, and
+            actually save.
+          </p>
+
+          <div
+            class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-24"
+          >
+            <a href="/signup">
+              <button
+                class="px-8 py-4 bg-pop-lime text-ink-900 rounded-2xl font-black text-lg shadow-[0_10px_40px_-10px_rgba(132,204,22,0.5)] hover:-translate-y-1 transition-all"
+              >
+                Start for Free 🚀
+              </button>
+            </a>
+            <a href="#features">
+              <button
+                class="px-8 py-4 bg-white border-2 border-ink-100 rounded-2xl font-bold text-lg hover:border-pop-purple hover:text-pop-purple transition-all"
+              >
+                See how it works
+              </button>
+            </a>
+          </div>
+
+          <div
+            class="relative max-w-5xl mx-auto h-[450px] md:h-[550px]"
+            style="perspective: 1000px"
+          >
+            <div
+              class="absolute inset-x-0 mx-auto w-[90%] md:w-[70%] bg-white rounded-[2.5rem] shadow-2xl border border-ink-100 p-8 transform rotate-x-12 hover:rotate-x-0 transition-all duration-700 z-20"
+            >
+              <div class="flex justify-between items-center mb-8">
+                <div class="flex gap-3">
+                  <div class="w-12 h-12 rounded-full bg-gray-100"></div>
+                  <div>
+                    <div class="h-4 w-32 bg-gray-100 rounded-full mb-2"></div>
+                    <div class="h-3 w-20 bg-gray-50 rounded-full"></div>
+                  </div>
+                </div>
+                <div
+                  class="px-4 py-2 bg-pop-lime/10 text-pop-lime rounded-full font-bold text-sm"
+                >
+                  Premium 🌟
+                </div>
+              </div>
+              <div
+                class="h-48 w-full bg-gradient-to-b from-pop-purple/5 to-transparent rounded-2xl border-b border-pop-purple/10 flex items-end justify-between px-6 pb-0 gap-2"
+              >
+                <div class="w-full bg-pop-purple/30 rounded-t-lg h-[40%]"></div>
+                <div class="w-full bg-pop-purple/50 rounded-t-lg h-[60%]"></div>
+                <div class="w-full bg-pop-purple/20 rounded-t-lg h-[30%]"></div>
+                <div
+                  class="w-full bg-pop-purple rounded-t-lg h-[80%] shadow-lg shadow-pop-purple/30"
+                ></div>
+                <div class="w-full bg-pop-purple/40 rounded-t-lg h-[50%]"></div>
+                <div class="w-full bg-pop-purple/90 rounded-t-lg h-[90%]"></div>
+              </div>
+              <div class="mt-8 space-y-3">
+                <div class="h-12 w-full bg-cream-50 rounded-xl"></div>
+                <div class="h-12 w-full bg-cream-50 rounded-xl"></div>
+              </div>
+            </div>
+
+            <div
+              class="absolute top-10 left-0 md:-left-4 bg-white p-4 pr-8 rounded-2xl shadow-xl border border-ink-100 animate-float z-30 flex items-center gap-4 -rotate-6"
+            >
+              <div
+                class="w-12 h-12 bg-pop-pink/10 rounded-full flex items-center justify-center text-2xl"
+              >
+                ☕️
+              </div>
+              <div>
+                <p class="font-bold text-ink-900 text-sm">Fancy Latte</p>
+                <p class="text-pop-pink font-black">-$6.50</p>
+              </div>
+            </div>
+
+            <div
+              class="absolute bottom-40 right-0 md:-right-4 bg-white p-4 pr-8 rounded-2xl shadow-xl border border-ink-100 animate-float-delayed z-30 flex items-center gap-4 rotate-6"
+            >
+              <div
+                class="w-12 h-12 bg-pop-lime/10 rounded-full flex items-center justify-center text-2xl"
+              >
+                💰
+              </div>
+              <div>
+                <p class="font-bold text-ink-900 text-sm">Payday!</p>
+                <p class="text-pop-lime font-black">+$4,200.00</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="py-24 px-4 bg-white">
+        <div class="max-w-7xl mx-auto">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-black mb-6 text-ink-900">
+              Organize your chaos.
+            </h2>
+            <p class="text-ink-400 text-lg max-w-2xl mx-auto">
+              Financial freedom isn't about being boring. It's about knowing
+              exactly how much you can spend on the fun stuff.
+            </p>
+          </div>
+
+          <div
+            class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]"
+          >
+            <div
+              class="md:col-span-2 bg-cream-50 rounded-[2.5rem] p-10 relative overflow-hidden group hover:shadow-xl transition-all duration-500 border border-transparent hover:border-pop-purple/20"
+            >
+              <div class="relative z-10">
+                <div
+                  class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm"
+                >
+                  📊
+                </div>
+                <h3 class="text-3xl font-bold mb-3 text-ink-900">
+                  Deep Dive Analytics
+                </h3>
+                <p class="text-ink-400 max-w-sm font-medium">
+                  Visualize your spending patterns. See exactly which category
+                  is eating your wallet (spoiler: it's food).
+                </p>
+              </div>
+              <div
+                class="absolute -right-10 -bottom-10 w-64 h-64 bg-pop-purple/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"
+              ></div>
+            </div>
+
+            <div
+              class="md:row-span-2 bg-ink-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden flex flex-col justify-between group"
+            >
+              <div>
+                <div
+                  class="w-14 h-14 bg-ink-800 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm border border-white/10"
+                >
+                  📅
+                </div>
+                <h3 class="text-3xl font-bold mb-3">Recurring Nightmares?</h3>
+                <p class="text-gray-400 font-medium">
+                  We track subscriptions so Netflix doesn't charge you for the
+                  50th month without you knowing.
+                </p>
+              </div>
+
+              <div class="mt-8 space-y-3">
+                <div
+                  class="flex items-center gap-3 p-3 bg-white/10 rounded-xl backdrop-blur-sm border border-white/5"
+                >
+                  <div class="w-2 h-2 bg-pop-pink rounded-full"></div>
+                  <span class="text-sm font-bold flex-1">Netflix</span>
+                  <span class="font-bold text-pop-pink">-$15</span>
+                </div>
+                <div
+                  class="flex items-center gap-3 p-3 bg-white/10 rounded-xl backdrop-blur-sm border border-white/5"
+                >
+                  <div class="w-2 h-2 bg-pop-yellow rounded-full"></div>
+                  <span class="text-sm font-bold flex-1">Gym</span>
+                  <span class="font-bold text-pop-yellow">-$40</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="bg-pop-lime/10 rounded-[2.5rem] p-10 border border-pop-lime/20 group hover:bg-pop-lime/20 transition-colors"
+            >
+              <div
+                class="w-14 h-14 bg-pop-lime text-ink-900 rounded-2xl flex items-center justify-center text-2xl mb-6 font-bold shadow-sm group-hover:rotate-12 transition-transform"
+              >
+                🏷️
+              </div>
+              <h3 class="text-2xl font-bold mb-2 text-ink-900">
+                Smart Categories
+              </h3>
+              <p class="text-ink-400 text-sm font-bold">
+                Your money, your labels.
+              </p>
+            </div>
+
+            <div
+              class="bg-pop-cyan/10 rounded-[2.5rem] p-10 border border-pop-cyan/20 group hover:bg-pop-cyan/20 transition-colors"
+            >
+              <div
+                class="w-14 h-14 bg-pop-cyan text-white rounded-2xl flex items-center justify-center text-2xl mb-6 font-bold shadow-sm group-hover:-translate-y-2 transition-transform"
+              >
+                📂
+              </div>
+              <h3 class="text-2xl font-bold mb-2 text-ink-900">Data Export</h3>
+              <p class="text-ink-400 text-sm font-bold">
+                PDF or Excel. You own your data.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="py-24 px-4 bg-cream-50">
+        <div class="max-w-4xl mx-auto text-center">
+          <h2 class="text-4xl md:text-5xl font-black mb-12 text-ink-900">
+            Fair pricing. No hidden math.
+          </h2>
+
+          <div class="grid md:grid-cols-2 gap-8 items-stretch">
+            <div
+              class="bg-white p-8 rounded-[2rem] border border-ink-100 shadow-lg flex flex-col hover:border-pop-lime transition-colors"
+            >
+              <h3 class="text-2xl font-bold mb-2 text-ink-900">The Starter</h3>
+              <div class="text-5xl font-black mb-6 text-ink-900">$0</div>
+              <p class="text-ink-400 mb-8 font-medium">
+                Perfect for tracking this month's survival.
+              </p>
+              <ul
+                class="text-left space-y-4 mb-8 flex-1 text-ink-800 font-medium"
+              >
+                <li class="flex items-center gap-3">
+                  <i class="pi pi-check text-pop-lime font-bold"></i> Current
+                  Month History
+                </li>
+                <li class="flex items-center gap-3">
+                  <i class="pi pi-check text-pop-lime font-bold"></i> Basic
+                  Budgeting
+                </li>
+                <li class="flex items-center gap-3">
+                  <i class="pi pi-check text-pop-lime font-bold"></i> Unlimited
+                  Transactions
+                </li>
+              </ul>
+              <a
+                href="/signup"
+                class="w-full py-3 rounded-xl border-2 border-ink-100 font-bold hover:bg-ink-100 transition-colors block text-center"
+              >
+                Start Free
+              </a>
+            </div>
+
+            <div
+              class="bg-ink-900 text-white p-8 rounded-[2rem] shadow-2xl shadow-pop-purple/20 relative flex flex-col transform md:-translate-y-4"
+            >
+              <div
+                class="absolute top-0 right-0 bg-pop-purple text-white text-xs font-bold px-4 py-2 rounded-bl-2xl rounded-tr-[1.8rem]"
+              >
+                BEST VALUE
+              </div>
+              <h3 class="text-2xl font-bold mb-2 text-pop-purple">The Pro</h3>
+              <div class="text-5xl font-black mb-6">
+                $5<span class="text-lg text-gray-400 font-medium">/mo</span>
+              </div>
+              <p class="text-gray-400 mb-8 font-medium">
+                For those who want to dominate their future.
+              </p>
+              <ul class="text-left space-y-4 mb-8 flex-1 font-medium">
+                <li class="flex items-center gap-3">
+                  <i class="pi pi-check text-pop-purple font-bold"></i> 10+
+                  Years History
+                </li>
+                <li class="flex items-center gap-3">
+                  <i class="pi pi-check text-pop-purple font-bold"></i> Excel &
+                  PDF Exports
+                </li>
+                <li class="flex items-center gap-3">
+                  <i class="pi pi-check text-pop-purple font-bold"></i> Trend
+                  Comparisons
+                </li>
+              </ul>
+              <a
+                href="/signup"
+                class="w-full py-3 rounded-xl bg-pop-purple text-white font-bold hover:bg-pop-purple/90 transition-colors shadow-lg shadow-pop-purple/40 block text-center"
+              >
+                Go Premium
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="py-12 bg-white border-t border-ink-100">
+        <div
+          class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6"
+        >
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 bg-pop-lime rounded-md rotate-3"></div>
+            <span class="font-bold text-lg text-ink-900">FinCheck</span>
+          </div>
+          <div class="flex gap-6 text-sm font-bold text-ink-400">
+            <a href="#" class="hover:text-ink-900">Privacy</a>
+            <a href="#" class="hover:text-ink-900">Terms</a>
+            <a href="#" class="hover:text-ink-900">Twitter</a>
+          </div>
+          <div class="text-ink-400 text-sm font-medium">
+            © 2025 FinCheck Inc.
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- App Container -->
+    <div id="app" style="display: none"></div>
+
+    <script>
+      (function () {
+        const path = window.location.pathname;
+        const staticLanding = document.getElementById("static-landing");
+        const app = document.getElementById("app");
+
+        if (path === "/" || path === "/index.html") {
+          staticLanding.style.display = "block";
+          app.style.display = "none";
+        } else {
+          staticLanding.style.display = "none";
+          app.style.display = "block";
+        }
+      })();
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
