@@ -2,9 +2,9 @@
     <div class="card flex justify-center">
         <Button label="Create Budget" @click="visible = true" />
         <Dialog v-model:visible="visible" modal header="Create Budget" :style="{ width: '25rem' }">
-            <span class="text-surface-500 dark:text-surface-400 block mb-8">First things first, what do you earn in a
+            <span class="text-surface-500  block mb-8">First things first, what do you earn in a
                 month?</span>
-            <span class="text-surface-500 dark:text-surface-400 block mb-8 italic text-sm">Your expected monthly income
+            <span class="text-surface-500  block mb-8 italic text-sm">Your expected monthly income
                 creates the foundation for your budget.</span>
             <div class="flex items-center gap-4 mb-4">
                 <label for="income" class="font-semibold w-24">Monthly Income</label>

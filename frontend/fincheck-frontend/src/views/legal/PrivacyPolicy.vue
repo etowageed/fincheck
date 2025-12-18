@@ -2,7 +2,7 @@
     <div class="min-h-screen bg-tertiary py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl mx-auto bg-primary shadow rounded-lg p-8 border border-default">
             <h1 class="text-3xl font-bold text-primary mb-6">Privacy Policy</h1>
-            <div class="prose dark:prose-invert max-w-none text-secondary space-y-4">
+            <div class="prose  max-w-none text-secondary space-y-4">
                 <p>Last updated: December 2025</p>
 
                 <h2 class="text-xl font-semibold text-primary mt-6">1. Information We Collect</h2>
@@ -28,7 +28,7 @@
 
                 <div class="mt-8 pt-6 border-t border-default">
                     <RouterLink to="/signup"
-                        class="text-accent-blue hover:text-blue-800 dark:hover:text-blue-400 font-medium">
+                        class="text-accent-blue hover:text-blue-800  font-medium">
                         &larr; Back to Sign Up
                     </RouterLink>
                 </div>

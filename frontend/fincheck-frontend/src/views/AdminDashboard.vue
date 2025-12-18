@@ -49,7 +49,7 @@
 
     <Dialog :visible="deleteDialogVisible" @update:visible="deleteDialogVisible = $event" modal header="Confirm Action"
       :style="{ width: '25rem' }">
-      <span class="text-surface-500 dark:text-surface-400 block mb-8">Are you sure you want to delete this user?</span>
+      <span class="text-surface-500  block mb-8">Are you sure you want to delete this user?</span>
       <div class="flex justify-end gap-2">
         <Button type="button" label="Cancel" severity="secondary" @click="deleteDialogVisible = false"></Button>
         <Button type="button" label="Delete" severity="danger" @click="executeDelete" :loading="deleteLoading"></Button>

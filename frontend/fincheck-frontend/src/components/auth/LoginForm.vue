@@ -20,13 +20,13 @@
 
         <div class="text-center mt-3 space-y-2">
             <RouterLink to="/forgot-password"
-                class="block text-sm text-accent-blue hover:text-blue-800 dark:hover:text-blue-400">
+                class="block text-sm text-accent-blue hover:text-blue-800 ">
                 Forgot your password?
             </RouterLink>
             <p class="text-sm text-secondary">
                 Don't have an account?
                 <RouterLink to="/signup"
-                    class="text-accent-blue hover:text-blue-800 dark:hover:text-blue-400 font-medium">
+                    class="text-accent-blue hover:text-blue-800  font-medium">
                     Sign up
                 </RouterLink>
             </p>

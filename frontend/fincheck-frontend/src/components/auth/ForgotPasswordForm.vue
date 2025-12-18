@@ -16,7 +16,7 @@
                 :disabled="authStore.isLoading" :loading="authStore.isLoading" />
 
             <div class="text-center mt-4">
-                <router-link to="/login" class="text-sm text-accent-blue hover:text-blue-800 dark:hover:text-blue-400">
+                <router-link to="/login" class="text-sm text-accent-blue hover:text-blue-800 ">
                     Back to Login
                 </router-link>
             </div>

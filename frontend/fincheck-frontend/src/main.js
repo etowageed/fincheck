@@ -5,7 +5,7 @@ import PrimeVue from "primevue/config";
 import Aura from "@primeuix/themes/aura";
 import { createPinia } from "pinia";
 import router from "./router";
-import { useDarkMode } from "./composables/useDarkMode";
+
 import { useAuthStore } from "./stores/auth";
 import ToastService from "primevue/toastservice";
 
@@ -22,10 +22,6 @@ app.use(PrimeVue, {
   },
 });
 app.use(ToastService);
-
-// Initialize dark mode
-const { initTheme } = useDarkMode();
-initTheme();
 
 // Initialize auth before mounting
 // const authStore = useAuthStore();

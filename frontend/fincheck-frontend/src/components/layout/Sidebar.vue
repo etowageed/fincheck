@@ -12,15 +12,15 @@
 
 
                     <RouterLink to="/transactions"
-                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-list mr-3"></i>
                         Transactions
                     </RouterLink>
 
                     <RouterLink to="/dashboard"
-                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-home mr-3"></i>
                         Dashboard
                     </RouterLink>
@@ -28,22 +28,22 @@
 
 
                     <RouterLink to="/budget"
-                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-wallet mr-3"></i>
                         Budget
                     </RouterLink>
 
                     <RouterLink to="/categories"
-                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-tags mr-3"></i>
                         Categories
                     </RouterLink>
 
                     <RouterLink v-if="isAdmin" to="/admin"
-                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-users mr-3"></i>
                         Admin
                     </RouterLink>
@@ -53,14 +53,11 @@
             <!-- Bottom Section -->
             <div class="px-4 py-6 border-t border-default">
                 <div class="space-y-2">
-                    <!-- Dark Mode Toggle -->
-                    <Button>
-                        <ToggleDarkMode />
-                    </Button>
+
                     <!-- Settings Link -->
                     <RouterLink to="/settings"
-                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-900/20 text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-cog mr-3"></i>
                         Settings
                     </RouterLink>

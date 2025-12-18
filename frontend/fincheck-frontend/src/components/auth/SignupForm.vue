@@ -38,7 +38,7 @@
             <p class="text-sm text-secondary">
                 Already have an account?
                 <RouterLink to="/login"
-                    class="text-accent-blue hover:text-blue-800 dark:hover:text-blue-400 font-medium">
+                    class="text-accent-blue hover:text-blue-800  font-medium">
                     Log in
                 </RouterLink>
             </p>

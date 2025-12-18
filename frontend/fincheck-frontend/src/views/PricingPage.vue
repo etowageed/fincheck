@@ -13,7 +13,7 @@
             </Message>
 
             <div class="grid grid-cols-1 gap-4 text-left">
-                <div class="p-4 border border-default rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                <div class="p-4 border border-default rounded-lg bg-blue-50 ">
                     <h3 class="font-semibold text-accent-blue mb-2">Premium Tier - Unlock Everything</h3>
                     <ul class="text-sm text-secondary space-y-2 mb-4">
                         <li class="flex items-center gap-2"><i class="pi pi-check text-accent-green"></i> Unlimited
@@ -49,7 +49,7 @@
             </div>
 
 
-            <router-link to="/transactions" class="text-sm text-accent-blue hover:text-blue-800 dark:hover:text-blue-400">
+            <router-link to="/transactions" class="text-sm text-accent-blue hover:text-blue-800 ">
                 Back to my dashboard
             </router-link>
         </div>
