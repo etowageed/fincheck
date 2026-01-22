@@ -81,17 +81,6 @@ const userSchema = new mongoose.Schema(
       minlength: 2,
     },
 
-    stripeCustomerId: {
-      type: String,
-      default: null, // Stores the Stripe Customer ID
-      index: true,
-    },
-    stripeSubscriptionId: {
-      type: String,
-      default: null, // Stores the active Stripe Subscription ID (used for idempotency)
-      index: true,
-    },
-
     subscriptionStatus: {
       type: String,
       enum: ['free', 'premium', 'canceled'],
@@ -109,7 +98,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Middleware to hash password before saving
@@ -138,7 +127,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
-      10
+      10,
     );
     return JWTTimestamp < changedTimestamp;
   }
