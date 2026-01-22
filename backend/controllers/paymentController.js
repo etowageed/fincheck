@@ -27,7 +27,7 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
       customerEmail: userEmail,
       successUrl: `${FRONTEND_URL}/transactions?payment=success`,
       metadata: {
-        userId: userId,
+        userId,
         statusToSet: 'premium',
       },
     });
@@ -39,12 +39,39 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     });
   } catch (error) {
     console.error('Polar Checkout Creation Failed:', error);
-    return next(
-      new AppError(
-        `Failed to initiate checkout session: ${error.message}`,
-        500,
-      ),
-    );
+
+    // Try to extract a clean message from the SDK error
+    let message = 'Failed to initiate checkout session';
+
+    // Check if it's a validation error with details
+    // The SDK often returns JSON in the message for API errors
+    try {
+      // Sometimes the error.message is `API error occurred: {...json...}`
+      const jsonMatch = error.message.match(/API error occurred: (\{.*\})/);
+      if (jsonMatch && jsonMatch[1]) {
+        const errorData = JSON.parse(jsonMatch[1]);
+        // Check for Pydantic/FastAPI style validation errors
+        if (errorData.detail && Array.isArray(errorData.detail)) {
+          // Find the first meaningful error
+          const firstError = errorData.detail[0];
+          if (firstError.msg && firstError.loc) {
+            // e.g. "richgang@example.com is not a valid email address..."
+            message = firstError.msg;
+          }
+        } else if (errorData.error) {
+          message = errorData.error;
+        }
+      } else if (error.body && error.body.detail) {
+        // Sometimes it might be attached differently
+        message = error.body.detail[0]?.msg || message;
+      }
+    } catch (parseErr) {
+      // If parsing fails, fall back to the generic message or original if safe
+      console.warn('Failed to parse Polar error details', parseErr);
+      message = error.message; // Fallback
+    }
+
+    return next(new AppError(message, 500));
   }
 });
 
@@ -60,8 +87,10 @@ exports.handleWebhook = async (req, res) => {
     const webhookHeaders = req.headers;
 
     // Validate the event using Polar SDK
-    // Note: The SDK's validateWebhook currently validates schema match.
-    // Ensure POLAR_WEBHOOK_SECRET is set if SDK updates to use it.
+    if (!process.env.POLAR_WEBHOOK_SECRET) {
+      throw new Error('POLAR_WEBHOOK_SECRET is not defined');
+    }
+
     const result = await polar.validateWebhook({
       request: {
         body: webhookBody,
@@ -69,6 +98,7 @@ exports.handleWebhook = async (req, res) => {
         method: 'POST',
         url: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
       },
+      secret: process.env.POLAR_WEBHOOK_SECRET,
     });
 
     event = result;
@@ -78,7 +108,7 @@ exports.handleWebhook = async (req, res) => {
   }
 
   const eventType = event.type;
-  const data = event.data;
+  const { data } = event;
 
   console.log(`Received Polar event: ${eventType} (id: ${event.id})`);
 
@@ -100,7 +130,7 @@ exports.handleWebhook = async (req, res) => {
       case 'subscription.updated':
       case 'subscription.active': {
         const userId = data.metadata?.userId;
-        const status = data.status;
+        const { status } = data;
         const polarSubscriptionId = data.id;
 
         let user;
