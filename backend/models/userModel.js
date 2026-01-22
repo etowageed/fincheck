@@ -81,6 +81,17 @@ const userSchema = new mongoose.Schema(
       minlength: 2,
     },
 
+    polarCustomerId: {
+      type: String,
+      default: null,
+      index: true,
+    },
+    polarSubscriptionId: {
+      type: String,
+      default: null,
+      index: true,
+    },
+
     subscriptionStatus: {
       type: String,
       enum: ['free', 'premium', 'canceled'],

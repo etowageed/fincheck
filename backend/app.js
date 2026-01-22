@@ -1,12 +1,14 @@
 const path = require('path');
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const enforce = require('express-sslify'); // Add this for HTTPS enforcement
 const session = require('express-session'); // Add this
 require('dotenv').config();
 const MongoStore = require('connect-mongo').default;
+const paymentController = require('./controllers/paymentController');
 const morgan = require('morgan'); // For logging requests in development
 const cors = require('cors'); // For handling CORS
 
@@ -81,6 +83,14 @@ const userRouter = require('./routes/userRoutes');
 const financesRouter = require('./routes/financesRoutes');
 const categoryRouter = require('./routes/categoryRoutes');
 const paymentRouter = require('./routes/paymentRoutes');
+
+// 4.1 Webhook Body Parser: Must run BEFORE express.json()
+// This middleware processes the raw body for the Polar webhook route only.
+app.post(
+  '/api/v1/payment/webhook',
+  bodyParser.raw({ type: 'application/json' }),
+  paymentController.handleWebhook,
+);
 
 app.use(express.json({ limit: '10kb' }));
 
