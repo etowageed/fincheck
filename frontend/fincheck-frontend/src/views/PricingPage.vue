@@ -73,14 +73,14 @@ const isLoading = ref(false);
 const handleUpgrade = async () => {
     // If user is already premium, this button would link to a subscription management portal.
     if (authStore.isPremium) {
-        alert("Placeholder for Stripe Customer Portal management link.");
+        alert("Placeholder for Customer Portal management link.");
         return;
     }
 
     isLoading.value = true;
 
     try {
-        // Call the backend endpoint to create the Stripe session
+        // Call the backend endpoint to create the session
         const response = await axios.post(
             `${import.meta.env.VITE_API_BASE_URL}/payment/checkout`,
             {},
@@ -90,7 +90,7 @@ const handleUpgrade = async () => {
         const sessionUrl = response.data.sessionUrl;
 
         if (sessionUrl) {
-            // Redirect the user to the Stripe hosted checkout page
+            // Redirect the user to the checkout page
             window.location.href = sessionUrl;
         } else {
             throw new Error("Did not receive a valid session URL.");
@@ -109,31 +109,6 @@ const handleUpgrade = async () => {
 };
 
 onMounted(() => {
-    // Handle the redirect query parameters after returning from Stripe
-    if (route.query.payment === 'success') {
-        toast.add({
-            severity: 'success',
-            summary: 'Payment Successful',
-            detail: 'Welcome to Premium! Your account status will update shortly.',
-            life: 5000
-        });
-
-        // Force re-check auth to update the subscription status immediately
-        // In a real application, the webhook would usually trigger this update, but 
-        // refreshing the user state here provides instant UI feedback.
-        authStore.checkAuth();
-
-        // Clean the URL
-        router.replace({ query: { payment: undefined } });
-
-    } else if (route.query.payment === 'cancel') {
-        toast.add({
-            severity: 'info',
-            summary: 'Payment Canceled',
-            detail: 'You canceled the checkout process.',
-            life: 3000
-        });
-        router.replace({ query: { payment: undefined } });
-    }
+    // Logic for payment success/cancel redirection is now handled in TransactionsPage.vue
 });
 </script>

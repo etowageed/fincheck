@@ -11,6 +11,26 @@
                     @user-logout="handleUserLogout" />
             </div>
 
+            <!-- Subscription Management Section -->
+            <div class="bg-primary p-6 rounded-lg shadow-sm border border-default">
+                <h2 class="text-lg font-semibold text-primary mb-4">Subscription</h2>
+                <div v-if="authStore.isPremium" class="space-y-4">
+                    <p class="text-sm text-secondary">
+                        You are currently on the <span class="font-bold text-accent-green">Premium Plan</span>.
+                    </p>
+                    <Button label="Manage Subscription" icon="pi pi-cog" severity="info" :loading="isPortalLoading"
+                        @click="handlePortalClick" />
+                </div>
+                <div v-else class="space-y-4">
+                    <p class="text-sm text-secondary">
+                        You are on the <span class="font-bold text-accent-blue">Free Plan</span>. Upgrade to unlock all
+                        features.
+                    </p>
+                    <Button label="Upgrade now" icon="pi pi-sparkles" severity="warning"
+                        @click="router.push('/pricing')" />
+                </div>
+            </div>
+
             <!--  : Data Export Section -->
             <div class="bg-primary p-6 rounded-lg shadow-sm border border-default">
                 <h2 class="text-lg font-semibold text-primary mb-4">Data Export</h2>
@@ -37,13 +57,43 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { useToast } from 'primevue/usetoast';
 import { useAuthStore } from '@/stores/auth';
 import ProfileSettings from '@/components/profile/ProfileSettings.vue';
 import ExportModal from '@/components/common/ExportModal.vue'; //  Import ExportModal
 
 const authStore = useAuthStore();
 const router = useRouter();
+const toast = useToast();
 const showExportModal = ref(false); // State for the export modal
+const isPortalLoading = ref(false);
+
+const handlePortalClick = async () => {
+    isPortalLoading.value = true;
+    try {
+        const response = await axios.post(
+            `${import.meta.env.VITE_API_BASE_URL}/payment/portal`,
+            {},
+            { withCredentials: true }
+        );
+        if (response.data.portalUrl) {
+            window.location.href = response.data.portalUrl;
+        } else {
+            throw new Error("Invalid portal URL");
+        }
+    } catch (error) {
+        console.error("Portal error", error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: error.response?.data?.message || 'Failed to open subscription portal.',
+            life: 5000
+        });
+    } finally {
+        isPortalLoading.value = false;
+    }
+};
 
 const handleExportClick = () => {
     if (authStore.isPremium) {

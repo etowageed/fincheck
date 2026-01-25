@@ -12,5 +12,6 @@ const router = express.Router();
 // Only authenticated users can initiate a checkout session
 router.use(authController.protect);
 router.post('/checkout', paymentController.createCheckoutSession);
+router.post('/portal', paymentController.createCustomerPortalSession);
 
 module.exports = router;

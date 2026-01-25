@@ -147,6 +147,7 @@ exports.handleWebhook = async (req, res) => {
 
         const updates = {
           polarSubscriptionId,
+          polarCustomerId: data.customerId, // Ensure we capture this if checkout.created was missed
           subscriptionStatus: status === 'active' ? 'premium' : 'free',
         };
 
@@ -207,3 +208,32 @@ exports.handleWebhook = async (req, res) => {
     res.status(500).send(`Webhook handling failed: ${err.message}`);
   }
 };
+
+/**
+ * Creates a Customer Portal Session for managing subscriptions.
+ */
+exports.createCustomerPortalSession = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user.polarCustomerId) {
+    return next(
+      new AppError('No subscription history found for this user.', 404),
+    );
+  }
+
+  try {
+    const session = await polar.customerSessions.create({
+      customerId: user.polarCustomerId,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      portalUrl: session.customerPortalUrl,
+    });
+  } catch (error) {
+    console.error('Polar Portal Session Creation Failed:', error);
+    return next(
+      new AppError(`Failed to create portal session: ${error.message}`, 500),
+    );
+  }
+});
