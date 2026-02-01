@@ -161,9 +161,9 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.title) {
-    document.title = `${to.meta.title} - FinCheck`;
+    document.title = `${to.meta.title} - Plete Finance`;
   } else {
-    document.title = "FinCheck";
+    document.title = "Plete Finance";
   }
 
   return next();

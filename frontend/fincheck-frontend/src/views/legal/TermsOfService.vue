@@ -6,15 +6,15 @@
                 <p>Last updated: December 2025</p>
 
                 <h2 class="text-xl font-semibold text-primary mt-6">1. Acceptance of Terms</h2>
-                <p>By accessing and using FinCheck, you accept and agree to be bound by the terms and provision of this
+                <p>By accessing and using Plete Finance, you accept and agree to be bound by the terms and provision of this
                     agreement.</p>
 
                 <h2 class="text-xl font-semibold text-primary mt-6">2. Description of Service</h2>
-                <p>FinCheck provides personal finance tracking and budgeting tools. We reserve the right to modify,
+                <p>Plete Finance provides personal finance tracking and budgeting tools. We reserve the right to modify,
                     suspend, or discontinue the service at any time.</p>
 
                 <h2 class="text-xl font-semibold text-primary mt-6">3. User Account</h2>
-                <p>You are responsible for maintaining the security of your account and password. FinCheck cannot and
+                <p>You are responsible for maintaining the security of your account and password. Plete Finance cannot and
                     will not be liable for any loss or damage from your failure to comply with this security obligation.
                 </p>
 
@@ -23,7 +23,7 @@
                     understand our practices.</p>
 
                 <h2 class="text-xl font-semibold text-primary mt-6">5. Financial Disclaimer</h2>
-                <p>FinCheck is provided for informational purposes only and does not constitute professional financial
+                <p>Plete Finance is provided for informational purposes only and does not constitute professional financial
                     advice. We are not responsible for any financial decisions made based on the information provided by
                     this application. You should consult with a qualified financial advisor before making any major
                     financial decisions.</p>

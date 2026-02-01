@@ -1,7 +1,7 @@
 <template>
     <div class="min-h-screen flex items-center justify-center bg-tertiary">
         <div class="max-w-md mx-auto p-8 bg-primary shadow rounded-lg text-center border border-default">
-            <h1 class="text-3xl font-bold text-primary mb-6">Welcome to FinCheck!</h1>
+            <h1 class="text-3xl font-bold text-primary mb-6">Welcome to Plete Finance!</h1>
 
             <div class="space-y-4 mb-8">
                 <div class="flex items-center space-x-3">

@@ -170,7 +170,7 @@ const _generateExcel = async (data, format, res, user) => {
   const filename = `${format.type}-${format.days}days-report.xlsx`;
   res.setHeader(
     'Content-Type',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   );
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
@@ -205,7 +205,9 @@ const _generatePDF = async (data, format, res, user) => {
   doc.pipe(res);
   doc
     .fontSize(18)
-    .text(`Fincheck Financial Report (${format.type})`, { align: 'center' });
+    .text(`Plete Finance Financial Report (${format.type})`, {
+      align: 'center',
+    });
   doc
     .fontSize(10)
     .text(`Period: Last ${format.days} days`, { align: 'center' });
@@ -226,7 +228,7 @@ const _generatePDF = async (data, format, res, user) => {
       doc
         .fontSize(11)
         .text(
-          `${tx.date} | ${tx.description} | ${amountFormatted} | ${categoryName} (${tx.type}) | Doc: ${docLabel}`
+          `${tx.date} | ${tx.description} | ${amountFormatted} | ${categoryName} (${tx.type}) | Doc: ${docLabel}`,
         );
     });
     doc.moveDown();
@@ -249,7 +251,7 @@ const _generatePDF = async (data, format, res, user) => {
         .text(
           `${docLabel} | ${item.name} | ${amountFormatted} | ${categoryName} (${
             item.isRecurring ? 'Recurring' : 'One-time'
-          })`
+          })`,
         );
     });
     doc.moveDown();
@@ -273,7 +275,7 @@ exports.generateReport = catchAsync(async (req, res, next) => {
 
   if (!['pdf', 'excel'].includes(format)) {
     return next(
-      new AppError('Invalid format. Use ?format=pdf or ?format=excel', 400)
+      new AppError('Invalid format. Use ?format=pdf or ?format=excel', 400),
     );
   }
 
@@ -281,8 +283,8 @@ exports.generateReport = catchAsync(async (req, res, next) => {
     return next(
       new AppError(
         'Invalid content type. Use ?type=transactions, ?type=budget, ?type=income, ?type=expense or ?type=all',
-        400
-      )
+        400,
+      ),
     );
   }
 
@@ -295,7 +297,7 @@ exports.generateReport = catchAsync(async (req, res, next) => {
 
   if (documents.length === 0) {
     return next(
-      new AppError(`No financial data found for the last ${days} days.`, 404)
+      new AppError(`No financial data found for the last ${days} days.`, 404),
     );
   }
 
@@ -323,8 +325,8 @@ exports.generateReport = catchAsync(async (req, res, next) => {
     return next(
       new AppError(
         `No matching ${type} data found for the last ${days} days.`,
-        404
-      )
+        404,
+      ),
     );
   }
 

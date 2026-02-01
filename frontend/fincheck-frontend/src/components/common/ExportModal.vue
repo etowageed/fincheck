@@ -188,7 +188,7 @@ const handleDownload = async () => {
         });
 
         // 1. Get filename from headers (or default)
-        let filename = `fincheck-report-${form.value.type}.${form.value.format}`;
+        let filename = `plete-finance-report-${form.value.type}.${form.value.format}`;
         const contentDisposition = response.headers['content-disposition'];
         if (contentDisposition) {
             const match = contentDisposition.match(/filename="(.+?)"/i) || contentDisposition.match(/filename=(.+?);/i);

@@ -9,7 +9,7 @@ class EmailService {
     this.firstName = user.name.split(' ')[0];
     this.url = url;
     this.user = user; // Added user to instance for formatCurrency
-    this.from = `Fincheck 💸 <${process.env.EMAIL_FROM}>`;
+    this.from = `Plete Finance 💸 <${process.env.EMAIL_FROM}>`;
   }
 
   newTransport() {
@@ -48,7 +48,7 @@ class EmailService {
         url: this.url,
         subject,
         ...templateData,
-      }
+      },
     );
 
     // 2) Define email options
@@ -65,13 +65,13 @@ class EmailService {
   }
 
   async sendWelcome() {
-    await this.send('welcome', 'Welcome to the Fincheck Family!');
+    await this.send('welcome', 'Welcome to the Plete Finance Family!');
   }
 
   async sendPasswordReset() {
     await this.send(
       'passwordReset',
-      'Your password reset token (valid for only 10 minutes)'
+      'Your password reset token (valid for only 10 minutes)',
     );
   }
 
@@ -99,7 +99,7 @@ class EmailService {
         ? `🎉 Awesome! You're doing great and staying within your budget. Keep it up!`
         : `😬 You've spent more than your monthly budget. Consider reviewing your spending categories.`;
 
-    await this.send('weeklySummary', 'Your Weekly Fincheck Summary 🌟', {
+    await this.send('weeklySummary', 'Your Weekly Plete Finance Summary 🌟', {
       startOfWeek: startOfWeek.toDateString(),
       endOfWeek: endOfWeek.toDateString(),
       incomeFormatted,
@@ -111,7 +111,7 @@ class EmailService {
   }
 
   async sendPremiumWelcome() {
-    await this.send('premiumWelcome', 'Welcome to Fincheck Premium! 🌟');
+    await this.send('premiumWelcome', 'Welcome to Plete Finance Premium! 🌟');
   }
 }
 

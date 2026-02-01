@@ -8,7 +8,7 @@
                 >
                     <i class="pi pi-bars text-xl"></i>
                 </button>
-                <h1 class="text-xl font-bold text-accent-blue">FinCheck</h1>
+                <h1 class="text-xl font-bold text-accent-blue">Plete Finance</h1>
             </div>
 
         </div>

@@ -24,7 +24,7 @@
                     unauthorized or unlawful processing, accidental loss, destruction, or damage.</p>
 
                 <h2 class="text-xl font-semibold text-primary mt-6">4. Contact Us</h2>
-                <p>If you have any questions about this Privacy Policy, please contact us at support@fincheck.com.</p>
+                <p>If you have any questions about this Privacy Policy, please contact us at support@pletefinance.com.</p>
 
                 <div class="mt-8 pt-6 border-t border-default">
                     <RouterLink to="/signup"

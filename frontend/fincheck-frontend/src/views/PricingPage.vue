@@ -1,7 +1,7 @@
 <template>
     <div class="min-h-screen flex items-center justify-center bg-tertiary">
         <div class="max-w-xl mx-auto p-8 bg-primary shadow rounded-lg text-center space-y-6 border border-default">
-            <h1 class="text-3xl font-bold text-accent-blue">FinCheck Premium</h1>
+            <h1 class="text-3xl font-bold text-accent-blue">Plete Finance Premium</h1>
             <p class="text-lg text-secondary">Unlock unlimited access to your financial data!</p>
 
             <!-- Status Indicator -->
