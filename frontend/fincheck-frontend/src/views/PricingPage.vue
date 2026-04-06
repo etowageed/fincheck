@@ -9,7 +9,7 @@
                 🎉 You are currently a **Premium** user! Thank you for your support.
             </Message>
             <Message v-else-if="authStore.isAuthenticated" severity="info" :closable="false">
-                Switch to **Premium** to stop hitting those free tier limits.
+                Switch to Premium to enjoy unlimited access to your financial data!
             </Message>
 
             <div class="grid grid-cols-1 gap-4 text-left">
@@ -28,7 +28,7 @@
 
                     <Button :label="authStore.isPremium ? 'Manage Subscription' : 'Upgrade Now'" icon="pi pi-bolt"
                         size="large" class="w-full" :loading="isLoading"
-                        :disabled="!authStore.isAuthenticated || isLoading || authStore.isPremium"
+                        :disabled="!authStore.isAuthenticated || isLoading"
                         @click="handleUpgrade" />
                     <p v-if="!authStore.isAuthenticated" class="text-xs text-muted mt-2">Please log in to upgrade.</p>
                 </div>
@@ -71,9 +71,32 @@ const toast = useToast();
 const isLoading = ref(false);
 
 const handleUpgrade = async () => {
-    // If user is already premium, this button would link to a subscription management portal.
+    // If user is already premium, route them to the Customer Portal
     if (authStore.isPremium) {
-        alert("Placeholder for Customer Portal management link.");
+        isLoading.value = true;
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_BASE_URL}/payment/portal`,
+                {},
+                { withCredentials: true }
+            );
+            
+            if (response.data.portalUrl) {
+                window.location.href = response.data.portalUrl;
+            } else {
+                throw new Error("Did not receive a valid portal URL.");
+            }
+        } catch (error) {
+            console.error('Portal error:', error);
+            toast.add({
+                severity: 'error',
+                summary: 'Access Failed',
+                detail: error.response?.data?.message || 'Failed to access subscription portal. Please try again.',
+                life: 5000
+            });
+        } finally {
+            isLoading.value = false;
+        }
         return;
     }
 

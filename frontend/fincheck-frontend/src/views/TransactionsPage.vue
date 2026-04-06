@@ -11,7 +11,6 @@ import UserTransactions from '@/components/finances/UserTransactions.vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useAuthStore } from '@/stores/auth';
-import * as authService from '@/services/auth';
 
 // Use the new store
 const transactionsStore = useTransactionsStore();
@@ -33,47 +32,10 @@ onMounted(() => {
             life: 5000
         });
 
-        // 1. Optimistic Update: Immediately show Premium status
-        if (authStore.user) {
-            authStore.user.subscriptionStatus = 'premium';
-            // Set a fake expiry date or null to ensure isPremium computed property works
-            authStore.user.subscriptionExpires = null; 
-        }
-
-        // 2. Background Polling to sync with server
-        let attempts = 0;
-        const maxAttempts = 20; // 20 * 3s = 60s max
-        
-        const pollInterval = setInterval(async () => {
-            attempts++;
-            try {
-                // Fetch user data directly without updating store yet
-                const response = await authService.getCurrentUser();
-                if (response.data?.status === 'success') {
-                    const serverUser = response.data.data.user;
-                    
-                    // If server now says premium, we can safely sync the store and stop polling
-                    if (serverUser.subscriptionStatus === 'premium') {
-                        authStore.user = serverUser;
-                        clearInterval(pollInterval);
-                        toast.add({
-                            severity: 'info',
-                            summary: 'Subscription Confirmed',
-                            detail: 'Your premium status is fully active.',
-                            life: 3000
-                        });
-                    }
-                }
-            } catch (err) {
-                console.error("Polling auth status failed", err);
-            }
-
-            if (attempts >= maxAttempts) {
-                clearInterval(pollInterval);
-                // Final sync attempt - if it's still free, it will revert the UI, 
-                // but at least we gave it 60s of optimistic grace.
-                authStore.checkAuth(); 
-            }
+        // Background check to sync natively without a full interval.
+        // Delayed slightly to allow Polar webhooks time to hit the backend.
+        setTimeout(() => {
+            authStore.checkAuth();
         }, 3000);
 
         // Clean the URL

@@ -19,11 +19,11 @@ const loginLimiter = rateLimit({
   message: 'Too many login attempts from this IP, please try again later.',
 });
 
-router.post('/signup', signupValidator, authController.signup);
+router.post('/signup', loginLimiter, signupValidator, authController.signup);
 router.post('/login', loginLimiter, loginValidator, authController.login);
 router.get('/logout', authController.logout);
 router.get('/isLoggedIn', authController.isLoggedIn);
-router.post('/forgotpassword', authController.forgotPassword);
+router.post('/forgotpassword', loginLimiter, authController.forgotPassword);
 router.patch('/resetpassword/:token', authController.resetPassword);
 router.patch('/:id/updatepassword', authController.updatePassword);
 
@@ -32,7 +32,7 @@ const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 // Google Auth Routes
 router.get(
   '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+  passport.authenticate('google', { scope: ['profile', 'email'] }),
 );
 
 router.get(
@@ -50,13 +50,13 @@ router.get(
     } else {
       res.redirect(`${frontendUrl}/transactions`);
     }
-  }
+  },
 );
 
 // Facebook Auth Routes
 router.get(
   '/facebook',
-  passport.authenticate('facebook', { scope: ['email', 'public_profile'] })
+  passport.authenticate('facebook', { scope: ['email', 'public_profile'] }),
 );
 
 router.get(
@@ -76,7 +76,7 @@ router.get(
     } else {
       res.redirect(`${frontendUrl}/transactions`);
     }
-  }
+  },
 );
 
 module.exports = router;

@@ -114,14 +114,18 @@ exports.handleWebhook = async (req, res) => {
 
   try {
     switch (eventType) {
-      case 'checkout.created': {
-        // Just created, might not be paid yet.
-        // We can capture the customer ID here if needed later.
-        const userId = data.metadata?.userId;
-        if (userId && data.customerId) {
-          await User.findByIdAndUpdate(userId, {
-            polarCustomerId: data.customerId,
-          });
+      case 'customer.created': {
+        // When a customer checks out, Polar creates a customer record.
+        // We match them by email to securely map their Polar Customer ID.
+        const email = data.email || data.billing_email;
+        if (email) {
+          const user = await User.findOne({ email });
+          if (user) {
+            await User.findByIdAndUpdate(user.id, {
+              polarCustomerId: data.id,
+            });
+            console.log(`✅ Linked Polar Customer ID to user ${user.id}`);
+          }
         }
         break;
       }
@@ -140,6 +144,17 @@ exports.handleWebhook = async (req, res) => {
           user = await User.findOne({ polarCustomerId: data.customerId });
         }
 
+        // --- BULLETPROOF FALLBACK FOR EXISTING SANDBOX CUSTOMERS ---
+        // If customer.created didn't fire, we still need to map the user.
+        // Polar Subscription objects usually include customer details or an email fallback.
+        if (!user) {
+          const emailFallback =
+            data.customer?.email || data.customer_email || data.customerEmail;
+          if (emailFallback) {
+            user = await User.findOne({ email: emailFallback });
+          }
+        }
+
         if (!user) {
           console.warn(`User not found for subscription event: ${event.id}`);
           return res.status(200).json({ received: true });
@@ -147,7 +162,7 @@ exports.handleWebhook = async (req, res) => {
 
         const updates = {
           polarSubscriptionId,
-          polarCustomerId: data.customerId, // Ensure we capture this if checkout.created was missed
+          polarCustomerId: data.customerId, // Capture this
           subscriptionStatus: status === 'active' ? 'premium' : 'free',
         };
 
@@ -188,9 +203,9 @@ exports.handleWebhook = async (req, res) => {
       }
 
       // Explicitly ignore these events to prevent log noise
-      case 'customer.created':
       case 'customer.updated':
       case 'customer.state_changed':
+      case 'checkout.created':
       case 'checkout.updated':
       case 'order.created':
       case 'order.updated':
