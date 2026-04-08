@@ -43,7 +43,7 @@ const categorySchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 // Compound indexes for efficient queries
@@ -60,7 +60,7 @@ categorySchema.index(
       isActive: true,
       isGlobalDefault: false,
     },
-  }
+  },
 );
 
 // Static method to get all categories for a user (global + user specific)
@@ -86,7 +86,7 @@ categorySchema.statics.getCategoriesForUser = async function (userId) {
 
   // 4. Filter the main list of global defaults, removing any that have an override
   const visibleDefaults = globalDefaults.filter(
-    (def) => !overriddenGlobalIds.has(def._id.toString())
+    (def) => !overriddenGlobalIds.has(def._id.toString()),
   );
 
   // 5. From the user's categories, only take the ones that are active to be displayed
@@ -119,37 +119,52 @@ categorySchema.statics.getUserCustomCategories = async function (userId) {
 // Static method to create global default categories (run once)
 categorySchema.statics.createGlobalDefaults = async function () {
   const defaultCategories = [
-    'Food & Dining',
-    'Transportation',
-    'Utilities',
-    'Entertainment',
-    'Healthcare',
-    'Shopping',
-    'Housing',
-    'Education',
-    'Travel',
-    'Insurance',
-    'Savings',
-    'Investments',
-    'Debt Payment',
-    'Gifts & Donations',
-    'Personal Care',
-    'Salary',
-    'Freelance',
-    'Business Income',
-    'Investment Returns',
-    'Other Income',
+    { name: 'Housing', description: 'Rent, mortgage, property tax' },
+    {
+      name: 'Bills & Utilities',
+      description: 'Electricity, water, internet, phone',
+    },
+    { name: 'Food & Dining', description: 'Groceries, takeaways, restaurants' },
+    { name: 'Transport', description: 'Fuel, public transport, car costs' },
+    {
+      name: 'Lifestyle',
+      description: 'Shopping, personal care, subscriptions',
+    },
+    { name: 'Health', description: 'Medical expenses, pharmacy, insurance' },
+    {
+      name: 'Leisure & Travel',
+      description: 'Entertainment, holidays, hobbies',
+    },
+    { name: 'Education & Growth', description: 'Courses, books, learning' },
+    {
+      name: 'Savings & Investments',
+      description: 'Savings, stocks, emergency fund',
+    },
+    { name: 'Income', description: 'Salary, freelance, side income' },
   ];
 
   // Check if global defaults already exist
   const existingDefaults = await this.find({ isGlobalDefault: true });
   if (existingDefaults.length > 0) {
-    console.log('Global default categories already exist');
-    return existingDefaults;
+    console.log(
+      'Global default categories already exist. Updating descriptions...',
+    );
+
+    // Update existing global defaults that match by name to ensure they have the new descriptions
+    const updatePromises = defaultCategories.map((cat) =>
+      this.updateOne(
+        { name: cat.name, isGlobalDefault: true },
+        { $set: { description: cat.description } },
+      ),
+    );
+    await Promise.all(updatePromises);
+
+    return this.find({ isGlobalDefault: true });
   }
 
-  const categoryDocuments = defaultCategories.map((name) => ({
-    name,
+  const categoryDocuments = defaultCategories.map((cat) => ({
+    name: cat.name,
+    description: cat.description,
     isGlobalDefault: true,
     userId: null,
   }));
