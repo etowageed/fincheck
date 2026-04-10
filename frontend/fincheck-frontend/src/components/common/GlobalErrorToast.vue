@@ -1,5 +1,5 @@
 <template>
-    <Toast position="top-right" />
+    <Toast position="top-center" />
 </template>
 
 <script setup>
