@@ -1,9 +1,9 @@
 <template>
     <div class="space-y-6">
-        <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
+        <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6">
             <div class="flex items-center gap-3 mb-4">
                 <i class="pi pi-chart-line text-2xl text-accent-blue"></i>
-                <h2 class="text-xl font-semibold text-primary">Your Financial Overview</h2>
+                <h2 class="text-xl md:text-2xl font-bold tracking-tight text-primary leading-snug">Your Financial Overview</h2>
             </div>
 
             <div v-if="!isLoading && !error">
@@ -97,15 +97,15 @@
             </div>
         </div>
 
-        <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
+        <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6">
             <div class="flex items-center gap-3 mb-4">
                 <i class="pi pi-chart-pie text-xl text-accent-blue"></i>
-                <h3 class="text-lg font-semibold text-primary">Budget Breakdown</h3>
+                <h3 class="text-lg font-bold text-primary leading-snug">Budget Breakdown</h3>
             </div>
 
             <div v-if="!isLoading && !error" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-3">
-                    <h4 class="font-medium text-secondary">Expense Categories</h4>
+                    <h4 class="text-sm font-bold uppercase tracking-wider text-muted mb-1">Expense Categories</h4>
 
                     <div class="space-y-2">
                         <div class="flex justify-between items-center p-3 bg-secondary rounded border border-default">
@@ -138,7 +138,7 @@
                 </div>
 
                 <div class="space-y-3">
-                    <h4 class="font-medium text-secondary">Financial Health</h4>
+                    <h4 class="text-sm font-bold uppercase tracking-wider text-muted mb-1">Financial Health</h4>
                     <div class="p-4 bg-secondary rounded border border-default">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-sm text-secondary">Budget Utilization</span>

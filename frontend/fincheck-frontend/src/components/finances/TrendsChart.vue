@@ -1,8 +1,8 @@
 <template>
-    <div class="bg-primary rounded-lg shadow-sm border border-default p-6 mt-6">
+    <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6 mt-6">
 
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-primary">Financial Trends</h3>
+        <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-4">
+            <h3 class="text-lg font-bold text-primary leading-snug">Financial Trends</h3>
         </div>
 
         <div v-if="isLoading" class="text-center py-8">

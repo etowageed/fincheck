@@ -1,7 +1,7 @@
 <template>
     <div class="card flex justify-center">
         <Button label="Create Budget" @click="visible = true" />
-        <Dialog v-model:visible="visible" modal header="Create Budget" :style="{ width: '25rem' }">
+        <Dialog v-model:visible="visible" modal header="Create Budget" :style="{ width: '25rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <span class="text-surface-500  block mb-8">First things first, what do you earn in a
                 month?</span>
             <span class="text-surface-500  block mb-8 italic text-sm">Your expected monthly income

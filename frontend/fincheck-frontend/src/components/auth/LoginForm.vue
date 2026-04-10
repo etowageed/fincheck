@@ -1,7 +1,7 @@
 <template>
     <form @submit.prevent="submitLogin"
-        class="space-y-4 w-full max-w-sm mx-auto p-6 bg-primary text-primary shadow rounded border border-default">
-        <h2 class="text-xl font-semibold text-center">Log in</h2>
+        class="space-y-6 w-full max-w-md mx-auto p-8 sm:p-10 bg-primary text-primary shadow rounded border border-default">
+        <h2 class="text-2xl font-bold tracking-tight text-center leading-snug">Log in</h2>
 
         <div>
             <label for="email" class="block text-sm mb-1">Email</label>

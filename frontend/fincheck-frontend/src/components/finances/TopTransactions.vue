@@ -1,11 +1,9 @@
 <template>
-    <div class="bg-primary rounded-lg shadow-sm border border-default p-6 mt-6">
-        <div class="flex justify-between items-center mb-4">
-            <div class="flex items-center gap-4">
-                <h3 class="text-lg font-semibold text-primary">Top Transactions</h3>
-                <SelectButton v-model="selectedType" :options="transactionTypes" optionLabel="label"
-                    aria-labelledby="basic" />
-            </div>
+    <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6 mt-6">
+        <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-4">
+            <h3 class="text-lg font-bold text-primary leading-snug">Top Transactions</h3>
+            <SelectButton v-model="selectedType" :options="transactionTypes" optionLabel="label"
+                aria-labelledby="basic" />
         </div>
 
         <div v-if="isLoading" class="text-center py-8">
@@ -19,18 +17,18 @@
         </div>
 
         <div v-else-if="transactions.length > 0" class="space-y-3">
-            <div v-for="(tx, index) in transactions" :key="tx._id" class="flex items-center gap-4 p-3">
+            <div v-for="(tx, index) in transactions" :key="tx._id" class="flex items-center gap-3 p-3">
                 <div
                     class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-secondary rounded-full font-bold text-primary">
                     {{ index + 1 }}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="font-medium text-primary truncate" :title="tx.description">{{ tx.description }}</p>
-                    <div class="flex items-center gap-2 text-xs text-muted">
-                        <span class="px-2 py-0.5 rounded-full bg-tertiary text-accent-blue">{{ tx.categoryName
+                    <p class="text-base font-medium text-primary leading-relaxed truncate" :title="tx.description">{{ tx.description }}</p>
+                    <div class="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-muted mt-1">
+                        <span class="px-2 py-0.5 rounded-full bg-tertiary text-accent-blue flex-shrink-0">{{ tx.categoryName
                         }}</span>
-                        <span>&middot;</span>
-                        <span>{{ formatDate(tx.date) }}</span>
+                        <span class="hidden sm:inline">&middot;</span>
+                        <span class="flex-shrink-0">{{ formatDate(tx.date) }}</span>
                     </div>
                 </div>
                 <div class="text-right">

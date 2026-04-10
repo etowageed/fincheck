@@ -80,7 +80,7 @@
         <ItemForm ref="editBudgetFormRef" formType="budget" :edit-item="editingItem"
             @budget-item-updated="handleBudgetItemChange" style="display: none;" />
 
-        <Dialog v-model:visible="editIncomeVisible" modal header="Edit Expected Income" :style="{ width: '25rem' }">
+        <Dialog v-model:visible="editIncomeVisible" modal header="Edit Expected Income" :style="{ width: '25rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col gap-2">
                     <label for="newIncome" class="font-semibold">Expected Monthly Income</label>

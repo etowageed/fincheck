@@ -1,6 +1,6 @@
 <template>
     <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" modal
-        :header="isEdit ? 'Edit Category' : 'Add Category'" :style="{ width: '500px' }">
+        :header="isEdit ? 'Edit Category' : 'Add Category'" :style="{ width: '500px' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
         <form @submit.prevent="handleSubmit" class="space-y-4">
             <!-- Category Name -->
             <div>

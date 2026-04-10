@@ -1,12 +1,12 @@
 <template>
     <div class="p-6">
-        <h1 v-if="budgetStore.getBudget" class="text-2xl font-bold text-gray-800 mb-6">Budget Overview for {{
+        <h1 v-if="budgetStore.getBudget" class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight mb-6">Budget Overview for {{
             getMonthName(budgetStore.getBudget.month) }}, {{ budgetStore.getBudget.year }}</h1>
-        <h1 v-else class="text-2xl font-bold text-gray-800 mb-6">Budget Overview</h1>
+        <h1 v-else class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight mb-6">Budget Overview</h1>
 
         <div v-if="budgetStore.isLoading" class="text-center py-8">
             <i class="pi pi-spinner pi-spin text-2xl text-blue-600"></i>
-            <p class="mt-2 text-gray-600">Loading budget...</p>
+            <p class="mt-2 text-secondary font-medium">Loading budget...</p>
         </div>
 
         <div v-else-if="budgetStore.getBudget">
@@ -15,7 +15,7 @@
         </div>
 
         <div v-else class="text-center py-8">
-            <p class="text-gray-600">No budget data available</p>
+            <p class="text-secondary font-medium">No budget data available</p>
             <AddBudgetEntryForm class="mt-8" @budget-created="handleBudgetCreated" />
         </div>
     </div>

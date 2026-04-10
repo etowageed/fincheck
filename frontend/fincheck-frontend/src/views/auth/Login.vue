@@ -1,6 +1,6 @@
 <!-- src/views/auth/Login.vue -->
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="min-h-screen flex items-center justify-center bg-secondary">
         <div>
             <LoginForm @submit="handleLogin" />
         </div>

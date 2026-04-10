@@ -1,6 +1,6 @@
 <template>
     <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" modal
-        :header="`Transactions for: ${categoryName}`" :style="{ width: '50vw' }">
+        :header="`Transactions for: ${categoryName}`" :style="{ width: '50vw' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
         <div v-if="isLoading" class="text-center py-8">
             <i class="pi pi-spinner pi-spin text-2xl text-accent-blue"></i>
             <p class="mt-2 text-secondary">Loading category transactions...</p>

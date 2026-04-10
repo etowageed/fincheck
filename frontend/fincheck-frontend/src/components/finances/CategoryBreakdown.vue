@@ -1,8 +1,8 @@
 <template>
-    <div class="bg-primary rounded-lg shadow-sm border border-default p-6 mt-6">
-        <div class="flex items-center gap-2 mb-4">
-            <h3 class="text-lg font-semibold text-primary">Spending by Category (Last 90 Days)</h3>
-            <i class="pi pi-info-circle text-accent-blue text-sm cursor-pointer"
+    <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6 mt-6">
+        <div class="flex items-start sm:items-center gap-2 mb-4">
+            <h3 class="text-lg font-bold text-primary leading-snug">Spending by Category (Last 90 Days)</h3>
+            <i class="pi pi-info-circle text-accent-blue text-sm cursor-pointer mt-1 sm:mt-0"
                 v-tooltip.top="'Click a segment on the chart to view the list of transactions for that category.'"></i>
         </div>
 

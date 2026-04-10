@@ -48,7 +48,7 @@
     </div>
 
     <Dialog :visible="deleteDialogVisible" @update:visible="deleteDialogVisible = $event" modal header="Confirm Action"
-      :style="{ width: '25rem' }">
+      :style="{ width: '25rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
       <span class="text-surface-500  block mb-8">Are you sure you want to delete this user?</span>
       <div class="flex justify-end gap-2">
         <Button type="button" label="Cancel" severity="secondary" @click="deleteDialogVisible = false"></Button>

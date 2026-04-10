@@ -1,6 +1,6 @@
 <template>
     <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" modal header="Export Financial Data"
-        :style="{ width: '400px' }">
+        :style="{ width: '400px' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
 
         <div class="space-y-4">
             <!-- 1. Data Type Selection -->

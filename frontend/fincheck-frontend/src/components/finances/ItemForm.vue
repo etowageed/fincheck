@@ -1,7 +1,7 @@
 <template>
     <div class="card flex justify-center">
         <Button :label="buttonLabel" :icon="buttonIcon" @click="openDialog" />
-        <Dialog v-model:visible="visible" modal :header="dialogHeader" :style="{ width: '35rem' }">
+        <Dialog v-model:visible="visible" modal :header="dialogHeader" :style="{ width: '35rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="space-y-4">
                 <div class="flex flex-col gap-2">
                     <label :for="nameFieldId" class="font-semibold">{{ nameFieldLabel }}</label>
@@ -103,7 +103,7 @@
             </template>
         </Dialog>
 
-        <Dialog v-model:visible="showQuickAddCategory" modal header="Quick Add Category" :style="{ width: '400px' }">
+        <Dialog v-model:visible="showQuickAddCategory" modal header="Quick Add Category" :style="{ width: '400px' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="space-y-4">
                 <div class="flex flex-col gap-2">
                     <label for="quickCategoryName" class="font-semibold">Category Name</label>

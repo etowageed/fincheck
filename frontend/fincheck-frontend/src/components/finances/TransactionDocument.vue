@@ -1,7 +1,7 @@
 <template>
     <div class="space-y-6">
-        <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
-            <div class="flex justify-between items-center mb-4">
+        <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6">
+            <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-4">
                 <h3 class="text-lg font-semibold text-primary">Transactions Overview</h3>
                 <!-- MODIFIED: Use a dedicated button for export which opens the modal -->
                 <Button label="Export Transactions" icon="pi pi-download" severity="secondary" size="small"
@@ -24,8 +24,8 @@
             </div>
         </div>
 
-        <div class="bg-primary rounded-lg shadow-sm border border-default p-6">
-            <div class="flex justify-between items-center mb-4">
+        <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6">
+            <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-4">
                 <h2 class="text-lg font-semibold text-primary">Recent Transactions</h2>
                 <ItemForm ref="addTransactionFormRef" formType="transaction" />
             </div>
@@ -39,22 +39,22 @@
                     </h3>
 
                     <div v-for="transaction in transactions" :key="transaction._id"
-                        class="flex justify-between items-center p-4 bg-secondary rounded-lg">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-1">
-                                <p class="font-medium text-primary">{{ transaction.description || 'No description' }}
+                        class="flex flex-col sm:flex-row gap-3 justify-between sm:items-center p-4 bg-secondary rounded-lg">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2 mb-1">
+                                <p class="font-medium text-primary break-words">{{ transaction.description || 'No description' }}
                                 </p>
-                                <span class="text-xs px-2 py-1 rounded-full bg-tertiary text-accent-blue capitalize">
+                                <span class="text-xs px-2 py-1 flex-shrink-0 rounded-full bg-tertiary text-accent-blue capitalize">
                                     {{ getCategoryName(transaction.category) }}
                                 </span>
-                                <span v-if="transaction.type" class="text-xs px-2 py-1 rounded-full capitalize"
+                                <span v-if="transaction.type" class="text-xs px-2 py-1 flex-shrink-0 rounded-full capitalize"
                                     :class="getTypeClass(transaction.type)">
                                     {{ transaction.type }}
                                 </span>
                             </div>
 
                         </div>
-                        <div class="text-right flex items-center gap-2">
+                        <div class="text-right flex items-center justify-end gap-2 w-full sm:w-auto">
                             <p class="font-semibold text-lg"
                                 :class="getAmountClass(transaction.amount, transaction.type)">
                                 {{ formatCurrency(transaction.amount, true) }}

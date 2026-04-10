@@ -1,9 +1,9 @@
 <template>
     <div class="space-y-6">
-        <h1 class="text-2xl font-bold text-primary">Settings</h1>
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight">Settings</h1>
         <div v-if="authStore.userProfile" class="max-w-md space-y-6">
             <div class="bg-primary p-6 rounded-lg shadow-sm border border-default">
-                <h2 class="text-lg font-semibold text-primary mb-4">Profile Management</h2>
+                <h2 class="text-xl font-bold tracking-tight text-primary leading-snug mb-4">Profile Management</h2>
                 <p class="text-sm text-secondary mb-6">
                     Click the button below to update your name, email, change your password, or delete your account.
                 </p>
@@ -13,7 +13,7 @@
 
             <!-- Subscription Management Section -->
             <div class="bg-primary p-6 rounded-lg shadow-sm border border-default">
-                <h2 class="text-lg font-semibold text-primary mb-4">Subscription</h2>
+                <h2 class="text-xl font-bold tracking-tight text-primary leading-snug mb-4">Subscription</h2>
                 <div v-if="authStore.isPremium" class="space-y-4">
                     <p class="text-sm text-secondary">
                         You are currently on the <span class="font-bold text-accent-green">Premium Plan</span>.
@@ -33,7 +33,7 @@
 
             <!--  : Data Export Section -->
             <div class="bg-primary p-6 rounded-lg shadow-sm border border-default">
-                <h2 class="text-lg font-semibold text-primary mb-4">Data Export</h2>
+                <h2 class="text-xl font-bold tracking-tight text-primary leading-snug mb-4">Data Export</h2>
                 <p class="text-sm text-secondary mb-6">
                     Export your full financial history, including all transactions and budget information, as Excel or
                     PDF.

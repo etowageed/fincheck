@@ -7,6 +7,9 @@ export default {
   darkMode: "false",
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', "sans-serif"],
+      },
       colors: {
         primary: "rgb(var(--color-bg-primary) / <alpha-value>)",
         secondary: "rgb(var(--color-bg-secondary) / <alpha-value>)",

@@ -1,12 +1,12 @@
 <template>
     <div v-if="insights.length > 0" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-6">
-        <h3 class="text-sm font-semibold text-accent-blue mb-3 flex items-center gap-2">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-accent-blue mb-3 flex items-center gap-2">
             <i class="pi pi-lightbulb text-lg"></i>
             Insights
         </h3>
         <ul class="space-y-2">
             <li v-for="(insight, index) in insights" :key="index"
-                class="flex items-center gap-2 text-sm text-text-primary">
+                class="flex items-center gap-2 text-sm sm:text-base font-medium text-primary leading-relaxed">
                 <i :class="insight.iconClass" class="text-lg"></i>
                 <span>{{ insight.message }}</span>
             </li>

@@ -1,7 +1,7 @@
 <template>
     <div>
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+        <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight">Dashboard</h1>
             <TimelineFilter />
         </div>
 

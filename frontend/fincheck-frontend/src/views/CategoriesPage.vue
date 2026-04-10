@@ -1,18 +1,18 @@
 <template>
     <div class="space-y-6">
         <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-gray-800">Categories</h1>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight">Categories</h1>
             <Button label="Add Category" icon="pi pi-plus" @click="showAddCategoryDialog = true" />
         </div>
 
         <!-- Loading State -->
         <div v-if="categoriesStore.isLoading" class="text-center py-8">
             <i class="pi pi-spinner pi-spin text-2xl"></i>
-            <p class="mt-2">Loading categories...</p>
+            <p class="mt-2 text-secondary font-medium">Loading categories...</p>
         </div>
 
         <!-- Error State -->
-        <div v-else-if="categoriesStore.error" class="text-center py-8 text-red-600">
+        <div v-else-if="categoriesStore.error" class="text-center py-8 text-accent-red font-medium">
             {{ categoriesStore.error }}
             <Button @click="loadCategories" class="mt-2">Retry</Button>
         </div>
@@ -21,8 +21,8 @@
         <div v-else>
             <TabView>
                 <TabPanel header="All Categories">
-                    <div v-if="!categoriesStore.getAllCategories.length" class="text-center py-8 text-gray-500">
-                        No categories found
+                    <div v-if="!categoriesStore.getAllCategories.length" class="text-center py-8">
+                        <p class="text-secondary font-medium">No categories found</p>
                     </div>
                     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <CategoryCard v-for="category in categoriesStore.getAllCategories" :key="category._id"
@@ -32,9 +32,8 @@
                 </TabPanel>
 
                 <TabPanel header="Default Categories">
-                    <div v-if="!categoriesStore.separatedCategories.globalDefaults.length"
-                        class="text-center py-8 text-gray-500">
-                        No default categories found
+                    <div v-if="!categoriesStore.separatedCategories.globalDefaults.length" class="text-center py-8">
+                        <p class="text-secondary font-medium">No default categories found</p>
                     </div>
                     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <CategoryCard v-for="category in categoriesStore.separatedCategories.globalDefaults"
@@ -44,9 +43,8 @@
                 </TabPanel>
 
                 <TabPanel header="My Categories">
-                    <div v-if="!categoriesStore.separatedCategories.userCustom.length && !categoriesStore.separatedCategories.userOverrides.length"
-                        class="text-center py-8 text-gray-500">
-                        No custom categories found
+                    <div v-if="!categoriesStore.separatedCategories.userCustom.length && !categoriesStore.separatedCategories.userOverrides.length" class="text-center py-8">
+                        <p class="text-secondary font-medium">No custom categories found</p>
                     </div>
                     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <CategoryCard

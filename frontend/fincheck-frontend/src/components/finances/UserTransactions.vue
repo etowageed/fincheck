@@ -1,18 +1,18 @@
 <template>
-    <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Transactions</h1>
+    <div class="p-4 sm:p-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight">Transactions</h1>
             <div>
                 <SelectButton v-model="selectedPeriod" :options="periods" optionLabel="label" aria-labelledby="basic" />
             </div>
         </div>
 
         <div v-if="transactionsStore.isLoading" class="text-center py-8">
-            <i class="pi pi-spinner pi-spin text-2xl text-blue-600"></i>
-            <p class="mt-2 text-gray-600">Loading transactions...</p>
+            <i class="pi pi-spinner pi-spin text-2xl text-accent-blue"></i>
+            <p class="mt-2 text-secondary font-medium">Loading transactions...</p>
         </div>
 
-        <div v-else-if="transactionsStore.error" class="text-center text-red-500 py-8">
+        <div v-else-if="transactionsStore.error" class="text-center text-accent-red font-medium py-8">
             {{ transactionsStore.error }}
         </div>
 
@@ -21,7 +21,7 @@
         </div>
 
         <div v-else class="text-center py-8">
-            <p class="text-gray-600 mb-4">No transactions found for this period.</p>
+            <p class="text-secondary font-medium mb-4">No transactions found for this period.</p>
             <ItemForm formType="transaction" />
         </div>
     </div>
