@@ -3,8 +3,12 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
 // Get all categories for the authenticated user (global + user specific)
-exports.getCategories = catchAsync(async (req, res, next) => {
-  const categories = await Category.getCategoriesForUser(req.user.id);
+exports.getCategories = catchAsync(async (req, res) => {
+  const includeHidden = req.query.includeHidden === 'true';
+  const categories = await Category.getCategoriesForUser(
+    req.user.id,
+    includeHidden,
+  );
 
   res.status(200).json({
     success: true,
@@ -74,7 +78,7 @@ exports.updateCategory = catchAsync(async (req, res, next) => {
 
     if (existingOverride) {
       return next(
-        new AppError('You already have a custom version of this category', 400)
+        new AppError('You already have a custom version of this category', 400),
       );
     }
 
@@ -146,7 +150,7 @@ exports.overrideGlobalDefault = catchAsync(async (req, res, next) => {
 
   if (existingOverride) {
     return next(
-      new AppError('You already have a custom version of this category', 400)
+      new AppError('You already have a custom version of this category', 400),
     );
   }
 
@@ -170,17 +174,16 @@ exports.overrideGlobalDefault = catchAsync(async (req, res, next) => {
 exports.deleteCategory = catchAsync(async (req, res, next) => {
   const categoryId = req.params.id;
 
-  // First, try to find user's own category
-  let category = await Category.findOne({
+  // First, try to find user's own category (Custom or active override)
+  const category = await Category.findOne({
     _id: categoryId,
     userId: req.user.id,
     isActive: true,
   });
 
   if (category) {
-    // User's own category - soft delete
-    category.isActive = false;
-    await category.save();
+    // User's custom categories and active overrides are totally deleted
+    await category.deleteOne();
 
     return res.status(204).json({
       success: true,
@@ -188,7 +191,7 @@ exports.deleteCategory = catchAsync(async (req, res, next) => {
     });
   }
 
-  // Check if it's a global default that user wants to "delete"
+  // Check if it's a global default that user wants to "hide"
   const globalDefault = await Category.findOne({
     _id: categoryId,
     isGlobalDefault: true,
@@ -207,7 +210,7 @@ exports.deleteCategory = catchAsync(async (req, res, next) => {
 
   if (existingOverride) {
     return next(
-      new AppError('You already have a custom version of this category', 400)
+      new AppError('Global default is already hidden or modified', 400),
     );
   }
 
@@ -224,12 +227,11 @@ exports.deleteCategory = catchAsync(async (req, res, next) => {
   res.status(204).json({
     success: true,
     data: null,
-    message: 'Global default category hidden from your view',
   });
 });
 
 // Admin only: Create global default categories
-exports.createGlobalDefaults = catchAsync(async (req, res, next) => {
+exports.createGlobalDefaults = catchAsync(async (req, res) => {
   const defaults = await Category.createGlobalDefaults();
 
   res.status(201).json({
@@ -240,7 +242,7 @@ exports.createGlobalDefaults = catchAsync(async (req, res, next) => {
 });
 
 // Get global defaults (for admin or reference)
-exports.getGlobalDefaults = catchAsync(async (req, res, next) => {
+exports.getGlobalDefaults = catchAsync(async (req, res) => {
   const globalDefaults = await Category.getGlobalDefaults();
 
   res.status(200).json({
@@ -257,23 +259,26 @@ exports.restoreToGlobalDefault = catchAsync(async (req, res, next) => {
   const category = await Category.findOne({
     _id: categoryId,
     userId: req.user.id,
-    isActive: true,
   });
 
   if (!category) {
     return next(new AppError('Category not found', 404));
   }
 
-  if (!category.overridesGlobalDefault) {
-    return next(
-      new AppError('This category does not override a global default', 400)
-    );
+  if (category.overridesGlobalDefault) {
+    await category.restoreToGlobalDefault();
+    return res.status(200).json({
+      success: true,
+      message: 'Category restored to global default',
+    });
   }
 
-  await category.restoreToGlobalDefault();
+  // If it's a personal category that was "hidden" (soft-deleted)
+  category.isActive = true;
+  await category.save();
 
   res.status(200).json({
     success: true,
-    message: 'Category restored to global default',
+    message: 'Category restored successfully',
   });
 });

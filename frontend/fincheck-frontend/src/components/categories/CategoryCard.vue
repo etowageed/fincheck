@@ -1,9 +1,13 @@
 <template>
-    <div class="bg-primary rounded-lg shadow-sm border border-default p-4 hover:shadow-md transition-shadow">
+    <div class="bg-primary rounded-lg shadow-sm border border-default p-4 hover:shadow-md transition-shadow"
+        :class="{ 'opacity-60 grayscale-[0.5]': !category.isActive }">
         <div class="flex justify-between items-start">
             <div>
                 <h3 class="font-semibold text-primary">{{ category.name }}</h3>
-                <div class="mt-2">
+                <div class="mt-2 flex gap-2">
+                    <span v-if="!category.isActive" class="px-2 py-1 text-xs rounded bg-gray-200 text-gray-800">
+                        Hidden
+                    </span>
                     <span v-if="category.isGlobalDefault" class="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">
                         Default
                     </span>
@@ -41,6 +45,13 @@ const emit = defineEmits(['edit', 'delete', 'restore']);
 
 // Create a dynamic list of actions for the dropdown menu
 const menuItems = computed(() => {
+    // If category is hidden, only show 'Restore'
+    if (!props.category.isActive) {
+        return [
+            { label: 'Restore', icon: 'pi pi-undo', action: 'restore' }
+        ];
+    }
+
     const items = [
         { label: 'Edit', icon: 'pi pi-pencil', action: 'edit' }
     ];

@@ -4,9 +4,12 @@ export class CategoryService {
   /**
    * Get all categories for the authenticated user (global defaults + user overrides/custom)
    */
-  static async getCategories() {
+  static async getCategories(options = {}) {
+    const { includeHidden = false } = options;
     try {
-      const response = await api.get("/categories");
+      const response = await api.get("/categories", {
+        params: { includeHidden },
+      });
       return {
         success: true,
         data: response.data.data,

@@ -64,7 +64,10 @@ categorySchema.index(
 );
 
 // Static method to get all categories for a user (global + user specific)
-categorySchema.statics.getCategoriesForUser = async function (userId) {
+categorySchema.statics.getCategoriesForUser = async function (
+  userId,
+  includeHidden = false
+) {
   // 1. Get all global defaults
   const globalDefaults = await this.find({
     isGlobalDefault: true,
@@ -89,11 +92,13 @@ categorySchema.statics.getCategoriesForUser = async function (userId) {
     (def) => !overriddenGlobalIds.has(def._id.toString()),
   );
 
-  // 5. From the user's categories, only take the ones that are active to be displayed
-  const visibleUserCategories = allUserCategories.filter((cat) => cat.isActive);
+  // 5. From the user's categories, filter based on isActive or includeHidden
+  const filteredUserCategories = allUserCategories.filter(
+    (cat) => includeHidden || cat.isActive,
+  );
 
-  // 6. Combine the visible defaults with the visible user categories and sort
-  return [...visibleDefaults, ...visibleUserCategories].sort((a, b) => {
+  // 6. Combine the visible defaults with the filtered user categories and sort
+  return [...visibleDefaults, ...filteredUserCategories].sort((a, b) => {
     if (a.isGlobalDefault && !b.isGlobalDefault) return -1;
     if (!a.isGlobalDefault && b.isGlobalDefault) return 1;
     return a.name.localeCompare(b.name);

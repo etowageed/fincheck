@@ -6,27 +6,35 @@ import CategoryService from "@/services/categoryService";
 export const useCategoriesStore = defineStore("categories", () => {
   const categories = ref([]);
   const isLoading = ref(false);
+  const showHidden = ref(false);
 
   const getCategoryById = computed(() => (id) => {
     return categories.value.find((cat) => cat._id === id);
   });
 
-  const getAllCategories = computed(() => categories.value);
+  const getAllCategories = computed(() =>
+    categories.value.filter((c) => c.isActive)
+  );
+
+  const getHiddenCategories = computed(() =>
+    categories.value.filter((c) => !c.isActive)
+  );
 
   const separatedCategories = computed(() => {
+    const activeCategories = categories.value.filter((c) => c.isActive);
     return {
-      globalDefaults: categories.value.filter((c) => c.isGlobalDefault),
-      userCustom: categories.value.filter(
+      globalDefaults: activeCategories.filter((c) => c.isGlobalDefault),
+      userCustom: activeCategories.filter(
         (c) => !c.isGlobalDefault && !c.overridesGlobalDefault
       ),
-      userOverrides: categories.value.filter((c) => c.overridesGlobalDefault),
+      userOverrides: activeCategories.filter((c) => c.overridesGlobalDefault),
     };
   });
 
   const fetchCategories = async () => {
     isLoading.value = true;
     try {
-      const response = await CategoryService.getCategories();
+      const response = await CategoryService.getCategories({ includeHidden: true });
       if (response.success && Array.isArray(response.data)) {
         categories.value = response.data;
       }
@@ -102,7 +110,9 @@ export const useCategoriesStore = defineStore("categories", () => {
     isLoading,
     getCategoryById,
     getAllCategories,
+    getHiddenCategories,
     separatedCategories,
+    showHidden,
     fetchCategories,
     createCategory,
     updateCategory,

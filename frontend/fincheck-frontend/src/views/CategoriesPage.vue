@@ -43,7 +43,8 @@
                 </TabPanel>
 
                 <TabPanel header="My Categories">
-                    <div v-if="!categoriesStore.separatedCategories.userCustom.length && !categoriesStore.separatedCategories.userOverrides.length" class="text-center py-8">
+                    <div v-if="!categoriesStore.separatedCategories.userCustom.length && !categoriesStore.separatedCategories.userOverrides.length"
+                        class="text-center py-8">
                         <p class="text-secondary font-medium">No custom categories found</p>
                     </div>
                     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -51,6 +52,17 @@
                             v-for="category in [...categoriesStore.separatedCategories.userCustom, ...categoriesStore.separatedCategories.userOverrides]"
                             :key="category._id" :category="category" @edit="editCategory" @delete="deleteCategory"
                             @restore="restoreCategory" />
+                    </div>
+                </TabPanel>
+
+                <TabPanel header="Hidden">
+                    <div v-if="!categoriesStore.getHiddenCategories.length" class="text-center py-8">
+                        <p class="text-secondary font-medium">No hidden categories</p>
+                        <p class="text-xs text-muted mt-2">Hidden default categories will appear here.</p>
+                    </div>
+                    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <CategoryCard v-for="category in categoriesStore.getHiddenCategories" :key="category._id"
+                            :category="category" @restore="restoreCategory" />
                     </div>
                 </TabPanel>
             </TabView>
