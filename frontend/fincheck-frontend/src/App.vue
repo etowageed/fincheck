@@ -2,7 +2,7 @@
   <div id="app">
     <GlobalErrorToast />
 
-    <Header @toggle-sidebar="toggleMobileSidebar" />
+    <Header v-if="!route.meta.hideHeader" @toggle-sidebar="toggleMobileSidebar" />
 
     <Sidebar 
       v-if="showSidebar" 
@@ -19,9 +19,10 @@
 
     <main :class="{ 
       'lg:ml-64 pt-20': showSidebar, 
-      'pt-20': !showSidebar 
+      'pt-20': !showSidebar && !route.meta.hideHeader,
+      'pt-0': !showSidebar && route.meta.hideHeader
     }">
-      <div class="p-6">
+      <div :class="{ 'p-6': !route.meta.hideHeader }">
         <router-view />
       </div>
     </main>

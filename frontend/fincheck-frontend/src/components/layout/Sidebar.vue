@@ -1,12 +1,12 @@
 <template>
     <aside
-        class="bg-primary shadow-sm border-r border-default w-64 h-screen fixed left-0 top-0 pt-20 transition-transform duration-300 z-30"
+        class="bg-primary shadow-sm border-r border-default w-64 h-dvh fixed left-0 top-0 pt-20 transition-transform duration-300 z-30"
         :class="[
             isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         ]">
-        <div class="flex flex-col h-full">
+        <div class="flex flex-col h-full overflow-hidden">
             <!-- Navigation Section -->
-            <nav class="flex-1 px-4 py-6">
+            <nav class="flex-1 px-4 py-6 overflow-y-auto">
                 <div class="space-y-2">
                     <!-- Navigation Links -->
 
