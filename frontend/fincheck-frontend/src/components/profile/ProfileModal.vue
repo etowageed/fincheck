@@ -1,7 +1,7 @@
 <template>
     <Dialog :visible="props.visible" modal :header="getHeaderTitle()" :style="{ width: '500px' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" :closable="true"
         @update:visible="handleVisibilityChange">
-        <Toast />
+        <Toast position="top-center" />
 
         <div v-if="currentView === 'main'" class="space-y-3">
             <Button label="Update Profile" icon="pi pi-user" @click="currentView = 'profile'"

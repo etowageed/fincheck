@@ -159,4 +159,68 @@
   .bg-accent-red .p-progressbar-value {
     background-color: rgb(var(--color-accent-red)) !important;
   }
+
+  /* NEW: Toast solid colors and typography overrides */
+  .p-toast .p-toast-message {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    border-radius: 0.5rem !important;
+    opacity: 1 !important;
+  }
+  
+  .p-toast-message.p-toast-message-info {
+    background: #eff6ff !important;
+    border-color: #bfdbfe !important;
+  }
+  .p-toast-message.p-toast-message-info * { color: #1e40af !important; }
+
+  .p-toast-message.p-toast-message-success {
+    background: #f0fdf4 !important;
+    border-color: #bbf7d0 !important;
+  }
+  .p-toast-message.p-toast-message-success * { color: #166534 !important; }
+
+  .p-toast-message.p-toast-message-warn {
+    background: #fefce8 !important;
+    border-color: #fef08a !important;
+  }
+  .p-toast-message.p-toast-message-warn * { color: #854d0e !important; }
+
+  .p-toast-message.p-toast-message-error {
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+  }
+  .p-toast-message.p-toast-message-error * { color: #991b1b !important; }
+
+  .p-toast-summary {
+    font-weight: 700 !important;
+  }
+  .p-toast-detail {
+    font-weight: 500 !important;
+  }
+
+  .dark .p-toast-message.p-toast-message-info {
+    background: #1e3a8a !important;
+    border-color: #1e3a8a !important;
+  }
+  .dark .p-toast-message.p-toast-message-info * { color: #bfdbfe !important; }
+  
+  .dark .p-toast-message.p-toast-message-success {
+    background: #14532d !important;
+    border-color: #14532d !important;
+  }
+  .dark .p-toast-message.p-toast-message-success * { color: #bbf7d0 !important; }
+
+  .dark .p-toast-message.p-toast-message-warn {
+    background: #713f12 !important;
+    border-color: #713f12 !important;
+  }
+  .dark .p-toast-message.p-toast-message-warn * { color: #fef08a !important; }
+
+  .dark .p-toast-message.p-toast-message-error {
+    background: #7f1d1d !important;
+    border-color: #7f1d1d !important;
+  }
+  .dark .p-toast-message.p-toast-message-error * { color: #fecaca !important; }
 }

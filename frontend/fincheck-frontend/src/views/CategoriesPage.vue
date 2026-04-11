@@ -59,7 +59,7 @@
         <CategoryFormDialog v-model:visible="showAddCategoryDialog" v-model:category="selectedCategory"
             :isEdit="isEditMode" @save="handleSaveCategory" />
 
-        <Toast ref="toast" />
+        <Toast ref="toast" position="top-center" />
     </div>
 </template>
 
