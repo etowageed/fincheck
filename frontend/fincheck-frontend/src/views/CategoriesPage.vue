@@ -19,53 +19,61 @@
 
         <!-- Categories Content -->
         <div v-else>
-            <TabView>
-                <TabPanel header="All Categories">
-                    <div v-if="!categoriesStore.getAllCategories.length" class="text-center py-8">
-                        <p class="text-secondary font-medium">No categories found</p>
-                    </div>
-                    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <CategoryCard v-for="category in categoriesStore.getAllCategories" :key="category._id"
-                            :category="category" @edit="editCategory" @delete="deleteCategory"
-                            @restore="restoreCategory" />
-                    </div>
-                </TabPanel>
+            <Tabs value="0" scrollable>
+                <TabList>
+                    <Tab value="0">All Categories</Tab>
+                    <Tab value="1">Default Categories</Tab>
+                    <Tab value="2">My Categories</Tab>
+                    <Tab value="3">Hidden</Tab>
+                </TabList>
+                <TabPanels>
+                    <TabPanel value="0">
+                        <div v-if="!categoriesStore.getAllCategories.length" class="text-center py-8">
+                            <p class="text-secondary font-medium">No categories found</p>
+                        </div>
+                        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <CategoryCard v-for="category in categoriesStore.getAllCategories" :key="category._id"
+                                :category="category" @edit="editCategory" @delete="deleteCategory"
+                                @restore="restoreCategory" />
+                        </div>
+                    </TabPanel>
 
-                <TabPanel header="Default Categories">
-                    <div v-if="!categoriesStore.separatedCategories.globalDefaults.length" class="text-center py-8">
-                        <p class="text-secondary font-medium">No default categories found</p>
-                    </div>
-                    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <CategoryCard v-for="category in categoriesStore.separatedCategories.globalDefaults"
-                            :key="category._id" :category="category" @edit="editCategory" @delete="deleteCategory"
-                            @restore="restoreCategory" />
-                    </div>
-                </TabPanel>
+                    <TabPanel value="1">
+                        <div v-if="!categoriesStore.separatedCategories.globalDefaults.length" class="text-center py-8">
+                            <p class="text-secondary font-medium">No default categories found</p>
+                        </div>
+                        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <CategoryCard v-for="category in categoriesStore.separatedCategories.globalDefaults"
+                                :key="category._id" :category="category" @edit="editCategory" @delete="deleteCategory"
+                                @restore="restoreCategory" />
+                        </div>
+                    </TabPanel>
 
-                <TabPanel header="My Categories">
-                    <div v-if="!categoriesStore.separatedCategories.userCustom.length && !categoriesStore.separatedCategories.userOverrides.length"
-                        class="text-center py-8">
-                        <p class="text-secondary font-medium">No custom categories found</p>
-                    </div>
-                    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <CategoryCard
-                            v-for="category in [...categoriesStore.separatedCategories.userCustom, ...categoriesStore.separatedCategories.userOverrides]"
-                            :key="category._id" :category="category" @edit="editCategory" @delete="deleteCategory"
-                            @restore="restoreCategory" />
-                    </div>
-                </TabPanel>
+                    <TabPanel value="2">
+                        <div v-if="!categoriesStore.separatedCategories.userCustom.length && !categoriesStore.separatedCategories.userOverrides.length"
+                            class="text-center py-8">
+                            <p class="text-secondary font-medium">No custom categories found</p>
+                        </div>
+                        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <CategoryCard
+                                v-for="category in [...categoriesStore.separatedCategories.userCustom, ...categoriesStore.separatedCategories.userOverrides]"
+                                :key="category._id" :category="category" @edit="editCategory" @delete="deleteCategory"
+                                @restore="restoreCategory" />
+                        </div>
+                    </TabPanel>
 
-                <TabPanel header="Hidden">
-                    <div v-if="!categoriesStore.getHiddenCategories.length" class="text-center py-8">
-                        <p class="text-secondary font-medium">No hidden categories</p>
-                        <p class="text-xs text-muted mt-2">Hidden default categories will appear here.</p>
-                    </div>
-                    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <CategoryCard v-for="category in categoriesStore.getHiddenCategories" :key="category._id"
-                            :category="category" @restore="restoreCategory" />
-                    </div>
-                </TabPanel>
-            </TabView>
+                    <TabPanel value="3">
+                        <div v-if="!categoriesStore.getHiddenCategories.length" class="text-center py-8">
+                            <p class="text-secondary font-medium">No hidden categories</p>
+                            <p class="text-xs text-muted mt-2">Hidden default categories will appear here.</p>
+                        </div>
+                        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <CategoryCard v-for="category in categoriesStore.getHiddenCategories" :key="category._id"
+                                :category="category" @restore="restoreCategory" />
+                        </div>
+                    </TabPanel>
+                </TabPanels>
+            </Tabs>
         </div>
 
         <CategoryFormDialog v-model:visible="showAddCategoryDialog" v-model:category="selectedCategory"
