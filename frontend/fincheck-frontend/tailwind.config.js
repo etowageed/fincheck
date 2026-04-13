@@ -10,6 +10,24 @@ export default {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', "sans-serif"],
       },
+      fontSize: {
+        xs: "var(--text-xs)",
+        sm: "var(--text-sm)",
+        base: "var(--text-base)",
+        lg: "var(--text-lg)",
+        xl: "var(--text-xl)",
+        "2xl": "var(--text-2xl)",
+        "3xl": "var(--text-3xl)",
+        "4xl": "var(--text-4xl)",
+        "5xl": "var(--text-5xl)",
+        display: "var(--text-display)",
+      },
+      fontWeight: {
+        label: "600",
+        h1: "800",
+        h2: "700",
+        h3: "700",
+      },
       colors: {
         primary: "rgb(var(--color-bg-primary) / <alpha-value>)",
         secondary: "rgb(var(--color-bg-secondary) / <alpha-value>)",
@@ -23,7 +41,7 @@ export default {
           blue: "rgb(var(--color-accent-blue) / <alpha-value>)",
           green: "rgb(var(--color-accent-green) / <alpha-value>)",
           red: "rgb(var(--color-accent-red) / <alpha-value>)",
-          yellow: "#FCD34D",
+          yellow: "rgb(var(--color-accent-yellow) / <alpha-value>)",
         },
         border: {
           default: "rgb(var(--color-border) / <alpha-value>)",
