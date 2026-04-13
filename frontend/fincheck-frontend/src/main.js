@@ -33,17 +33,17 @@ const MyPreset = definePreset(Aura, {
         colorScheme: {
           light: {
             blur: '0px',
-            info: { background: '#eff6ff', color: '#1e40af', detailColor: '#1e40af', borderColor: '#bfdbfe' },
-            success: { background: '#f0fdf4', color: '#166534', detailColor: '#166534', borderColor: '#bbf7d0' },
-            warn: { background: '#fefce8', color: '#854d0e', detailColor: '#854d0e', borderColor: '#fef08a' },
-            error: { background: '#fef2f2', color: '#991b1b', detailColor: '#991b1b', borderColor: '#fecaca' }
+            info: { background: '#3b82f6', color: '#ffffff', detailColor: '#ffffff', borderColor: '#2563eb' },
+            success: { background: '#84cc16', color: '#ffffff', detailColor: '#ffffff', borderColor: '#65a30d' },
+            warn: { background: '#f59e0b', color: '#ffffff', detailColor: '#ffffff', borderColor: '#d97706' },
+            error: { background: '#dc2626', color: '#ffffff', detailColor: '#ffffff', borderColor: '#b91c1c' }
           },
           dark: {
             blur: '0px',
-            info: { background: '#1e3a8a', color: '#bfdbfe', detailColor: '#bfdbfe', borderColor: '#1e3a8a' },
-            success: { background: '#14532d', color: '#bbf7d0', detailColor: '#bbf7d0', borderColor: '#14532d' },
-            warn: { background: '#713f12', color: '#fef08a', detailColor: '#fef08a', borderColor: '#713f12' },
-            error: { background: '#7f1d1d', color: '#fecaca', detailColor: '#fecaca', borderColor: '#7f1d1d' }
+            info: { background: '#3b82f6', color: '#ffffff', detailColor: '#ffffff', borderColor: '#2563eb' },
+            success: { background: '#84cc16', color: '#ffffff', detailColor: '#ffffff', borderColor: '#65a30d' },
+            warn: { background: '#f59e0b', color: '#ffffff', detailColor: '#ffffff', borderColor: '#d97706' },
+            error: { background: '#dc2626', color: '#ffffff', detailColor: '#ffffff', borderColor: '#b91c1c' }
           }
         }
       }
