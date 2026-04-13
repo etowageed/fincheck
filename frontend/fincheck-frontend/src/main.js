@@ -24,31 +24,71 @@ const MyPreset = definePreset(Aura, {
       600: "#65a30d",
       700: "#4d7c0f",
       800: "#3f6212",
-        900: "#365314",
-        950: "#1a2e05",
+      900: "#365314",
+      950: "#1a2e05",
+    },
+  },
+  components: {
+    toast: {
+      colorScheme: {
+        light: {
+          blur: "0px",
+          info: {
+            background: "#3b82f6",
+            color: "#ffffff",
+            detailColor: "#ffffff",
+            borderColor: "#2563eb",
+          },
+          success: {
+            background: "#1e820e",
+            color: "#ffffff",
+            detailColor: "#ffffff",
+            borderColor: "#65a30d",
+          },
+          warn: {
+            background: "#f59e0b",
+            color: "#ffffff",
+            detailColor: "#ffffff",
+            borderColor: "#d97706",
+          },
+          error: {
+            background: "#a2352e",
+            color: "#ffffff",
+            detailColor: "#ffffff",
+            borderColor: "#b91c1c",
+          },
+        },
+        dark: {
+          blur: "0px",
+          info: {
+            background: "#3b82f6",
+            color: "#ffffff",
+            detailColor: "#ffffff",
+            borderColor: "#2563eb",
+          },
+          success: {
+            background: "#1e820e",
+            color: "#ffffff",
+            detailColor: "#ffffff",
+            borderColor: "#65a30d",
+          },
+          warn: {
+            background: "#f59e0b",
+            color: "#ffffff",
+            detailColor: "#ffffff",
+            borderColor: "#d97706",
+          },
+          error: {
+            background: "#a2352e",
+            color: "#ffffff",
+            detailColor: "#ffffff",
+            borderColor: "#b91c1c",
+          },
+        },
       },
     },
-    components: {
-      toast: {
-        colorScheme: {
-          light: {
-            blur: '0px',
-            info: { background: '#3b82f6', color: '#ffffff', detailColor: '#ffffff', borderColor: '#2563eb' },
-            success: { background: '#84cc16', color: '#ffffff', detailColor: '#ffffff', borderColor: '#65a30d' },
-            warn: { background: '#f59e0b', color: '#ffffff', detailColor: '#ffffff', borderColor: '#d97706' },
-            error: { background: '#dc2626', color: '#ffffff', detailColor: '#ffffff', borderColor: '#b91c1c' }
-          },
-          dark: {
-            blur: '0px',
-            info: { background: '#3b82f6', color: '#ffffff', detailColor: '#ffffff', borderColor: '#2563eb' },
-            success: { background: '#84cc16', color: '#ffffff', detailColor: '#ffffff', borderColor: '#65a30d' },
-            warn: { background: '#f59e0b', color: '#ffffff', detailColor: '#ffffff', borderColor: '#d97706' },
-            error: { background: '#dc2626', color: '#ffffff', detailColor: '#ffffff', borderColor: '#b91c1c' }
-          }
-        }
-      }
-    }
-  });
+  },
+});
 
 const app = createApp(App);
 const pinia = createPinia();
