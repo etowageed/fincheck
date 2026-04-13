@@ -141,6 +141,24 @@
   .btn-secondary:hover {
     background-color: rgb(var(--color-bg-tertiary));
   }
+
+  /* CTA button variant with pop-lime background and dark ink text */
+  .btn-cta {
+    background-color: var(--color-pop-lime) !important;
+    color: var(--color-ink-900) !important;
+    font-weight: 700 !important;
+    border: none !important;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out !important;
+  }
+
+  .btn-cta:hover {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+
+  .btn-cta:active {
+    transform: scale(0.98);
+  }
   /* NEW: Define the custom background color utility for the progress bar */
   .bg-accent-yellow-warning {
     background-color: rgb(var(--color-accent-yellow));

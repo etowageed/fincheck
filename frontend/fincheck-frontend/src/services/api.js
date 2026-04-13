@@ -33,17 +33,22 @@ api.interceptors.response.use(
     }
 
     // Handle 401 Unauthorized errors specifically for session expiration
-    if (
-      error.response?.status === 401 &&
-      !originalRequest.url.endsWith("/login") &&
-      !originalRequest.url.endsWith("/signup")
-    ) {
+    if (error.response?.status === 401) {
       const authStore = useAuthStore();
 
       if (authStore.isAuthenticated) {
         authStore.user = null;
         authStore.isAuthenticated = false;
         // The router guard will automatically redirect now that isAuthenticated is false
+      }
+
+      // If it's not a login or signup request, return without setting a global error
+      // this prevents the "not logged in" message from appearing on public pages
+      if (
+        !originalRequest.url.endsWith("/login") &&
+        !originalRequest.url.endsWith("/signup")
+      ) {
+        return Promise.reject(error);
       }
     }
 

@@ -24,7 +24,7 @@
                 :disabled="authStore.isLoading" />
         </div>
 
-        <Button label="Create Account" class="w-full mt-10" type="submit" :loading="authStore.isLoading"
+        <Button label="Create Account" class="w-full mt-10 btn-cta" type="submit" :loading="authStore.isLoading"
             :disabled="authStore.isLoading" />
 
         <p class="text-xs text-secondary text-center mt-4">

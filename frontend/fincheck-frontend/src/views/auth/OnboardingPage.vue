@@ -26,7 +26,7 @@
                 </div>
             </div>
 
-            <Button label="Get Started" class="w-full" @click="goToTransactions" />
+            <Button label="Get Started" class="w-full btn-cta" @click="goToTransactions" />
         </div>
     </div>
 </template>

@@ -2,7 +2,7 @@
     <div class="space-y-6">
         <div class="flex justify-between items-center">
             <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight">Categories</h1>
-            <Button label="Add Category" icon="pi pi-plus" @click="showAddCategoryDialog = true" />
+            <Button label="Add Category" icon="pi pi-plus" class="btn-cta" @click="showAddCategoryDialog = true" />
         </div>
 
         <!-- Loading State -->

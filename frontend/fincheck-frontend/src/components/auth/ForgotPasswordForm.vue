@@ -12,7 +12,7 @@
                     :disabled="authStore.isLoading" required />
             </div>
 
-            <Button type="submit" :label="authStore.isLoading ? 'Sending...' : 'Send Reset Link'" class="w-full mt-4"
+            <Button type="submit" :label="authStore.isLoading ? 'Sending...' : 'Send Reset Link'" class="w-full mt-4 btn-cta"
                 :disabled="authStore.isLoading" :loading="authStore.isLoading" />
 
             <div class="text-center mt-4">

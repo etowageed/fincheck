@@ -42,7 +42,7 @@
             <Button 
                 type="submit" 
                 :label="loading ? 'Resetting...' : 'Reset Password'" 
-                class="w-full mt-4" 
+                class="w-full mt-4 btn-cta" 
                 :disabled="loading"
                 :loading="loading"
             />

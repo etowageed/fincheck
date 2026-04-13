@@ -15,7 +15,7 @@
                 :disabled="authStore.isLoading" />
         </div>
 
-        <Button type="submit" :label="authStore.isLoading ? 'Logging in...' : 'Login'" class="w-full mt-10"
+        <Button type="submit" :label="authStore.isLoading ? 'Logging in...' : 'Login'" class="w-full mt-10 btn-cta"
             :loading="authStore.isLoading" :disabled="authStore.isLoading" />
 
         <div class="text-center mt-3 space-y-2">

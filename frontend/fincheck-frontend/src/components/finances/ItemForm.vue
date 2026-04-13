@@ -1,6 +1,6 @@
 <template>
     <div class="card flex justify-center">
-        <Button :label="buttonLabel" :icon="buttonIcon" @click="openDialog" />
+        <Button :label="buttonLabel" :icon="buttonIcon" class="btn-cta" @click="openDialog" />
         <Dialog v-model:visible="visible" modal :header="dialogHeader" :style="{ width: '35rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="space-y-4">
                 <div class="flex flex-col gap-2">
@@ -97,7 +97,7 @@
                 <div class="flex justify-end gap-2">
                     <Button type="button" label="Cancel" severity="secondary" @click="closeDialog"
                         :disabled="isLoading" />
-                    <Button type-="button" :label="submitButtonLabel" @click="handleSubmit" :loading="isLoading"
+                    <Button type="button" :label="submitButtonLabel" class="btn-cta" @click="handleSubmit" :loading="isLoading"
                         :disabled="!isFormValid" />
                 </div>
             </template>
@@ -127,7 +127,7 @@
                 <div class="flex justify-end gap-2">
                     <Button label="Cancel" severity="secondary" @click="closeQuickAddCategory"
                         :disabled="isQuickAddLoading" />
-                    <Button label="Add Category" @click="handleQuickAddCategory" :loading="isQuickAddLoading" />
+                    <Button label="Add Category" class="btn-cta" @click="handleQuickAddCategory" :loading="isQuickAddLoading" />
                 </div>
             </template>
         </Dialog>
