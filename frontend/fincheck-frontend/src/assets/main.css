@@ -9,7 +9,7 @@
   --color-ink-400: #94a3b8;
   --color-ink-100: #e2e8f0;
   --color-pop-purple: #8b5cf6;
-  --color-pop-lime: #84cc16;
+  --color-pop-lime: #D1FF4F;
   --color-pop-pink: #ec4899;
   --color-pop-yellow: #fcd34d;
   --color-pop-cyan: #06b6d4;
@@ -56,7 +56,7 @@
     --color-bg-tertiary: 243 244 246; /* gray-100 */
     --color-border: 229 231 235; /* gray-200 */
     --color-accent-blue: 37 99 235; /* blue-600 */
-    --color-accent-green: 132 204 22; /* lime-500 */
+    --color-accent-green: 209 255 79; /* #D1FF4F */
     --color-accent-red: 220 38 38; /* red-600 */
     --color-accent-yellow: 245 158 11; /* amber-600 */
   }
@@ -72,7 +72,7 @@
     --color-bg-tertiary: 40 38 45; /* Elevated Surface */
     --color-border: 56 54 61; /* Subtle Border */
     --color-accent-blue: 96 165 250;
-    --color-accent-green: 163 230 53;
+    --color-accent-green: 209 255 79;
     --color-accent-red: 248 113 113;
     --color-accent-yellow: 251 191 36;
   }

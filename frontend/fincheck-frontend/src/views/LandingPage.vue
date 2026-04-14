@@ -5,11 +5,7 @@
       <div
         class="max-w-7xl mx-auto bg-white/70 backdrop-blur-xl border border-white/40 rounded-full px-6 py-3 flex justify-between items-center shadow-lg shadow-black/5">
         <div class="flex items-center gap-2 cursor-pointer">
-          <div
-            class="w-8 h-8 bg-pop-lime rounded-lg flex items-center justify-center text-ink-900 font-black text-xl rotate-3 shadow-sm">
-            P
-          </div>
-          <span class="font-bold text-xl tracking-tight">Plete Finance</span>
+          <BrandLogo :size="24" variant="on-light" />
         </div>
 
         <div class="hidden md:flex items-center gap-8 font-medium text-sm text-ink-800">
@@ -275,8 +271,7 @@
     <footer class="py-12 bg-white border-t border-ink-100">
       <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
         <div class="flex items-center gap-2">
-          <div class="w-6 h-6 bg-pop-lime rounded-md rotate-3"></div>
-          <span class="font-bold text-lg text-ink-900">Plete Finance</span>
+          <BrandLogo :size="20" variant="on-light" />
         </div>
         <div class="flex gap-6 text-sm font-bold text-ink-400">
           <a href="#" class="hover:text-ink-900">Privacy</a>
@@ -292,6 +287,7 @@
 </template>
 
 <script setup>
+import BrandLogo from '@/components/BrandLogo.vue'
 </script>
 
 <style scoped></style>
