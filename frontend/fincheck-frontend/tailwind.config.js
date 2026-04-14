@@ -43,8 +43,20 @@ export default {
           red: "rgb(var(--color-accent-red) / <alpha-value>)",
           yellow: "rgb(var(--color-accent-yellow) / <alpha-value>)",
         },
+        pop: {
+          lime: "#84CC16",
+        },
         border: {
           default: "rgb(var(--color-border) / <alpha-value>)",
+        },
+      },
+      animation: {
+        "fade-in-up": "fade-in-up 0.6s ease-out forwards",
+      },
+      keyframes: {
+        "fade-in-up": {
+          "0%": { opacity: 0, transform: "translateY(20px)" },
+          "100%": { opacity: 1, transform: "translateY(0)" },
         },
       },
     },
