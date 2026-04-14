@@ -60,10 +60,7 @@ const sendWeeklySummaries = async () => {
     const spentSoFar = finances.expensesTotal;
     const percentUsed = budget ? (spentSoFar / budget) * 100 : 0;
 
-    const appUrl = process.env.APP_BASE_URL || 'http://localhost:3000';
-
-    // 🌍 IP/Locale detection REMOVED
-
+    const appUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard`;
     const emailInstance = new EmailService(user, appUrl);
     await emailInstance.sendWeeklySummary({
       startOfWeek,
@@ -72,18 +69,24 @@ const sendWeeklySummaries = async () => {
       totalExpenses,
       percentUsed,
       comparisonText,
-      // locale, // REMOVED
-      // currency, // REMOVED
+    });
+
+    // ⏱️ Add a small delay (2s) to respect SMTP rate limits (e.g. Mailtrap)
+    await new Promise((resolve) => {
+      setTimeout(resolve, 2000);
     });
   }
 };
 
 // Run manually or via cron
+
+// every monday at 12pm
 // cron.schedule('0 12 * * 1', () => {
 //   console.log('⏰ Sending weekly summaries...');
 //   sendWeeklySummaries().catch(console.error);
 // });
 
+// every minute - for testing
 // cron.schedule('* * * * *', () => {
 //   console.log('⏰ Sending weekly summaries...');
 //   sendWeeklySummaries().catch(console.error);

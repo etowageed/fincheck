@@ -1,17 +1,20 @@
 extends base
 
 block content
-  p Hi #{firstName},
-  p Welcome to Plete Finance 🎉, we're glad to have you 🎉🙏
-  p Your financial freedom starts here.
-  table.btn.btn-primary(role='presentation', border='0', cellpadding='0', cellspacing='0', style='border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;')
+  h1 Welcome to Plete, #{firstName} 🚀
+  p We're thrilled to have you join our community of finance enthusiasts. Your journey to financial freedom starts right here.
+  p Plete is designed to give you total control over your money with minimal effort. Ready to dive in?
+  
+  table.btn(role='presentation', border='0', cellpadding='0', cellspacing='0')
     tbody
       tr
-        td(align='left', style='font-family: sans-serif; font-size: 14px; vertical-align: top; padding-bottom: 15px;')
-          table(role='presentation', border='0', cellpadding='0', cellspacing='0', style='border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;')
+        td(align='left')
+          table(role='presentation', border='0', cellpadding='0', cellspacing='0')
             tbody
               tr
-                td(style='font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: #3498db; border-radius: 5px; text-align: center;')
-                  a(href=`${url}`, target='_blank', style='display: inline-block; color: #ffffff; background-color: #3498db; border: solid 1px #3498db; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-transform: capitalize; border-color: #3498db;') Start Managing Finances
-  p If you need any help with managing your finances, please don't hesitate to contact me!
-  p - Plete Finance Team
+                td
+                  a(href=`${url}`, target='_blank') Start Managing Finances
+                  
+  p(style='margin-top: 32px; font-size: 14px;') Need a hand? Our support team is just an email away. We're here to help you succeed.
+  p(style='font-weight: 600; color: #F8FAFC;') — The Plete Finance Team
+

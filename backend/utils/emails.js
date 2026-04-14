@@ -1,23 +1,23 @@
 const nodemailer = require('nodemailer');
 const pug = require('pug');
 const path = require('path');
+const { convert } = require('html-to-text');
 const formatCurrency = require('./formatCurrency');
 
 class EmailService {
   constructor(user, url) {
     this.to = user.email;
-    this.firstName = user.name.split(' ')[0];
+    [this.firstName] = user.name.split(' ');
     this.url = url;
-    this.user = user; // Added user to instance for formatCurrency
-    this.from = `Plete Finance 💸 <${process.env.EMAIL_FROM}>`;
+    this.user = user;
+    const fromName = process.env.EMAIL_FROM_NAME || 'Plete Finance';
+    const fromEmail = process.env.EMAIL_FROM || 'hello@plete.finance';
+    this.from = `${fromName} <${fromEmail}>`;
   }
 
-  newTransport() {
-    // uses Brevo in production
-
+  static _createTransporter() {
     if (process.env.NODE_ENV === 'production') {
       return nodemailer.createTransport({
-        service: 'Brevo',
         host: process.env.BREVO_EMAIL_HOST,
         port: process.env.BREVO_EMAIL_PORT,
         auth: {
@@ -27,7 +27,6 @@ class EmailService {
       });
     }
 
-    // uses mailtrap when in development
     return nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
@@ -38,34 +37,50 @@ class EmailService {
     });
   }
 
-  //   actualy sends the email
+  static get transporter() {
+    if (!EmailService.sharedTransporter) {
+      EmailService.sharedTransporter = EmailService._createTransporter();
+    }
+    return EmailService.sharedTransporter;
+  }
+
   async send(template, subject, templateData = {}) {
-    // 1) Render HTML based on a pug template
-    const html = pug.renderFile(
-      path.join(__dirname, `../views/emails/${template}.pug`),
-      {
-        firstName: this.firstName,
-        url: this.url,
+    try {
+      // 1) Render HTML based on a pug template
+      const html = pug.renderFile(
+        path.join(__dirname, `../views/emails/${template}.pug`),
+        {
+          firstName: this.firstName,
+          url: this.url,
+          subject,
+          ...templateData,
+        },
+      );
+
+      // 2) Generate text version
+      const text = convert(html, {
+        wordwrap: 130,
+      });
+
+      // 3) Define email options
+      const mailOptions = {
+        from: this.from,
+        to: this.to,
         subject,
-        ...templateData,
-      },
-    );
+        html,
+        text,
+      };
 
-    // 2) Define email options
-    const mailOptions = {
-      from: this.from,
-      to: this.to,
-      subject,
-      html,
-      // text: htmlToText.fromString(html) // Optional: convert HTML to text
-    };
-
-    // 3) Create a transport and send email
-    await this.newTransport().sendMail(mailOptions);
+      // 4) Create a transport and send email
+      await EmailService.transporter.sendMail(mailOptions);
+      console.log(`✅ Email sent: ${subject} to ${this.to}`);
+    } catch (err) {
+      console.error(`❌ Error sending email: ${err.message}`);
+    }
   }
 
   async sendWelcome() {
-    await this.send('welcome', 'Welcome to the Plete Finance Family!');
+    await this.send('welcome', 'Welcome to the Plete Finance Family! 🎉');
   }
 
   async sendPasswordReset() {
@@ -83,7 +98,6 @@ class EmailService {
     percentUsed,
     comparisonText,
   }) {
-    // Format currency amounts using locale-aware utility
     const incomeFormatted = formatCurrency(totalIncome, {
       preferredLocale: this.user?.preferredLocale,
       preferredCurrency: this.user?.preferredCurrency,
@@ -94,10 +108,9 @@ class EmailService {
       preferredCurrency: this.user?.preferredCurrency,
     });
 
-    const friendlyComment =
-      percentUsed <= 100
-        ? `🎉 Awesome! You're doing great and staying within your budget. Keep it up!`
-        : `😬 You've spent more than your monthly budget. Consider reviewing your spending categories.`;
+    const friendlyComment = percentUsed <= 100
+      ? "🎉 Awesome! You're doing great and staying within your budget. Keep it up!"
+      : "😬 You've spent more than your monthly budget. Review your categories.";
 
     await this.send('weeklySummary', 'Your Weekly Plete Finance Summary 🌟', {
       startOfWeek: startOfWeek.toDateString(),
