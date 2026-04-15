@@ -38,7 +38,7 @@
 
             <div class="flex justify-end gap-2 pt-4">
                 <Button label="Back" @click="currentView = 'main'" severity="secondary" outlined />
-                <Button label="Save Changes" @click="handleUpdateProfile" :loading="authStore.isLoading" />
+                <Button label="Save Changes" class="btn-cta" @click="handleUpdateProfile" :loading="authStore.isLoading" />
             </div>
         </div>
 
@@ -62,7 +62,7 @@
             </div>
             <div class="flex justify-end gap-2 pt-4">
                 <Button label="Back" @click="currentView = 'main'" severity="secondary" outlined />
-                <Button label="Change Password" @click="handleChangePassword" :loading="authStore.isLoading" />
+                <Button label="Change Password" class="btn-cta" @click="handleChangePassword" :loading="authStore.isLoading" />
             </div>
         </div>
 

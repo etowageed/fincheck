@@ -14,7 +14,7 @@
           <router-link to="/login" class="hover:text-pop-purple transition-colors">Log in</router-link>
           <router-link to="/signup">
             <button
-              class="bg-pop-lime text-ink-900 px-6 py-2.5 rounded-full font-bold hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-ink-900/20">
+              class="btn-cta bg-pop-lime text-ink-900 px-6 py-2.5 rounded-full font-bold hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-ink-900/20">
               Get Started
             </button>
           </router-link>
@@ -48,7 +48,7 @@
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-24">
           <router-link to="/signup">
             <button
-              class="px-8 py-4 bg-pop-lime text-ink-900 rounded-2xl font-black text-lg shadow-[0_10px_40px_-10px_rgba(132,204,22,0.5)] hover:-translate-y-1 transition-all">
+              class="btn-cta px-8 py-4 bg-pop-lime text-ink-900 rounded-2xl font-black text-lg shadow-[0_10px_40px_-10px_rgba(132,204,22,0.5)] hover:-translate-y-1 transition-all">
               Start for Free 🚀
             </button>
           </router-link>

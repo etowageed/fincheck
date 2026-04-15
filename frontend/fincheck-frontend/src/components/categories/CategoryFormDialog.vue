@@ -43,7 +43,7 @@
         <template #footer>
             <div class="flex gap-2">
                 <Button label="Cancel" severity="secondary" outlined @click="handleCancel" :disabled="isSubmitting" />
-                <Button :label="isEdit ? 'Update' : 'Create'" :loading="isSubmitting" @click="handleSubmit" />
+                <Button :label="isEdit ? 'Update' : 'Create'" class="btn-cta" :loading="isSubmitting" @click="handleSubmit" />
             </div>
         </template>
     </Dialog>

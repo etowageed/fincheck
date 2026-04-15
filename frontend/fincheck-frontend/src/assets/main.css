@@ -166,8 +166,17 @@
     color: rgb(var(--color-accent-blue));
   }
 
-  .text-accent-green {
-    color: rgb(var(--color-accent-green));
+  /* Accessible contrast for bright lime/green text */
+  .text-accent-green, .text-pop-lime {
+    color: #166534 !important; /* Deep forest green for light mode */
+  }
+
+  .dark .text-accent-green {
+    color: rgb(var(--color-accent-green)) !important;
+  }
+
+  .dark .text-pop-lime {
+    color: var(--color-pop-lime) !important;
   }
 
   .text-accent-red {

@@ -80,7 +80,8 @@
         <ItemForm ref="editBudgetFormRef" formType="budget" :edit-item="editingItem"
             @budget-item-updated="handleBudgetItemChange" style="display: none;" />
 
-        <Dialog v-model:visible="editIncomeVisible" modal header="Edit Expected Income" :style="{ width: '25rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+        <Dialog v-model:visible="editIncomeVisible" modal header="Edit Expected Income" :style="{ width: '25rem' }"
+            :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="flex flex-col gap-4">
                 <div class="flex flex-col gap-2">
                     <label for="newIncome" class="font-semibold">Expected Monthly Income</label>
@@ -95,8 +96,8 @@
                 <div class="flex justify-end gap-2">
                     <Button type="button" label="Cancel" severity="secondary" @click="closeIncomeDialog"
                         :disabled="budgetStore.isLoading" />
-                    <Button type="button" label="Update" @click="updateExpectedIncome" :loading="budgetStore.isLoading"
-                        :disabled="!newExpectedIncome || newExpectedIncome <= 0" />
+                    <Button type="button" label="Update" class="btn-cta" @click="updateExpectedIncome"
+                        :loading="budgetStore.isLoading" :disabled="!newExpectedIncome || newExpectedIncome <= 0" />
                 </div>
             </template>
         </Dialog>

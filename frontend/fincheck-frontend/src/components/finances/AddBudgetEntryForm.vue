@@ -1,24 +1,28 @@
 <template>
     <div class="card flex justify-center">
         <Button label="Create Budget" icon="pi pi-plus" class="btn-cta" @click="visible = true" />
-        <Dialog v-model:visible="visible" modal header="Create Budget" :style="{ width: '25rem' }"
+        <Dialog :visible="visible" @update:visible="visible = $event" modal header="Create Budget" :style="{ width: '28rem' }"
             :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
-            <span class="text-surface-500  block mb-8">First things first, what do you earn in a
-                month?</span>
-            <span class="text-surface-500  block mb-8 italic text-sm">Your expected monthly income
-                creates the foundation for your budget.</span>
-            <div class="flex items-center gap-4 mb-4">
-                <label for="income" class="font-semibold w-24">Monthly Income</label>
-                <InputNumber id="income" class="flex-auto" autocomplete="off" type="number"
-                    :placeholder="inputPlaceholder" v-model="monthlyIncome" :mode="'currency'"
+            
+            <div class="mb-6 space-y-2 mt-2">
+                <p class="text-lg font-bold text-primary leading-tight">First things first, what do you earn in a month?</p>
+                <p class="text-sm text-secondary">Your expected monthly income creates the foundation for your budget.</p>
+            </div>
+
+            <div class="flex flex-col gap-2 mb-8">
+                <label for="income" class="font-semibold text-primary text-sm">Monthly Income</label>
+                <InputNumber id="income" class="w-full" autocomplete="off"
+                    :placeholder="inputPlaceholder" v-model="monthlyIncome" mode="currency"
                     :currency="currentCurrency" :locale="currentLocale" :min="0" />
             </div>
 
-            <div class="flex justify-end gap-2">
-                <Button type="button" label="Cancel" severity="secondary" @click="closeDialog"></Button>
-                <Button type="button" label="Save" @click="handleCreateBudget"
-                    :disabled="!monthlyIncome || monthlyIncome <= 0"></Button>
-            </div>
+            <template #footer>
+                <div class="flex justify-end gap-3">
+                    <Button type="button" label="Cancel" severity="secondary" outlined @click="closeDialog" />
+                    <Button type="button" label="Save" class="btn-cta" @click="handleCreateBudget"
+                        :disabled="!monthlyIncome || monthlyIncome <= 0" />
+                </div>
+            </template>
         </Dialog>
     </div>
 </template>
