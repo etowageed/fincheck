@@ -250,6 +250,12 @@
   /* Override colors using the new classes defined in UserDashboard.vue */
   .bg-accent-green .p-progressbar-value {
     background-color: rgb(var(--color-accent-green)) !important;
+    color: var(--color-ink-900) !important;
+  }
+
+  .bg-accent-green .p-progressbar-label {
+    color: var(--color-ink-900) !important;
+    font-weight: 700 !important;
   }
 
   .bg-accent-yellow-warning .p-progressbar-value {

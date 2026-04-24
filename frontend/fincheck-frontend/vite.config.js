@@ -25,7 +25,7 @@ export default defineConfig({
     // This host needs to be updated every time Ngrok assigns a new URL.
     allowedHosts: [
       "twana-uncleft-annually.ngrok-free.dev",
-      "honest-subway.outray.app",
+      "shy-light.outray.app",
       "localhost",
       "127.0.0.1",
     ],

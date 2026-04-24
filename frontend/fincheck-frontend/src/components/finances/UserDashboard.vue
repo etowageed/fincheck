@@ -3,7 +3,8 @@
         <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6">
             <div class="flex items-center gap-3 mb-4">
                 <i class="pi pi-chart-line text-2xl text-accent-blue"></i>
-                <h2 class="text-xl md:text-2xl font-bold tracking-tight text-primary leading-snug">Your Financial Overview</h2>
+                <h2 class="text-xl md:text-2xl font-bold tracking-tight text-primary leading-snug">Your Financial
+                    Overview</h2>
             </div>
 
             <div v-if="!isLoading && !error">
