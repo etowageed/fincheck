@@ -140,8 +140,7 @@ financesSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
 // Virtual properties = computed fields that are not stored in the database
 
 financesSchema.virtual('totalMonthlyBudget').get(function () {
-  const baseBudget = this.monthlyBudget.reduce((sum, exp) => sum + exp.amount, 0);
-  return baseBudget + (this.rolloverAmount || 0);
+  return this.monthlyBudget.reduce((sum, exp) => sum + exp.amount, 0);
 });
 
 // Total recurring budget = sum of all recurring expenses in the monthly budget
@@ -184,10 +183,9 @@ financesSchema.virtual('outflow').get(function () {
   return this.expensesTotal + this.excludedExpensesTotal;
 });
 
-// NEW VIRTUAL PROPERTY: Budget Balance (Remaining Funds)
 financesSchema.virtual('budgetBalance').get(function () {
-  // Budget Balance = Planned Budget - Actual Expenses (Non-Excluded)
-  return this.totalMonthlyBudget - this.expensesTotal;
+  // Budget Balance = Planned Budget + Rollover - Actual Expenses (Non-Excluded)
+  return (this.totalMonthlyBudget + (this.rolloverAmount || 0)) - this.expensesTotal;
 });
 
 // expenses performance

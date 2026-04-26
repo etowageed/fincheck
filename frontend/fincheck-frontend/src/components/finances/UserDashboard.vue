@@ -84,8 +84,8 @@
                     <p class="text-2xl font-bold text-primary">{{ formatCurrency(metrics.totalMonthlyBudget) }}</p>
                     <div v-if="metrics.rolloverAmount > 0"
                         class="mt-1 flex items-center gap-1 text-xs text-accent-green font-medium">
-                        <i class="pi pi-arrow-circle-right"></i> Includes {{ formatCurrency(metrics.rolloverAmount) }}
-                        Rollover from last month
+                        <i class="pi pi-plus-circle"></i> {{ formatCurrency(metrics.rolloverAmount) }}
+                        rolled over from last month's budget
                     </div>
                 </div>
 
@@ -330,8 +330,9 @@ const getComparisonClass = (direction, isExpense = false) => {
 // ❌ REMOVED: The local formatCurrency function is removed and replaced by the composable
 
 const getBudgetUtilization = () => {
-    if (!metrics.value.totalMonthlyBudget || metrics.value.totalMonthlyBudget === 0) return 0;
-    return Math.round((metrics.value.expensesTotal / metrics.value.totalMonthlyBudget) * 100);
+    const effectiveBudget = (metrics.value.totalMonthlyBudget || 0) + (metrics.value.rolloverAmount || 0);
+    if (!effectiveBudget || effectiveBudget === 0) return 0;
+    return Math.round((metrics.value.expensesTotal / effectiveBudget) * 100);
 };
 
 const getBudgetUtilizationClass = () => {

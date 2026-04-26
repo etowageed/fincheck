@@ -32,8 +32,9 @@ const props = defineProps({
 });
 
 const getBudgetUtilization = computed(() => {
-    if (!props.metrics.totalMonthlyBudget || props.metrics.totalMonthlyBudget === 0) return 0;
-    return Math.round((props.metrics.expensesTotal / props.metrics.totalMonthlyBudget) * 100);
+    const effectiveBudget = (props.metrics.totalMonthlyBudget || 0) + (props.metrics.rolloverAmount || 0);
+    if (!effectiveBudget || effectiveBudget === 0) return 0;
+    return Math.round((props.metrics.expensesTotal / effectiveBudget) * 100);
 });
 
 const insights = computed(() => {
@@ -81,26 +82,28 @@ const insights = computed(() => {
         });
     }
 
-    // Insight 4: Predictive Spending (Premium Only)
-    if (authStore.isPremium && props.metrics.totalMonthlyBudget > 0) {
-        const today = new Date();
-        const currentDay = today.getDate();
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        
-        if (currentDay > 0) {
-            const projectedSpend = (props.metrics.expensesTotal / currentDay) * daysInMonth;
-            const projectedUtilization = Math.round((projectedSpend / props.metrics.totalMonthlyBudget) * 100);
+    if (authStore.isPremium) {
+        const effectiveBudget = (props.metrics.totalMonthlyBudget || 0) + (props.metrics.rolloverAmount || 0);
+        if (effectiveBudget > 0) {
+            const today = new Date();
+            const currentDay = today.getDate();
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
             
-            if (projectedUtilization >= 100) {
-                list.unshift({
-                    message: `Predictive Insight: At your current rate, you are projected to exceed your budget by end of month (${projectedUtilization}% utilization).`,
-                    iconClass: 'pi pi-chart-line text-accent-red font-bold'
-                });
-            } else if (projectedUtilization <= 85) {
-                list.unshift({
-                    message: `Predictive Insight: Great pacing! You are projected to finish the month well under budget (${projectedUtilization}% utilization).`,
-                    iconClass: 'pi pi-chart-line text-accent-green font-bold'
-                });
+            if (currentDay > 0) {
+                const projectedSpend = (props.metrics.expensesTotal / currentDay) * daysInMonth;
+                const projectedUtilization = Math.round((projectedSpend / effectiveBudget) * 100);
+                
+                if (projectedUtilization >= 100) {
+                    list.unshift({
+                        message: `Predictive Insight: At your current rate, you are projected to exceed your budget by end of month (${projectedUtilization}% utilization).`,
+                        iconClass: 'pi pi-chart-line text-accent-red font-bold'
+                    });
+                } else if (projectedUtilization <= 85) {
+                    list.unshift({
+                        message: `Predictive Insight: Great pacing! You are projected to finish the month well under budget (${projectedUtilization}% utilization).`,
+                        iconClass: 'pi pi-chart-line text-accent-green font-bold'
+                    });
+                }
             }
         }
     }

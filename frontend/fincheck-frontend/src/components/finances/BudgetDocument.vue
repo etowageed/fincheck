@@ -63,6 +63,11 @@
                         <span class="text-primary">Total Monthly Budget:</span>
                         <span class="text-accent-blue">{{ formatCurrency(budget.totalMonthlyBudget) }}</span>
                     </div>
+                    <div v-if="budget.rolloverAmount > 0"
+                        class="flex justify-between items-center text-sm text-accent-green mt-1 font-medium">
+                        <span><i class="pi pi-plus-circle"></i> Rollover from last month:</span>
+                        <span>{{ formatCurrency(budget.rolloverAmount) }}</span>
+                    </div>
                     <div v-if="budget.expectedMonthlyIncome"
                         class="flex justify-between items-center text-sm text-secondary mt-1">
                         <span>Planned Savings:</span>
