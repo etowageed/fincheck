@@ -26,6 +26,14 @@
                     <small v-if="errors.type" class="p-error">{{ errors.type }}</small>
                 </div>
 
+                <div v-if="formType === 'transaction' && formData.type === 'excludedExpense'" class="flex flex-col gap-2">
+                    <label for="goalId" class="font-semibold text-accent-blue flex items-center gap-2">
+                        <i class="pi pi-star"></i> Allocate to Goal
+                    </label>
+                    <Dropdown id="goalId" v-model="formData.goalId" :options="goalOptions" optionLabel="label"
+                        optionValue="value" placeholder="Select a goal (Optional)" :disabled="isLoading" class="w-full" />
+                </div>
+
                 <div class="flex flex-col gap-2">
                     <label for="category" class="font-semibold">Category</label>
                     <div class="flex gap-2">
@@ -136,6 +144,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
+import { useAuthStore } from '@/stores/auth';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoriesStore } from '@/stores/categories';
 import { useBudgetStore } from '@/stores/budget';
@@ -162,6 +171,7 @@ const emit = defineEmits([
 const transactionsStore = useTransactionsStore();
 const categoriesStore = useCategoriesStore();
 const budgetStore = useBudgetStore();
+const authStore = useAuthStore();
 // 💰 MODIFIED: Destructure preferred values and the formatter
 const { preferredCurrency: currentCurrency, preferredLocale: currentLocale, formatCurrency } = useCurrencyFormatter();
 
@@ -189,6 +199,17 @@ const categoryOptions = computed(() => {
         isGlobal: cat.isGlobalDefault,
         isOverride: cat.overridesGlobalDefault
     }));
+});
+
+const goalOptions = computed(() => {
+    const goals = authStore.user?.goals?.map(g => ({
+        label: g.name,
+        value: g._id
+    })) || [];
+    return [
+        { label: 'None (Unallocated Savings)', value: null },
+        ...goals
+    ];
 });
 
 const handleQuickAddCategory = async () => {
@@ -232,7 +253,8 @@ const getInitialFormData = () => ({
     amount: null,
     isRecurring: true,
     type: 'expense',
-    date: new Date()
+    date: new Date(),
+    goalId: null
 });
 
 const formData = ref(getInitialFormData());
@@ -360,6 +382,7 @@ const handleSubmit = async () => {
                 amount: formData.value.amount,
                 type: formData.value.type,
                 date: dateString, // Use the fixed date string
+                goalId: formData.value.type === 'excludedExpense' ? (formData.value.goalId || null) : null,
             };
 
             if (editMode.value) {

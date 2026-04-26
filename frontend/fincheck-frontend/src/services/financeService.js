@@ -172,6 +172,15 @@ export class FinanceService {
   /**
    * Budget Operations
    */
+  static async processRollover(month, year, accept) {
+    try {
+      const response = await api.post(`/finances/${month}/${year}/rollover`, { accept });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to process rollover: ${error.message}`);
+    }
+  }
+
   static async deleteBudget(month, year) {
     try {
       const response = await api.delete(`/finances/${month}/${year}`);
@@ -317,6 +326,7 @@ export class FinanceService {
       type: itemData.type,
       // MODIFIED: Pass the ISO string directly, no parsing needed here.
       date: transactionDateString,
+      goalId: itemData.goalId,
     };
 
     if (itemData.description?.trim()) {

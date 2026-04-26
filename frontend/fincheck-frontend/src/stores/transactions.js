@@ -2,8 +2,10 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { FinanceService } from "@/services/financeService";
+import { useAuthStore } from "@/stores/auth";
 
 export const useTransactionsStore = defineStore("transactions", () => {
+  const authStore = useAuthStore();
   const transactions = ref([]);
   const isLoading = ref(false);
 
@@ -47,6 +49,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
     try {
       await FinanceService.addTransaction(transactionData);
       await fetchTransactions();
+      await authStore.checkAuth();
       return { success: true };
     } catch (err) {
       return { success: false };
@@ -57,6 +60,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
     try {
       await FinanceService.updateTransaction(transactionId, transactionData);
       await fetchTransactions();
+      await authStore.checkAuth();
       return { success: true };
     } catch (err) {
       return { success: false };
@@ -70,6 +74,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
       transactions.value = transactions.value.filter(
         (t) => t._id !== transactionId
       );
+      await authStore.checkAuth();
       return { success: true };
     } catch (err) {
       return { success: false };

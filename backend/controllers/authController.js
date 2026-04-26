@@ -35,6 +35,7 @@ const filterUserForResponse = (user) => {
     preferredLocale,
     subscriptionStatus, // Include new field
     subscriptionExpires, // Include new field
+    goals,
   } = user;
 
   return {
@@ -48,6 +49,7 @@ const filterUserForResponse = (user) => {
     preferredLocale,
     subscriptionStatus,
     subscriptionExpires,
+    goals: goals || [],
   };
 };
 
@@ -130,7 +132,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 2a) find user by email
   const user = await User.findOne({ email }).select(
-    '+password subscriptionStatus subscriptionExpires'
+    '+password subscriptionStatus subscriptionExpires goals'
   );
 
   // 2b) If no user, or if password doesn't match, send error
@@ -185,7 +187,7 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
 
   // 3) check if user still exists
   const user = await User.findById(decoded.id).select(
-    'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name'
+    'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name goals'
   );
   if (!user) {
     return res.status(200).json({

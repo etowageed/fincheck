@@ -18,6 +18,10 @@ router.get(
   exportController.generateReport
 );
 
+router.post('/me/goals', restrictToTier('premium'), userController.addGoal);
+router.patch('/me/goals/:id', restrictToTier('premium'), userController.updateGoal);
+router.delete('/me/goals/:id', restrictToTier('premium'), userController.deleteGoal);
+
 router.delete('/me', userController.deleteMe);
 
 router.get('/', authController.restrictTo('admin'), userController.getAllUsers);

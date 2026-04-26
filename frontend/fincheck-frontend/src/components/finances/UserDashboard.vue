@@ -8,6 +8,26 @@
             </div>
 
             <div v-if="!isLoading && !error">
+                <!-- Rollover Prompt -->
+                <div v-if="metrics.potentialRollover > 0 && !metrics.rolloverDismissed"
+                    class="bg-yellow-50 dark:bg-accent-yellow/10 border border-yellow-300 dark:border-accent-yellow/30 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <i class="pi pi-wallet text-2xl text-accent-yellow"></i>
+                        <div>
+                            <h4 class="font-bold text-primary text-sm">Rollover Available</h4>
+                            <p class="text-xs text-secondary mt-1">You saved {{
+                                formatCurrency(metrics.potentialRollover) }} last month. Would you like to roll it over
+                                into this month's budget?</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 shrink-0">
+                        <Button label="No Thanks" severity="secondary" size="small" outlined
+                            @click="handleRollover(false)" :loading="isRollingOver" />
+                        <Button label="Yes, Roll It Over" class="btn-cta" size="small" @click="handleRollover(true)"
+                            :loading="isRollingOver" />
+                    </div>
+                </div>
+
                 <DashboardInsights :metrics="metrics" :comparison="comparison" />
             </div>
 
@@ -62,6 +82,11 @@
                         </span>
                     </div>
                     <p class="text-2xl font-bold text-primary">{{ formatCurrency(metrics.totalMonthlyBudget) }}</p>
+                    <div v-if="metrics.rolloverAmount > 0"
+                        class="mt-1 flex items-center gap-1 text-xs text-accent-green font-medium">
+                        <i class="pi pi-arrow-circle-right"></i> Includes {{ formatCurrency(metrics.rolloverAmount) }}
+                        Rollover from last month
+                    </div>
                 </div>
 
                 <div class="bg-secondary rounded-lg p-4 border border-default">
@@ -115,7 +140,7 @@
                                 <span class="text-sm text-secondary">Recurring Expenses</span>
                             </div>
                             <span class="font-semibold text-primary">{{ formatCurrency(metrics.totalRecurringExpenses)
-                            }}</span>
+                                }}</span>
                         </div>
 
                         <div class="flex justify-between items-center p-3 bg-secondary rounded border border-default">
@@ -133,7 +158,7 @@
                                 <span class="text-sm text-secondary">Excluded Expenses</span>
                             </div>
                             <span class="font-semibold text-primary">{{ formatCurrency(metrics.excludedExpensesTotal)
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -156,10 +181,51 @@
                                 <span class="text-sm text-secondary">Overall Status</span>
                             </div>
                             <span class="font-medium" :style="{ color: getHealthColor() }">{{ getHealthStatus()
-                            }}</span>
+                                }}</span>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Financial Goals (Premium Only) -->
+        <div v-if="authStore.isPremium" class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6 mt-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <i class="pi pi-star text-xl text-yellow-500"></i>
+                    <h3 class="text-lg font-bold text-primary leading-snug">Your Financial Goals</h3>
+                </div>
+                <RouterLink to="/goals">
+                    <Button label="Manage" icon="pi pi-arrow-right" iconPos="right" size="small" outlined />
+                </RouterLink>
+            </div>
+            <div v-if="authStore.user?.goals?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div v-for="goal in authStore.user.goals" :key="goal._id"
+                    class="p-4 bg-secondary rounded border border-default">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-2">
+                            <i :class="['pi', goal.icon || 'pi-star', 'text-accent-blue']"></i>
+                            <span class="font-semibold text-primary">{{ goal.name }}</span>
+                        </div>
+                        <span class="text-xs font-bold"
+                            :class="goal.currentAmount >= goal.targetAmount ? 'text-accent-green' : 'text-primary'">
+                            {{ Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100) }}%
+                        </span>
+                    </div>
+                    <ProgressBar :value="Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100)"
+                        :showValue="false" class="h-2 mb-2" />
+                    <div class="flex justify-between text-xs text-secondary mt-1">
+                        <span>{{ formatCurrency(goal.currentAmount) }} saved</span>
+                        <span>{{ formatCurrency(goal.targetAmount) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div v-else class="text-center py-6 text-secondary bg-secondary rounded border border-default">
+                <i class="pi pi-star text-2xl mb-2 text-muted"></i>
+                <p>You haven't set any financial goals yet.</p>
+                <RouterLink to="/goals">
+                    <Button label="Go to Goals" class="mt-3 btn-cta" />
+                </RouterLink>
             </div>
         </div>
     </div>
@@ -170,13 +236,30 @@ import { ref, onMounted } from 'vue';
 import { FinanceService } from '@/services/financeService';
 import DashboardInsights from '@/components/finances/DashboardInsights.vue';
 import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
+import { useAuthStore } from '@/stores/auth';
 
-const { formatCurrency } = useCurrencyFormatter(); // 👈 MODIFIED: Destructure function
+const authStore = useAuthStore();
+
+const { preferredCurrency: currentCurrency, preferredLocale: currentLocale, formatCurrency } = useCurrencyFormatter();
 
 const metrics = ref({});
 const comparison = ref({});
 const isLoading = ref(true);
 const error = ref('');
+const isRollingOver = ref(false);
+
+const handleRollover = async (accept) => {
+    isRollingOver.value = true;
+    try {
+        const date = new Date();
+        await FinanceService.processRollover(date.getMonth(), date.getFullYear(), accept);
+        await loadMetrics();
+    } catch (err) {
+        console.error('Failed to process rollover', err);
+    } finally {
+        isRollingOver.value = false;
+    }
+};
 
 // ... (Rest of the component logic remains the same, except for the removed local formatCurrency function)
 

@@ -183,6 +183,10 @@
     color: rgb(var(--color-accent-red));
   }
 
+  .text-accent-yellow {
+    color: rgb(var(--color-accent-yellow));
+  }
+
   /* Card component */
   .card-primary {
     background-color: rgb(var(--color-bg-primary));

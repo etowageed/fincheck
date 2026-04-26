@@ -146,7 +146,7 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
 exports.getMe = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select(
-    'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name email role _id'
+    'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name email role _id goals'
   );
   if (!user) {
     return next(new AppError('User not found', 404));
@@ -160,5 +160,61 @@ exports.getMe = catchAsync(async (req, res, next) => {
       user,
       // The dashboard object is no longer sent from this endpoint
     },
+  });
+});
+
+// Goals operations
+
+exports.addGoal = catchAsync(async (req, res, next) => {
+  const { name, targetAmount, icon } = req.body;
+
+  if (!name || !targetAmount) {
+    return next(new AppError('Goal must have a name and target amount', 400));
+  }
+
+  const user = await User.findById(req.user.id);
+  user.goals.push({ name, targetAmount, icon });
+  await user.save({ validateBeforeSave: false });
+
+  res.status(201).json({
+    status: 'success',
+    data: user.goals,
+  });
+});
+
+exports.updateGoal = catchAsync(async (req, res, next) => {
+  const goalId = req.params.id;
+  const { name, targetAmount, icon, currentAmount } = req.body;
+
+  const user = await User.findById(req.user.id);
+  const goal = user.goals.id(goalId);
+
+  if (!goal) {
+    return next(new AppError('Goal not found', 404));
+  }
+
+  if (name) goal.name = name;
+  if (targetAmount !== undefined) goal.targetAmount = targetAmount;
+  if (icon) goal.icon = icon;
+  if (currentAmount !== undefined) goal.currentAmount = currentAmount;
+
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    status: 'success',
+    data: goal,
+  });
+});
+
+exports.deleteGoal = catchAsync(async (req, res, next) => {
+  const goalId = req.params.id;
+  const user = await User.findById(req.user.id);
+
+  user.goals.pull({ _id: goalId });
+  await user.save({ validateBeforeSave: false });
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
   });
 });

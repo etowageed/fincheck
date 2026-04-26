@@ -57,6 +57,10 @@ const transactionSchema = new mongoose.Schema({
     enum: ['expense', 'excludedExpense', 'income'],
     default: 'expense',
   }, // 'excluded expenses = savings/investments
+  goalId: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Goal',
+  },
   // date: { type: Date, default: Date.now },
   date: {
     type: Date,
@@ -110,6 +114,14 @@ const financesSchema = new mongoose.Schema(
       // },
     },
     transactions: [transactionSchema],
+    rolloverAmount: {
+      type: Number,
+      default: 0,
+    },
+    rolloverDismissed: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true, // Added timestamps as per your current file
@@ -128,7 +140,8 @@ financesSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
 // Virtual properties = computed fields that are not stored in the database
 
 financesSchema.virtual('totalMonthlyBudget').get(function () {
-  return this.monthlyBudget.reduce((sum, exp) => sum + exp.amount, 0);
+  const baseBudget = this.monthlyBudget.reduce((sum, exp) => sum + exp.amount, 0);
+  return baseBudget + (this.rolloverAmount || 0);
 });
 
 // Total recurring budget = sum of all recurring expenses in the monthly budget

@@ -4,6 +4,7 @@ const Category = require('../models/categoryModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { body, validationResult } = require('express-validator');
+const User = require('../models/userModel');
 
 // Create or update monthly finances document (monthlyBudget and actuals)
 exports.upsertMonthlyFinances = catchAsync(async (req, res, next) => {
@@ -22,7 +23,9 @@ exports.upsertMonthlyFinances = catchAsync(async (req, res, next) => {
 
   const expenseDoc = await Finances.findOneAndUpdate(
     { user: req.user.id, month, year }, // Query based on user, calculated/provided month and year
-    { monthlyBudget, expectedMonthlyIncome },
+    { 
+      $set: { monthlyBudget, expectedMonthlyIncome }
+    },
     {
       upsert: true, // Create the document if it doesn't exist
       new: true, // Return the updated/new document
@@ -144,7 +147,18 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
     category,
     type: type || 'expense', // Changed from 'actual' to 'expense' to match schema
     date: req.body.date ? new Date(req.body.date) : Date.now(),
+    goalId: req.body.goalId || undefined,
   });
+
+  if (req.body.goalId && type === 'excludedExpense') {
+    const user = await User.findById(req.user.id);
+    const goal = user.goals.id(req.body.goalId);
+    if (goal) {
+       goal.currentAmount += amount;
+       if (goal.currentAmount < 0) goal.currentAmount = 0;
+       await user.save({ validateBeforeSave: false });
+    }
+  }
 
   await expenseDoc.save({ validateBeforeSave: true });
 
@@ -179,6 +193,9 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
     // Assuming type might also be updated partially
     updateFields.type = req.body.type;
   }
+  if (req.body.goalId !== undefined) {
+    updateFields.goalId = req.body.goalId;
+  }
   // You can add other fields here if your transactionSchema had more updateable fields
 
   // Check if any fields were actually provided for update
@@ -198,6 +215,43 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
   const transaction = expenseDoc.transactions.id(transactionId);
   if (!transaction) {
     return next(new AppError('Transaction not found.', 404));
+  }
+
+  const oldAmount = transaction.amount;
+  const newAmount = req.body.amount !== undefined ? req.body.amount : transaction.amount;
+  
+  const oldType = transaction.type;
+  const newType = req.body.type !== undefined ? req.body.type : transaction.type;
+
+  const oldGoalId = transaction.goalId;
+  const newGoalId = req.body.goalId !== undefined ? req.body.goalId : transaction.goalId;
+
+  const user = await User.findById(req.user.id);
+  let goalDataChanged = false;
+
+  if (oldType === 'excludedExpense' && oldGoalId) {
+     const oldGoal = user.goals.id(oldGoalId);
+     if (oldGoal) {
+         oldGoal.currentAmount -= oldAmount;
+         if (oldGoal.currentAmount < 0) oldGoal.currentAmount = 0;
+         goalDataChanged = true;
+     }
+  }
+
+  if (newType === 'excludedExpense' && newGoalId) {
+     const newGoal = user.goals.id(newGoalId);
+     if (newGoal) {
+         newGoal.currentAmount += newAmount;
+         goalDataChanged = true;
+     }
+  }
+
+  if (goalDataChanged) {
+      await user.save({ validateBeforeSave: false });
+  }
+
+  if (req.body.goalId === null) {
+      updateFields.goalId = null;
   }
 
   // Apply only the provided fields to the transaction subdocument
@@ -228,7 +282,22 @@ exports.deleteTransaction = catchAsync(async (req, res, next) => {
   }
 
   // Remove the transaction by its ID
-  expenseDoc.transactions.id(transactionId).deleteOne(); // Use deleteOne() to remove subdocument
+  const transaction = expenseDoc.transactions.id(transactionId);
+  if (!transaction) {
+    return next(new AppError('Transaction not found.', 404));
+  }
+
+  if (transaction.goalId && transaction.type === 'excludedExpense') {
+     const user = await User.findById(req.user.id);
+     const goal = user.goals.id(transaction.goalId);
+     if (goal) {
+        goal.currentAmount -= transaction.amount;
+        if (goal.currentAmount < 0) goal.currentAmount = 0;
+        await user.save({ validateBeforeSave: false });
+     }
+  }
+
+  transaction.deleteOne(); // Use deleteOne() to remove subdocument
 
   await expenseDoc.save({ validateBeforeSave: true });
 
@@ -251,6 +320,29 @@ exports.deleteMonthlyFinances = catchAsync(async (req, res, next) => {
     return next(
       new AppError('No expense document found for this month and year.', 404)
     );
+  }
+
+  const goalDecrements = {};
+  for (const t of expenseDoc.transactions) {
+    if (t.type === 'excludedExpense' && t.goalId) {
+      goalDecrements[t.goalId] = (goalDecrements[t.goalId] || 0) + t.amount;
+    }
+  }
+
+  if (Object.keys(goalDecrements).length > 0) {
+    const user = await User.findById(req.user.id);
+    let changed = false;
+    for (const [gId, amount] of Object.entries(goalDecrements)) {
+       const goal = user.goals.id(gId);
+       if (goal) {
+          goal.currentAmount -= amount;
+          if (goal.currentAmount < 0) goal.currentAmount = 0;
+          changed = true;
+       }
+    }
+    if (changed) {
+      await user.save({ validateBeforeSave: false });
+    }
   }
 
   // If the document exists, proceed to delete it
@@ -781,6 +873,25 @@ exports.getDashboardMetrics = catchAsync(async (req, res, next) => {
 
   const finances = await Finances.findOne({ user: req.user.id, month, year });
 
+  let potentialRollover = 0;
+  if (
+    finances &&
+    req.user.subscriptionStatus === 'premium' &&
+    !finances.rolloverDismissed &&
+    finances.rolloverAmount === 0
+  ) {
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear = month === 0 ? year - 1 : year;
+    const prevDoc = await Finances.findOne({
+      user: req.user.id,
+      month: prevMonth,
+      year: prevYear,
+    });
+    if (prevDoc && prevDoc.budgetBalance > 0) {
+      potentialRollover = prevDoc.budgetBalance;
+    }
+  }
+
   // If a finances document exists, populate all metrics from its virtual properties.
   const metrics = finances
     ? {
@@ -788,11 +899,14 @@ exports.getDashboardMetrics = catchAsync(async (req, res, next) => {
         expensesTotal: finances.expensesTotal,
         excludedExpensesTotal: finances.excludedExpensesTotal,
         outflow: finances.outflow,
-        totalMonthlyBudget: finances.totalMonthlyBudget,
+        totalMonthlyBudget: finances.totalMonthlyBudget, // Rollover is natively included here
+        rolloverAmount: finances.rolloverAmount,
+        potentialRollover,
+        rolloverDismissed: finances.rolloverDismissed,
         totalRecurringExpenses: finances.totalRecurringExpenses,
         totalNonRecurringExpenses: finances.totalNonRecurringExpenses,
         plannedSavings: finances.plannedSavings,
-        budgetBalance: finances.budgetBalance,
+        budgetBalance: finances.budgetBalance, // Computes natively using updated totalMonthlyBudget
       }
     : // If no document exists, return a default object with all metrics set to 0.
       {
@@ -813,4 +927,37 @@ exports.getDashboardMetrics = catchAsync(async (req, res, next) => {
       metrics,
     },
   });
+});
+
+exports.processRollover = catchAsync(async (req, res, next) => {
+  const { month, year } = req.params;
+  const { accept } = req.body;
+
+  if (req.user.subscriptionStatus !== 'premium') {
+    return next(new AppError('Rollover is a Premium feature', 403));
+  }
+
+  const currentDoc = await Finances.findOne({ user: req.user.id, month, year });
+  if (!currentDoc) {
+    return next(new AppError('Current month finances not found', 404));
+  }
+
+  if (accept) {
+    const prevMonth = month == 0 ? 11 : month - 1;
+    const prevYear = month == 0 ? year - 1 : year;
+    const prevDoc = await Finances.findOne({
+      user: req.user.id,
+      month: prevMonth,
+      year: prevYear,
+    });
+
+    if (prevDoc && prevDoc.budgetBalance > 0) {
+      currentDoc.rolloverAmount = prevDoc.budgetBalance;
+    }
+  }
+
+  currentDoc.rolloverDismissed = true;
+  await currentDoc.save();
+
+  res.status(200).json({ status: 'success', data: currentDoc });
 });

@@ -41,6 +41,13 @@
                         Categories
                     </RouterLink>
 
+                    <RouterLink to="/goals"
+                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
+                        <i class="pi pi-star mr-3"></i>
+                        Goals
+                    </RouterLink>
+
                     <RouterLink v-if="isAdmin" to="/admin"
                         class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
                         active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">

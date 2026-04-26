@@ -103,6 +103,15 @@ const userSchema = new mongoose.Schema(
       default: null, // Date when the subscription will expire
     },
 
+    goals: [
+      {
+        name: { type: String, required: true },
+        targetAmount: { type: Number, required: true },
+        currentAmount: { type: Number, default: 0 },
+        icon: { type: String, default: 'pi-star' },
+      },
+    ],
+
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,

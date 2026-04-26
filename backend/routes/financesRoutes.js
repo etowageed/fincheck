@@ -64,4 +64,6 @@ router
   .patch(financesController.updateTransaction)
   .delete(financesController.deleteTransaction);
 
+router.post('/:month/:year/rollover', financesController.processRollover);
+
 module.exports = router;

@@ -46,3 +46,8 @@ export const deleteMyAccount = () => api.delete("/users/me");
 
 // ✅ Update user profile
 export const updateProfile = (data) => api.patch("/users/me", data);
+
+// ✅ Goals operations
+export const addGoal = (data) => api.post("/users/me/goals", data);
+export const updateGoal = (goalId, data) => api.patch(`/users/me/goals/${goalId}`, data);
+export const deleteGoal = (goalId) => api.delete(`/users/me/goals/${goalId}`);

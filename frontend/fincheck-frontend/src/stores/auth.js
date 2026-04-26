@@ -191,6 +191,21 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
+  const addGoal = async (goalData) => {
+    isLoading.value = true;
+    try {
+      const response = await authService.addGoal(goalData);
+      if (response.data?.status === "success") {
+        user.value.goals = response.data.data;
+        return { success: true };
+      }
+    } catch (err) {
+      return { success: false };
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   return {
     user,
     isAuthenticated,
@@ -209,5 +224,6 @@ export const useAuthStore = defineStore("auth", () => {
     forgotPassword,
     resetPassword,
     deleteAccount,
+    addGoal,
   };
 });
