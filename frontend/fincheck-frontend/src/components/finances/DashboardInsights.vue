@@ -16,6 +16,9 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
 
 const props = defineProps({
     metrics: {
@@ -76,6 +79,30 @@ const insights = computed(() => {
             message: `You have a positive Budget Balance. You're meeting your planned savings goal!`,
             iconClass: 'pi pi-check-circle text-accent-green'
         });
+    }
+
+    // Insight 4: Predictive Spending (Premium Only)
+    if (authStore.isPremium && props.metrics.totalMonthlyBudget > 0) {
+        const today = new Date();
+        const currentDay = today.getDate();
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        
+        if (currentDay > 0) {
+            const projectedSpend = (props.metrics.expensesTotal / currentDay) * daysInMonth;
+            const projectedUtilization = Math.round((projectedSpend / props.metrics.totalMonthlyBudget) * 100);
+            
+            if (projectedUtilization >= 100) {
+                list.unshift({
+                    message: `Predictive Insight: At your current rate, you are projected to exceed your budget by end of month (${projectedUtilization}% utilization).`,
+                    iconClass: 'pi pi-chart-line text-accent-red font-bold'
+                });
+            } else if (projectedUtilization <= 85) {
+                list.unshift({
+                    message: `Predictive Insight: Great pacing! You are projected to finish the month well under budget (${projectedUtilization}% utilization).`,
+                    iconClass: 'pi pi-chart-line text-accent-green font-bold'
+                });
+            }
+        }
     }
 
     return list;

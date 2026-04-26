@@ -38,6 +38,13 @@ const categorySchema = new mongoose.Schema(
       default: null,
       index: true,
     },
+    // For rule-based auto categorization
+    keywords: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
   },
   {
     timestamps: true,

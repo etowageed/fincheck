@@ -5,10 +5,14 @@ const AppError = require('../utils/appError');
 // Get all categories for the authenticated user (global + user specific)
 exports.getCategories = catchAsync(async (req, res) => {
   const includeHidden = req.query.includeHidden === 'true';
-  const categories = await Category.getCategoriesForUser(
+  let categories = await Category.getCategoriesForUser(
     req.user.id,
     includeHidden,
   );
+
+  if (req.user.subscriptionStatus !== 'premium') {
+    categories = categories.filter((c) => c.isGlobalDefault);
+  }
 
   res.status(200).json({
     success: true,
@@ -19,7 +23,11 @@ exports.getCategories = catchAsync(async (req, res) => {
 
 // Create a new custom category
 exports.createCategory = catchAsync(async (req, res, next) => {
-  const { name, description } = req.body;
+  if (req.user.subscriptionStatus !== 'premium') {
+    return next(new AppError('Custom categories are a Premium feature.', 403));
+  }
+
+  const { name, description, keywords } = req.body;
 
   // Check if category name already exists for this user
   const existingCategory = await Category.findOne({
@@ -37,6 +45,7 @@ exports.createCategory = catchAsync(async (req, res, next) => {
     description: description?.trim(),
     userId: req.user.id,
     isGlobalDefault: false,
+    keywords: Array.isArray(keywords) ? keywords.map((k) => k.trim()) : [],
   });
 
   res.status(201).json({
@@ -47,7 +56,11 @@ exports.createCategory = catchAsync(async (req, res, next) => {
 
 // Updated: Allow updating global defaults by auto-creating overrides
 exports.updateCategory = catchAsync(async (req, res, next) => {
-  const { name, description } = req.body;
+  if (req.user.subscriptionStatus !== 'premium') {
+    return next(new AppError('Custom categories are a Premium feature.', 403));
+  }
+
+  const { name, description, keywords } = req.body;
   const categoryId = req.params.id;
 
   // First, try to find user's own category
@@ -89,6 +102,7 @@ exports.updateCategory = catchAsync(async (req, res, next) => {
       userId: req.user.id,
       isGlobalDefault: false,
       overridesGlobalDefault: categoryId,
+      keywords: Array.isArray(keywords) ? keywords.map((k) => k.trim()) : [],
     });
 
     return res.status(200).json({
@@ -116,6 +130,9 @@ exports.updateCategory = catchAsync(async (req, res, next) => {
   // Update fields
   if (name) category.name = name.trim();
   if (description !== undefined) category.description = description?.trim();
+  if (keywords !== undefined) {
+    category.keywords = Array.isArray(keywords) ? keywords.map((k) => k.trim()) : [];
+  }
 
   await category.save();
 
@@ -127,8 +144,12 @@ exports.updateCategory = catchAsync(async (req, res, next) => {
 
 // New: Dedicated endpoint to override a global default
 exports.overrideGlobalDefault = catchAsync(async (req, res, next) => {
+  if (req.user.subscriptionStatus !== 'premium') {
+    return next(new AppError('Custom categories are a Premium feature.', 403));
+  }
+
   const { globalCategoryId } = req.params;
-  const { name, description } = req.body;
+  const { name, description, keywords } = req.body;
 
   // Check if global default exists
   const globalDefault = await Category.findOne({
@@ -161,6 +182,7 @@ exports.overrideGlobalDefault = catchAsync(async (req, res, next) => {
     userId: req.user.id,
     isGlobalDefault: false,
     overridesGlobalDefault: globalCategoryId,
+    keywords: Array.isArray(keywords) ? keywords.map((k) => k.trim()) : [],
   });
 
   res.status(201).json({
@@ -172,6 +194,10 @@ exports.overrideGlobalDefault = catchAsync(async (req, res, next) => {
 
 // Updated: Allow deleting global defaults by creating "hidden" override
 exports.deleteCategory = catchAsync(async (req, res, next) => {
+  if (req.user.subscriptionStatus !== 'premium') {
+    return next(new AppError('Custom categories are a Premium feature.', 403));
+  }
+
   const categoryId = req.params.id;
 
   // First, try to find user's own category (Custom or active override)

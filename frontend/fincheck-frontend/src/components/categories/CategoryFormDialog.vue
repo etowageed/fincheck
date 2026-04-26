@@ -2,6 +2,18 @@
     <Dialog :visible="visible" @update:visible="$emit('update:visible', $event)" modal
         :header="isEdit ? 'Edit Category' : 'Add Category'" :style="{ width: '500px' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
         <form @submit.prevent="handleSubmit" class="space-y-4">
+            <!-- Premium Lock -->
+            <div v-if="!authStore.isPremium" class="p-3 bg-red-50 border border-red-200 rounded">
+                <div class="flex items-start gap-2">
+                    <i class="pi pi-lock text-accent-red mt-0.5"></i>
+                    <div>
+                        <p class="text-sm text-red-800">
+                            <strong>Premium Feature:</strong> Custom categories and auto-categorization are available for Premium users only.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Category Name -->
             <div>
                 <label for="categoryName" class="block text-sm font-medium text-secondary mb-2">
@@ -18,7 +30,19 @@
                     Description
                 </label>
                 <Textarea id="categoryDescription" v-model="form.description"
-                    placeholder="Enter category description (optional)" rows="3" class="w-full" />
+                    placeholder="Enter category description (optional)" rows="3" class="w-full" :disabled="!authStore.isPremium" />
+            </div>
+
+            <!-- Keywords -->
+            <div>
+                <label for="categoryKeywords" class="block text-sm font-medium text-secondary mb-2">
+                    Auto-Categorize Keywords
+                </label>
+                <div class="relative">
+                    <InputText id="categoryKeywords" v-model="form.keywords"
+                        placeholder="e.g. Starbucks, Uber (comma separated)" class="w-full" :disabled="!authStore.isPremium" />
+                </div>
+                <small class="text-muted text-xs">When a transaction description matches a keyword, this category is auto-selected.</small>
             </div>
 
             <!-- Override Notice (for global defaults) -->
@@ -43,7 +67,7 @@
         <template #footer>
             <div class="flex gap-2">
                 <Button label="Cancel" severity="secondary" outlined @click="handleCancel" :disabled="isSubmitting" />
-                <Button :label="isEdit ? 'Update' : 'Create'" class="btn-cta" :loading="isSubmitting" @click="handleSubmit" />
+                <Button :label="isEdit ? 'Update' : 'Create'" class="btn-cta" :loading="isSubmitting" :disabled="!authStore.isPremium" @click="handleSubmit" />
             </div>
         </template>
     </Dialog>
@@ -52,8 +76,10 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
 import { useCategoriesStore } from '@/stores/categories';
+import { useAuthStore } from '@/stores/auth';
 
 const categoriesStore = useCategoriesStore();
+const authStore = useAuthStore();
 
 const props = defineProps({
     visible: {
@@ -74,7 +100,8 @@ const emit = defineEmits(['update:visible', 'save']);
 
 const form = ref({
     name: '',
-    description: ''
+    description: '',
+    keywords: ''
 });
 
 const errors = ref({});
@@ -85,7 +112,8 @@ watch(() => props.category, (newCategory) => {
     if (newCategory) {
         form.value = {
             name: newCategory.name || '',
-            description: newCategory.description || ''
+            description: newCategory.description || '',
+            keywords: newCategory.keywords ? newCategory.keywords.join(', ') : ''
         };
     }
 }, { immediate: true });
@@ -115,7 +143,8 @@ const handleSubmit = async () => {
     try {
         const categoryData = {
             name: form.value.name.trim(),
-            description: form.value.description?.trim() || undefined
+            description: form.value.description?.trim() || undefined,
+            keywords: form.value.keywords ? form.value.keywords.split(',').map(k => k.trim()).filter(k => k) : []
         };
 
         let result;
@@ -152,7 +181,8 @@ const handleCancel = () => {
 const resetForm = () => {
     form.value = {
         name: '',
-        description: ''
+        description: '',
+        keywords: ''
     };
     errors.value = {};
 };

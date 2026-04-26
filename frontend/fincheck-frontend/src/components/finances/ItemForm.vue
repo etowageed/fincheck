@@ -270,6 +270,24 @@ const descriptionFieldLabel = computed(() => props.formType === 'budget' ? 'Desc
 const descriptionFieldPlaceholder = computed(() => props.formType === 'budget' ? 'Brief description...' : 'Additional notes...');
 const submitButtonLabel = computed(() => `${editMode.value ? 'Update' : 'Add'} ${props.formType === 'budget' ? 'Item' : 'Transaction'}`);
 
+// Rule-based auto-categorization
+watch(() => formData.value.name, (newVal) => {
+    if (props.formType === 'transaction' && !editMode.value && newVal) {
+        const lowerName = newVal.toLowerCase();
+        const matchedCategory = categoriesStore.categories.find(cat => {
+            if (cat.keywords && Array.isArray(cat.keywords)) {
+                return cat.keywords.some(k => lowerName.includes(k.toLowerCase()));
+            }
+            return false;
+        });
+
+        if (matchedCategory) {
+            // Only update if no category is selected or it was auto-selected previously
+            formData.value.category = matchedCategory._id || matchedCategory.id;
+        }
+    }
+});
+
 watch(() => props.editItem, (newEditItem) => {
     if (newEditItem) {
         if (props.formType === 'budget') {
