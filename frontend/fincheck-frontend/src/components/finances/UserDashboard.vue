@@ -188,8 +188,8 @@
             </div>
         </div>
 
-        <!-- Financial Goals (Premium Only) -->
-        <div v-if="authStore.isPremium" class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6 mt-6">
+        <!-- Financial Goals -->
+        <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6 mt-6">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <i class="pi pi-star text-xl text-yellow-500"></i>

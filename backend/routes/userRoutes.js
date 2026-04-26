@@ -18,9 +18,9 @@ router.get(
   exportController.generateReport
 );
 
-router.post('/me/goals', restrictToTier('premium'), userController.addGoal);
-router.patch('/me/goals/:id', restrictToTier('premium'), userController.updateGoal);
-router.delete('/me/goals/:id', restrictToTier('premium'), userController.deleteGoal);
+router.post('/me/goals', userController.addGoal);
+router.patch('/me/goals/:id', userController.updateGoal);
+router.delete('/me/goals/:id', userController.deleteGoal);
 
 router.delete('/me', userController.deleteMe);
 

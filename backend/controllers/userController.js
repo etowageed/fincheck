@@ -173,6 +173,11 @@ exports.addGoal = catchAsync(async (req, res, next) => {
   }
 
   const user = await User.findById(req.user.id);
+
+  if (user.subscriptionStatus !== 'premium' && user.goals.length >= 1) {
+    return next(new AppError('Free users can only create 1 goal. Please upgrade to Premium for unlimited goals.', 403));
+  }
+
   user.goals.push({ name, targetAmount, icon });
   await user.save({ validateBeforeSave: false });
 

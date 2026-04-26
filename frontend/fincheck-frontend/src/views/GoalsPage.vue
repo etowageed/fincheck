@@ -2,27 +2,33 @@
     <div class="space-y-6">
         <div class="flex justify-between items-center">
             <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight">Financial Goals</h1>
-            <Button v-if="authStore.isPremium" label="Create Goal" icon="pi pi-plus" class="btn-cta" @click="openGoalDialog" />
+            <Button v-if="authStore.isPremium || !authStore.user?.goals || authStore.user.goals.length < 1" label="Create Goal" icon="pi pi-plus" class="btn-cta" @click="openGoalDialog" />
         </div>
 
-        <div v-if="!authStore.isPremium" class="bg-secondary border border-default rounded-lg p-8 text-center">
-            <i class="pi pi-lock text-4xl text-muted mb-4"></i>
-            <h2 class="text-xl font-bold mb-2">Premium Feature</h2>
-            <p class="text-secondary mb-4">Unlock goal tracking to supercharge your savings and financial planning.</p>
-            <RouterLink to="/pricing">
-                <Button label="Upgrade Now" class="btn-cta" />
-            </RouterLink>
-        </div>
-
-        <div v-else>
-            <div v-if="authStore.user?.goals?.length === 0" class="text-center py-12 bg-secondary rounded-lg border border-default">
+        <div>
+            <div v-if="!authStore.user?.goals || authStore.user.goals.length === 0" class="text-center py-12 bg-secondary rounded-lg border border-default">
                 <i class="pi pi-star text-4xl text-muted mb-4"></i>
                 <h2 class="text-lg font-semibold text-primary mb-2">No Goals Set</h2>
                 <p class="text-secondary mb-4">You haven't created any financial goals yet.</p>
                 <Button label="Create Your First Goal" class="btn-cta" @click="openGoalDialog" />
             </div>
 
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div v-else class="space-y-6">
+                <!-- Free Tier Banner -->
+                <div v-if="!authStore.isPremium" class="bg-yellow-50 dark:bg-accent-yellow/10 border border-yellow-300 dark:border-accent-yellow/30 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <i class="pi pi-lock text-2xl text-accent-yellow"></i>
+                        <div>
+                            <h4 class="font-bold text-primary text-sm">Goal Limit Reached</h4>
+                            <p class="text-xs text-secondary mt-1">You are using your 1 free goal. Upgrade to Premium to create unlimited goals!</p>
+                        </div>
+                    </div>
+                    <RouterLink to="/pricing">
+                        <Button label="Upgrade Now" class="btn-cta" size="small" />
+                    </RouterLink>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div v-for="goal in authStore.user.goals" :key="goal._id" class="p-6 bg-secondary rounded-xl border border-default shadow-sm hover:shadow-md transition-shadow relative group">
                     <div class="absolute top-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button icon="pi pi-trash" text severity="danger" size="small" @click="deleteGoal(goal)" v-tooltip.top="'Delete Goal'" />
@@ -60,6 +66,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
         <Dialog v-model:visible="showGoalDialog" modal header="Set Financial Goal" :style="{ width: '400px' }">
             <div class="flex flex-col gap-4 mt-2">
