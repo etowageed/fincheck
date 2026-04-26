@@ -199,25 +199,32 @@
                     <Button label="Manage" icon="pi pi-arrow-right" iconPos="right" size="small" outlined />
                 </RouterLink>
             </div>
-            <div v-if="authStore.user?.goals?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div v-for="goal in authStore.user.goals" :key="goal._id"
-                    class="p-4 bg-secondary rounded border border-default">
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="flex items-center gap-2">
-                            <i :class="['pi', goal.icon || 'pi-star', 'text-accent-blue']"></i>
-                            <span class="font-semibold text-primary">{{ goal.name }}</span>
-                        </div>
-                        <span class="text-xs font-bold"
-                            :class="goal.currentAmount >= goal.targetAmount ? 'text-accent-green' : 'text-primary'">
-                            {{ Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100) }}%
-                        </span>
-                    </div>
-                    <ProgressBar :value="Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100)"
-                        :showValue="false" class="h-2 mb-2" />
-                    <div class="flex justify-between text-xs text-secondary mt-1">
-                        <span>{{ formatCurrency(goal.currentAmount) }} saved</span>
-                        <span>{{ formatCurrency(goal.targetAmount) }}</span>
-                    </div>
+            <div v-if="authStore.user?.goals?.length > 0" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-secondary rounded border border-default p-4">
+                <div class="h-64">
+                    <Doughnut :data="goalsChartData" :options="goalsChartOptions" />
+                </div>
+                <div class="max-h-64 overflow-y-auto pr-2">
+                    <ul class="space-y-3">
+                        <li v-for="(goal, index) in authStore.user.goals" :key="goal._id"
+                            class="flex justify-between items-center text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full"
+                                    :style="{ backgroundColor: goalsChartData.datasets[0].backgroundColor[index] }"></span>
+                                <span class="text-primary font-semibold">{{ goal.name }}</span>
+                            </div>
+                            <div class="text-right flex flex-col items-end">
+                                <div>
+                                    <span class="font-semibold text-primary">{{ formatCurrency(goal.currentAmount, true) }}</span>
+                                    <span class="text-xs text-muted mx-1">/</span>
+                                    <span class="text-xs text-secondary">{{ formatCurrency(goal.targetAmount, true) }}</span>
+                                </div>
+                                <span class="text-xs font-bold mt-1"
+                                    :class="goal.currentAmount >= goal.targetAmount ? 'text-accent-green' : 'text-accent-blue'">
+                                    {{ Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100) }}% target
+                                </span>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
             <div v-else class="text-center py-6 text-secondary bg-secondary rounded border border-default">
@@ -232,11 +239,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { Doughnut } from 'vue-chartjs';
+import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale } from 'chart.js';
 import { FinanceService } from '@/services/financeService';
 import DashboardInsights from '@/components/finances/DashboardInsights.vue';
 import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
 import { useAuthStore } from '@/stores/auth';
+
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale);
 
 const authStore = useAuthStore();
 
@@ -247,6 +258,47 @@ const comparison = ref({});
 const isLoading = ref(true);
 const error = ref('');
 const isRollingOver = ref(false);
+
+const goalsChartData = computed(() => {
+    const goals = authStore.user?.goals || [];
+    const colors = [
+        '#4A90E2', '#50E3C2', '#F5A623', '#F8E71C', '#BD10E0',
+        '#9013FE', '#417505', '#D0021B', '#B8E986', '#7ED321'
+    ];
+    return {
+        labels: goals.map(g => g.name),
+        datasets: [
+            {
+                backgroundColor: goals.map((_, i) => colors[i % colors.length]),
+                data: goals.map(g => g.currentAmount)
+            }
+        ]
+    };
+});
+
+const goalsChartOptions = ref({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            display: false
+        },
+        tooltip: {
+            callbacks: {
+                label: function (context) {
+                    let label = context.label || '';
+                    if (label) {
+                        label += ': ';
+                    }
+                    if (context.parsed !== null) {
+                        label += formatCurrency(context.parsed, true);
+                    }
+                    return label;
+                }
+            }
+        }
+    }
+});
 
 const handleRollover = async (accept) => {
     isRollingOver.value = true;
