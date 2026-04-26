@@ -104,8 +104,8 @@ exports.validateTransaction = [
     .escape(),
   body('type')
     .optional()
-    .isIn(['expense', 'excludedExpense', 'income'])
-    .withMessage('Type must be expense, excludedExpense, or income'),
+    .isIn(['expense', 'savings', 'income'])
+    .withMessage('Type must be expense, savings, or income'),
 ];
 
 // Add a transaction to an existing monthly expense document
@@ -155,7 +155,7 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
     goalId: req.body.goalId || undefined,
   });
 
-  if (req.body.goalId && type === 'excludedExpense') {
+  if (req.body.goalId && type === 'savings') {
     const user = await User.findById(req.user.id);
     const goal = user.goals.id(req.body.goalId);
     if (goal) {
@@ -238,7 +238,7 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id);
   let goalDataChanged = false;
 
-  if (oldType === 'excludedExpense' && oldGoalId) {
+  if (oldType === 'savings' && oldGoalId) {
      const oldGoal = user.goals.id(oldGoalId);
      if (oldGoal) {
          oldGoal.currentAmount -= oldAmount;
@@ -247,7 +247,7 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
      }
   }
 
-  if (newType === 'excludedExpense' && newGoalId) {
+  if (newType === 'savings' && newGoalId) {
      const newGoal = user.goals.id(newGoalId);
      if (newGoal) {
          newGoal.currentAmount += newAmount;
@@ -296,7 +296,7 @@ exports.deleteTransaction = catchAsync(async (req, res, next) => {
     return next(new AppError('Transaction not found.', 404));
   }
 
-  if (transaction.goalId && transaction.type === 'excludedExpense') {
+  if (transaction.goalId && transaction.type === 'savings') {
      const user = await User.findById(req.user.id);
      const goal = user.goals.id(transaction.goalId);
      if (goal) {
@@ -333,7 +333,7 @@ exports.deleteMonthlyFinances = catchAsync(async (req, res, next) => {
 
   const goalDecrements = {};
   for (const t of expenseDoc.transactions) {
-    if (t.type === 'excludedExpense' && t.goalId) {
+    if (t.type === 'savings' && t.goalId) {
       goalDecrements[t.goalId] = (goalDecrements[t.goalId] || 0) + t.amount;
     }
   }
@@ -428,7 +428,7 @@ exports.comparePeriods = catchAsync(async (req, res, next) => {
   const compareFields = [
     'incomeTotal',
     'expensesTotal',
-    'excludedExpensesTotal',
+    'savingsTotal',
     'safeToSpend',
     'totalMonthlyBudget',
     'outflow',
@@ -918,7 +918,7 @@ exports.getDashboardMetrics = catchAsync(async (req, res, next) => {
     ? {
         incomeTotal: finances.incomeTotal,
         expensesTotal: finances.expensesTotal,
-        excludedExpensesTotal: finances.excludedExpensesTotal,
+        savingsTotal: finances.savingsTotal,
         outflow: finances.outflow,
         totalMonthlyBudget: finances.totalMonthlyBudget, // Rollover is natively included here
         rolloverAmount: finances.rolloverAmount,
@@ -933,7 +933,7 @@ exports.getDashboardMetrics = catchAsync(async (req, res, next) => {
       {
         incomeTotal: 0,
         expensesTotal: 0,
-        excludedExpensesTotal: 0,
+        savingsTotal: 0,
         outflow: 0,
         totalMonthlyBudget: 0,
         totalRecurringExpenses: 0,

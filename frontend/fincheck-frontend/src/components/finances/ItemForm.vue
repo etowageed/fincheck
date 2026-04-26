@@ -26,7 +26,7 @@
                     <small v-if="errors.type" class="p-error">{{ errors.type }}</small>
                 </div>
 
-                <div v-if="formType === 'transaction' && formData.type === 'excludedExpense'" class="flex flex-col gap-2">
+                <div v-if="formType === 'transaction' && formData.type === 'savings'" class="flex flex-col gap-2">
                     <label for="goalId" class="font-semibold text-accent-blue flex items-center gap-2">
                         <i class="pi pi-star"></i> Allocate to Goal
                     </label>
@@ -264,7 +264,7 @@ const formData = ref(getInitialFormData());
 const transactionTypes = [
     { label: 'Income', value: 'income' },
     { label: 'Expense', value: 'expense' },
-    { label: 'Excluded Expense', value: 'excludedExpense' }
+    { label: 'Savings Contribution', value: 'savings' }
 ];
 
 const minDateRange = computed(() => {
@@ -384,7 +384,7 @@ const handleSubmit = async () => {
                 amount: formData.value.amount,
                 type: formData.value.type,
                 date: dateString, // Use the fixed date string
-                goalId: formData.value.type === 'excludedExpense' ? (formData.value.goalId || null) : null,
+                goalId: formData.value.type === 'savings' ? (formData.value.goalId || null) : null,
             };
 
             if (editMode.value) {

@@ -154,10 +154,10 @@
 
                         <div class="flex justify-between items-center p-3 bg-secondary rounded border border-default">
                             <div class="flex items-center gap-2">
-                                <i class="pi pi-eye-slash text-muted"></i>
-                                <span class="text-sm text-secondary">Excluded Expenses</span>
+                                <i class="pi pi-star text-accent-blue"></i>
+                                <span class="text-sm text-secondary">Savings Contributions</span>
                             </div>
-                            <span class="font-semibold text-primary">{{ formatCurrency(metrics.excludedExpensesTotal)
+                            <span class="font-semibold text-primary">{{ formatCurrency(metrics.savingsTotal)
                                 }}</span>
                         </div>
                     </div>

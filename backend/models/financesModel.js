@@ -54,9 +54,9 @@ const transactionSchema = new mongoose.Schema({
   type: {
     type: String,
     required: [true, 'Transaction type is required'], // Added required validation
-    enum: ['expense', 'excludedExpense', 'income'],
+    enum: ['expense', 'savings', 'income'],
     default: 'expense',
-  }, // 'excluded expenses = savings/investments
+  }, // savings = goal contributions/investments
   goalId: {
     type: mongoose.Schema.ObjectId,
     ref: 'Goal',
@@ -171,16 +171,16 @@ financesSchema.virtual('incomeTotal').get(function () {
     .reduce((sum, tx) => sum + tx.amount, 0);
 });
 
-// total excluded expenses (savings/investments)
-financesSchema.virtual('excludedExpensesTotal').get(function () {
+// total savings (goal contributions/investments)
+financesSchema.virtual('savingsTotal').get(function () {
   return this.transactions
-    .filter((t) => t.type === 'excludedExpense')
+    .filter((t) => t.type === 'savings')
     .reduce((sum, tx) => sum + tx.amount, 0);
 });
 
-// total outflow = expenses + excluded expenses
+// total outflow = expenses + savings
 financesSchema.virtual('outflow').get(function () {
-  return this.expensesTotal + this.excludedExpensesTotal;
+  return this.expensesTotal + this.savingsTotal;
 });
 
 financesSchema.virtual('budgetBalance').get(function () {

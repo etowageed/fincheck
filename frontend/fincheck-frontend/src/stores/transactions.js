@@ -23,7 +23,7 @@ export const useTransactionsStore = defineStore("transactions", () => {
 
   const totalExpenses = computed(() => {
     return transactions.value
-      .filter((t) => t.type === "expense" || t.type === "excludedExpense")
+      .filter((t) => t.type === "expense" || t.type === "savings")
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
   });
 
