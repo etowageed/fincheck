@@ -35,7 +35,9 @@
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <label for="category" class="font-semibold">Category</label>
+                    <label for="category" class="font-semibold">
+                        Category <span v-if="formType === 'transaction'" class="text-gray-400 font-normal">(Optional)</span>
+                    </label>
                     <div class="flex gap-2">
                         <Dropdown id="category" v-model="formData.category" :options="categoryOptions"
                             optionLabel="label" optionValue="value" placeholder="Select a category"
@@ -336,7 +338,7 @@ watch(() => props.editItem, (newEditItem) => {
 const isFormValid = computed(() => {
     const data = formData.value;
     if (props.formType === 'transaction') {
-        return data.name?.trim() && data.category?.trim() && data.amount && data.type && data.date;
+        return data.name?.trim() && data.amount && data.type && data.date;
     }
     if (props.formType === 'budget') {
         return data.name?.trim() && data.category?.trim() && data.amount > 0;

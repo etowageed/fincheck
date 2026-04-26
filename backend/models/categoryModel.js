@@ -153,20 +153,22 @@ categorySchema.statics.createGlobalDefaults = async function () {
       description: 'Savings, stocks, emergency fund',
     },
     { name: 'Income', description: 'Salary, freelance, side income' },
+    { name: 'Uncategorised', description: 'Transactions without a specified category' },
   ];
 
   // Check if global defaults already exist
   const existingDefaults = await this.find({ isGlobalDefault: true });
   if (existingDefaults.length > 0) {
     console.log(
-      'Global default categories already exist. Updating descriptions...',
+      'Global default categories already exist. Upserting any missing and updating descriptions...',
     );
 
     // Update existing global defaults that match by name to ensure they have the new descriptions
     const updatePromises = defaultCategories.map((cat) =>
       this.updateOne(
         { name: cat.name, isGlobalDefault: true },
-        { $set: { description: cat.description } },
+        { $set: { description: cat.description, userId: null } },
+        { upsert: true }
       ),
     );
     await Promise.all(updatePromises);

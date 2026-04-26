@@ -97,11 +97,10 @@ exports.validateTransaction = [
     .isFloat({ min: 0 })
     .withMessage('Amount must be a positive number'),
   body('category')
+    .optional({ checkFalsy: true })
     .isString()
     .withMessage('Category must be a string')
     .trim()
-    .notEmpty()
-    .withMessage('Category is required')
     .escape(),
   body('type')
     .optional()
@@ -140,11 +139,17 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
     );
   }
 
+  let categoryId = category;
+  if (!categoryId) {
+    const defaultCat = await Category.findOne({ name: 'Uncategorised', isGlobalDefault: true });
+    categoryId = defaultCat ? defaultCat._id.toString() : 'Uncategorised';
+  }
+
   // Add the new transaction to the transactions array
   expenseDoc.transactions.push({
     description,
     amount,
-    category,
+    category: categoryId,
     type: type || 'expense', // Changed from 'actual' to 'expense' to match schema
     date: req.body.date ? new Date(req.body.date) : Date.now(),
     goalId: req.body.goalId || undefined,
@@ -182,8 +187,12 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
     updateFields.amount = req.body.amount;
   }
   if (req.body.category !== undefined) {
-    // Assuming category might also be updated partially
-    updateFields.category = req.body.category;
+    if (!req.body.category) {
+      const defaultCat = await Category.findOne({ name: 'Uncategorised', isGlobalDefault: true });
+      updateFields.category = defaultCat ? defaultCat._id.toString() : 'Uncategorised';
+    } else {
+      updateFields.category = req.body.category;
+    }
   }
   if (req.body.date !== undefined) {
     // Assuming date might also be updated partially
@@ -705,7 +714,14 @@ exports.getCategoryBreakdown = catchAsync(async (req, res, next) => {
     //
     {
       $addFields: {
-        convertedCategoryId: { $toObjectId: '$_id' },
+        convertedCategoryId: { 
+          $convert: {
+            input: '$_id',
+            to: 'objectId',
+            onError: null,
+            onNull: null
+          }
+        },
       },
     },
     // 6. Look up category names from the Categories collection
@@ -791,7 +807,12 @@ exports.getTopTransactions = catchAsync(async (req, res, next) => {
     {
       $addFields: {
         'transactions.convertedCategoryId': {
-          $toObjectId: '$transactions.category',
+          $convert: {
+            input: '$transactions.category',
+            to: 'objectId',
+            onError: null,
+            onNull: null
+          }
         },
       },
     },
