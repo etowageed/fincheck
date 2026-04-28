@@ -134,6 +134,12 @@ exports.validateTransaction = [
     .optional()
     .isIn(['expense', 'savings', 'income'])
     .withMessage('Type must be expense, savings, or income'),
+  body('notes')
+    .optional()
+    .isString()
+    .withMessage('Notes must be a string')
+    .trim()
+    .escape(),
 ];
 
 // Add a transaction to an existing monthly expense document
@@ -153,7 +159,7 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
   }
 
   const { month, year } = req.params; // Expect month and year from URL parameters
-  const { description, amount, category, type, date } = req.body;
+  const { description, amount, category, type, date, notes } = req.body;
 
   let expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
 
@@ -176,6 +182,7 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
   // Add the new transaction to the transactions array
   expenseDoc.transactions.push({
     description,
+    notes,
     amount,
     category: categoryId,
     type: type || 'expense', // Changed from 'actual' to 'expense' to match schema
@@ -210,6 +217,9 @@ exports.updateTransaction = catchAsync(async (req, res, next) => {
   const updateFields = {};
   if (req.body.description !== undefined) {
     updateFields.description = req.body.description;
+  }
+  if (req.body.notes !== undefined) {
+    updateFields.notes = req.body.notes;
   }
   if (req.body.amount !== undefined) {
     updateFields.amount = req.body.amount;

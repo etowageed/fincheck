@@ -52,7 +52,9 @@
                                     {{ transaction.type }}
                                 </span>
                             </div>
-
+                            <p v-if="transaction.notes" class="text-xs text-muted italic break-words mt-1">
+                                {{ transaction.notes }}
+                            </p>
                         </div>
                         <div class="text-right flex items-center justify-end gap-2 w-full sm:w-auto">
                             <p class="font-semibold text-lg"

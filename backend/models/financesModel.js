@@ -38,6 +38,10 @@ const transactionSchema = new mongoose.Schema({
     required: [true, 'Transaction description is required'], // Added required validation
     trim: true, // Ensured trimming
   },
+  notes: {
+    type: String,
+    trim: true,
+  },
 
   amount: {
     type: Number,
