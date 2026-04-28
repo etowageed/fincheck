@@ -181,6 +181,24 @@ export class FinanceService {
     }
   }
 
+  static async importRecurringItems(month, year) {
+    try {
+      const response = await api.post(`/finances/${month}/${year}/import-recurring`);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to import recurring items: ${error.message}`);
+    }
+  }
+
+  static async dismissRecurringItem(month, year, data) {
+    try {
+      const response = await api.patch(`/finances/${month}/${year}/dismiss-recurring`, data);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to dismiss recurring item: ${error.message}`);
+    }
+  }
+
   static async deleteBudget(month, year) {
     try {
       const response = await api.delete(`/finances/${month}/${year}`);

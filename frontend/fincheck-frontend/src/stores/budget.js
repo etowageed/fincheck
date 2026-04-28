@@ -132,6 +132,41 @@ export const useBudgetStore = defineStore("budget", () => {
     }
   };
 
+  const importRecurringItems = async () => {
+    if (!budget.value) return { success: false };
+    isLoading.value = true;
+    try {
+      await FinanceService.importRecurringItems(
+        budget.value.month,
+        budget.value.year
+      );
+      await fetchBudget();
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const dismissRecurringItem = async (data) => {
+    if (!budget.value) return { success: false };
+    isLoading.value = true;
+    try {
+      await FinanceService.dismissRecurringItem(
+        budget.value.month,
+        budget.value.year,
+        data
+      );
+      await fetchBudget();
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   return {
     budget,
     isLoading,
@@ -143,5 +178,7 @@ export const useBudgetStore = defineStore("budget", () => {
     updateBudgetItem, // <-- Expose new action
     deleteBudget,
     deleteBudgetItem,
+    importRecurringItems,
+    dismissRecurringItem,
   };
 });

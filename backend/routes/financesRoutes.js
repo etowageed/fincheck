@@ -65,5 +65,7 @@ router
   .delete(financesController.deleteTransaction);
 
 router.post('/:month/:year/rollover', financesController.processRollover);
+router.post('/:month/:year/import-recurring', financesController.importRecurringItems);
+router.patch('/:month/:year/dismiss-recurring', financesController.dismissRecurringItem);
 
 module.exports = router;

@@ -12,7 +12,6 @@ exports.upsertMonthlyFinances = catchAsync(async (req, res, next) => {
 
   // If month or year are not provided in the request body,
   // automatically set them to the current month and year.
-  // This ensures the findOneAndUpdate query correctly targets the current month's document.
   const currentDate = new Date();
   if (month === undefined || month === null) {
     month = currentDate.getMonth(); // Mongoose default for month is 0-indexed (Jan=0, Dec=11)
@@ -21,18 +20,47 @@ exports.upsertMonthlyFinances = catchAsync(async (req, res, next) => {
     year = currentDate.getFullYear();
   }
 
-  const expenseDoc = await Finances.findOneAndUpdate(
-    { user: req.user.id, month, year }, // Query based on user, calculated/provided month and year
-    { 
-      $set: { monthlyBudget, expectedMonthlyIncome }
-    },
-    {
-      upsert: true, // Create the document if it doesn't exist
-      new: true, // Return the updated/new document
-      setDefaultsOnInsert: true, // Apply schema defaults for new documents (e.g., timestamps)
-      runValidators: true, // Run schema validators on the update operation
+  // Check if document already exists
+  let expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
+
+  if (expenseDoc) {
+    // 1. UPDATE Case: Update existing budget document
+    if (monthlyBudget !== undefined) expenseDoc.monthlyBudget = monthlyBudget;
+    if (expectedMonthlyIncome !== undefined)
+      expenseDoc.expectedMonthlyIncome = expectedMonthlyIncome;
+
+    await expenseDoc.save({ runValidators: true });
+  } else {
+    // 2. CREATE Case: First time creating a budget for this month
+    // If no monthlyBudget is provided, we still carry over income for convenience.
+    if (!monthlyBudget || monthlyBudget.length === 0) {
+      const prevMonth = month === 0 ? 11 : month - 1;
+      const prevYear = month === 0 ? year - 1 : year;
+      const prevDoc = await Finances.findOne({
+        user: req.user.id,
+        month: prevMonth,
+        year: prevYear,
+      });
+
+      if (prevDoc) {
+        // Carry over expected income if not explicitly provided
+        if (
+          expectedMonthlyIncome === undefined ||
+          expectedMonthlyIncome === null
+        ) {
+          expectedMonthlyIncome = prevDoc.expectedMonthlyIncome;
+        }
+      }
     }
-  );
+
+    expenseDoc = await Finances.create({
+      user: req.user.id,
+      month,
+      year,
+      monthlyBudget: monthlyBudget || [],
+      expectedMonthlyIncome: expectedMonthlyIncome || 0,
+    });
+  }
 
   res.status(200).json({
     status: 'success',
@@ -375,9 +403,141 @@ exports.getMonthlyExpense = catchAsync(async (req, res, next) => {
     );
   }
 
+  // Handle Suggestions for "Draft Mode"
+  // We suggest recurring items from the previous month that haven't been added or dismissed yet
+  let suggestions = [];
+  const prevMonth = parseInt(month) === 0 ? 11 : parseInt(month) - 1;
+  const prevYear = parseInt(month) === 0 ? parseInt(year) - 1 : parseInt(year);
+  const prevDoc = await Finances.findOne({
+    user: req.user.id,
+    month: prevMonth,
+    year: prevYear,
+  });
+
+  if (prevDoc) {
+    const dismissed = expenseDoc.dismissedRecurringItems || [];
+    const currentBudgetKeys = expenseDoc.monthlyBudget.map(i => `${i.name}-${i.category}`);
+    
+    suggestions = prevDoc.monthlyBudget
+      .filter((item) => item.isRecurring)
+      // Filter out items already dismissed
+      .filter((item) => !dismissed.some(d => d.name === item.name && d.category === item.category))
+      // Filter out items already added to the budget
+      .filter((item) => !currentBudgetKeys.includes(`${item.name}-${item.category}`))
+      .map((item) => ({
+          name: item.name,
+          amount: item.amount,
+          category: item.category,
+          description: item.description,
+          isRecurring: true,
+        }));
+  }
+
+  // Convert to object to add the non-schema field 'suggestions'
+  const responseData = expenseDoc.toObject({ virtuals: true });
+  responseData.suggestions = suggestions;
+
+  res.status(200).json({
+    status: 'success',
+    data: responseData,
+  });
+});
+
+// Dismiss a suggested recurring item (individual or all)
+exports.dismissRecurringItem = catchAsync(async (req, res, next) => {
+  const { month, year } = req.params;
+  const { name, category, dismissAll } = req.body;
+
+  const expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
+  if (!expenseDoc) {
+    return next(new AppError('Budget document not found', 404));
+  }
+
+  if (dismissAll) {
+    const prevMonth = parseInt(month) === 0 ? 11 : parseInt(month) - 1;
+    const prevYear = parseInt(month) === 0 ? parseInt(year) - 1 : parseInt(year);
+    const prevDoc = await Finances.findOne({
+      user: req.user.id,
+      month: prevMonth,
+      year: prevYear,
+    });
+
+    if (prevDoc) {
+      const allRecurring = prevDoc.monthlyBudget
+        .filter((i) => i.isRecurring)
+        .map((i) => ({ name: i.name, category: i.category }));
+      
+      expenseDoc.dismissedRecurringItems = allRecurring;
+    }
+  } else if (name && category) {
+    // Check if already dismissed to avoid duplicates
+    const isAlreadyDismissed = expenseDoc.dismissedRecurringItems.some(
+      (d) => d.name === name && d.category === category
+    );
+
+    if (!isAlreadyDismissed) {
+      expenseDoc.dismissedRecurringItems.push({ name, category });
+    }
+  }
+
+  await expenseDoc.save();
+
   res.status(200).json({
     status: 'success',
     data: expenseDoc,
+  });
+});
+
+// Bulk import recurring items from the previous month
+exports.importRecurringItems = catchAsync(async (req, res, next) => {
+  const { month, year } = req.params;
+
+  const currentDoc = await Finances.findOne({ user: req.user.id, month, year });
+  if (!currentDoc) {
+    return next(new AppError('Budget document not found', 404));
+  }
+
+  const prevMonth = parseInt(month) === 0 ? 11 : parseInt(month) - 1;
+  const prevYear = parseInt(month) === 0 ? parseInt(year) - 1 : parseInt(year);
+  const prevDoc = await Finances.findOne({
+    user: req.user.id,
+    month: prevMonth,
+    year: prevYear,
+  });
+
+  if (!prevDoc) {
+    return next(new AppError('No previous month budget found to import from', 404));
+  }
+
+  const recurringItems = prevDoc.monthlyBudget
+    .filter((item) => item.isRecurring)
+    .map((item) => ({
+      name: item.name,
+      amount: item.amount,
+      category: item.category,
+      description: item.description,
+      isRecurring: true,
+    }));
+
+  if (recurringItems.length === 0) {
+    return res.status(200).json({
+      status: 'success',
+      message: 'No recurring items found in the previous month',
+      data: currentDoc,
+    });
+  }
+
+  // Avoid duplicates by checking name and category
+  const existingNames = currentDoc.monthlyBudget.map(i => `${i.name}-${i.category}`);
+  const itemsToAdd = recurringItems.filter(i => !existingNames.includes(`${i.name}-${i.category}`));
+
+  currentDoc.monthlyBudget.push(...itemsToAdd);
+  await currentDoc.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: `${itemsToAdd.length} items imported successfully`,
+    data: currentDoc,
   });
 });
 

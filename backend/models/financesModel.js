@@ -122,6 +122,15 @@ const financesSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    dismissedRecurringItems: {
+      type: [
+        {
+          name: String,
+          category: String,
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true, // Added timestamps as per your current file

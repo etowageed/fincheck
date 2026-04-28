@@ -63,9 +63,14 @@
                         <span class="text-primary">Total Monthly Budget:</span>
                         <span class="text-accent-blue">{{ formatCurrency(budget.totalMonthlyBudget) }}</span>
                     </div>
+                    <div v-if="budget.totalRecurringExpenses > 0"
+                        class="flex justify-between items-center text-sm text-secondary mt-1">
+                        <span>Recurring Expenses:</span>
+                        <span>{{ formatCurrency(budget.totalRecurringExpenses) }}</span>
+                    </div>
                     <div v-if="budget.rolloverAmount > 0"
                         class="flex justify-between items-center text-sm text-accent-green mt-1 font-medium">
-                        <span><i class="pi pi-plus-circle"></i> Rollover from last month:</span>
+                        <span><i class="pi pi-plus-circle"></i> Rollover from last month's budget:</span>
                         <span>{{ formatCurrency(budget.rolloverAmount) }}</span>
                     </div>
                     <div v-if="budget.expectedMonthlyIncome"
@@ -81,6 +86,54 @@
                 No budget items yet. Add some budget categories to get started.
             </div>
         </div>
+
+        <!-- Suggested Items (Draft Mode) -->
+        <div v-if="budget.suggestions && budget.suggestions.length > 0"
+            class="bg-yellow-50 dark:bg-accent-yellow/10 border border-yellow-300 dark:border-accent-yellow/30 rounded-lg p-4 mb-6">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <i class="pi pi-calendar-plus text-2xl text-accent-yellow"></i>
+                    <div>
+                        <h4 class="font-bold text-primary text-sm">Suggested recurring items</h4>
+                        <p class="text-xs text-secondary mt-1">We found {{ budget.suggestions.length }} recurring items
+                            from
+                            your previous month.</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <Button label="Dismiss All" icon="pi pi-times" size="small" outlined severity="secondary"
+                        @click="handleDismissAll" :loading="budgetStore.isLoading" />
+                    <Button label="Approve All" icon="pi pi-check" size="small" class="btn-cta"
+                        @click="handleImportRecurring" :loading="budgetStore.isLoading" />
+                </div>
+            </div>
+
+            <!-- List of individual suggested items -->
+            <div class="space-y-2 border-t border-yellow-200 dark:border-accent-yellow/20 pt-4">
+                <div v-for="item in budget.suggestions" :key="item.name"
+                    class="flex justify-between items-center p-3 bg-white rounded-md border border-yellow-200/50 dark:border-accent-yellow/10">
+                    <div class="flex items-center gap-3">
+                        <i class="pi pi-receipt text-accent-yellow opacity-70"></i>
+                        <div>
+                            <p class="text-sm font-medium text-primary">{{ item.name }}</p>
+                            <p class="text-xs text-muted">{{ getCategoryName(item.category) }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <p class="font-semibold text-sm text-primary">{{ formatCurrency(item.amount) }}</p>
+                        <div class="flex gap-1">
+                            <Button icon="pi pi-check" size="small" rounded text severity="success"
+                                @click="handleApproveIndividual(item)" v-tooltip.top="'Add to budget'" />
+                            <Button icon="pi pi-times" size="small" rounded text severity="danger"
+                                @click="handleDismissIndividual(item)" v-tooltip.top="'Dismiss suggestion'" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Optional: Preview of items in a collapsed or separate area if you want, 
+             but the user wanted it like the rollover alert which is more of a prompt -->
 
         <ItemForm ref="editBudgetFormRef" formType="budget" :edit-item="editingItem"
             @budget-item-updated="handleBudgetItemChange" style="display: none;" />
@@ -239,6 +292,29 @@ const deleteBudgetItem = async (budgetItemId) => {
     // if (!confirm('Are you sure you want to delete this budget item?')) return;
     if (!window.confirm('Are you sure you want to delete this budget item?')) return;
     await budgetStore.deleteBudgetItem(budgetItemId);
+};
+
+const handleImportRecurring = async () => {
+    const result = await budgetStore.importRecurringItems();
+    if (!result.success) {
+        // You could add a toast here if you have a toast plugin
+        console.error('Failed to import items:', result.error);
+    }
+};
+
+const handleDismissAll = async () => {
+    await budgetStore.dismissRecurringItem({ dismissAll: true });
+};
+
+const handleApproveIndividual = async (item) => {
+    const result = await budgetStore.addBudgetItem(item);
+    if (!result.success) {
+        console.error('Failed to add item:', result.error);
+    }
+};
+
+const handleDismissIndividual = async (item) => {
+    await budgetStore.dismissRecurringItem({ name: item.name, category: item.category });
 };
 
 // Category name getter
