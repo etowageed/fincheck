@@ -111,16 +111,16 @@
             <!-- List of individual suggested items -->
             <div class="space-y-2 border-t border-yellow-200 dark:border-accent-yellow/20 pt-4">
                 <div v-for="item in budget.suggestions" :key="item.name"
-                    class="flex justify-between items-center p-3 bg-white rounded-md border border-yellow-200/50 dark:border-accent-yellow/10">
+                    class="flex justify-between items-center p-2 rounded-md border border-default italic">
                     <div class="flex items-center gap-3">
                         <i class="pi pi-receipt text-accent-yellow opacity-70"></i>
                         <div>
-                            <p class="text-sm font-medium text-primary">{{ item.name }}</p>
+                            <p class="text-sm font-medium text-muted">{{ item.name }}</p>
                             <p class="text-xs text-muted">{{ getCategoryName(item.category) }}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <p class="font-semibold text-sm text-primary">{{ formatCurrency(item.amount) }}</p>
+                        <p class="font-semibold text-sm text-muted">{{ formatCurrency(item.amount) }}</p>
                         <div class="flex gap-1">
                             <Button icon="pi pi-check" size="small" rounded text severity="success"
                                 @click="handleApproveIndividual(item)" v-tooltip.top="'Add to budget'" />

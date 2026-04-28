@@ -27,7 +27,7 @@
                         features.
                     </p>
                     <Button label="Upgrade now" icon="pi pi-sparkles" severity="warning"
-                        @click="router.push('/pricing')" />
+                        @click="router.push('/pricing')" class="btn-cta" />
                 </div>
             </div>
 
