@@ -11,7 +11,7 @@ const MongoStore = require('connect-mongo').default;
 const paymentController = require('./controllers/paymentController');
 const morgan = require('morgan'); // For logging requests in development
 const cors = require('cors'); // For handling CORS
-const mongoSanitize = require('express-mongo-sanitize'); // NoSQL injection protection
+const sanitize = require('mongo-sanitize'); // NoSQL injection protection (Express 5 compatible)
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./middleware/errorHandler'); // Import the global error handler
@@ -21,7 +21,7 @@ const app = express();
 app.set('trust proxy', 'loopback'); // uncomment in production
 
 app.use(helmet()); // Set security headers
-app.use(mongoSanitize()); // Sanitize req.body, req.query, req.params against NoSQL injection
+
 // TODO uncomment this code when in production to enforce HTTPS
 // Only use this in production where a load balancer/proxy handles SSL termination
 // Only use this in production where a load balancer/proxy handles SSL termination
@@ -100,6 +100,19 @@ app.post(
 );
 
 app.use(express.json({ limit: '10kb' }));
+
+// Custom Mongo Sanitize for Express 5 compatibility
+// Express 5 makes req.query a read-only getter, so we must mutate it in-place
+app.use((req, res, next) => {
+  if (req.body) req.body = sanitize(req.body);
+  if (req.params) req.params = sanitize(req.params);
+  if (req.query) {
+    const sanitizedQuery = sanitize(req.query);
+    Object.keys(req.query).forEach((key) => delete req.query[key]);
+    Object.assign(req.query, sanitizedQuery);
+  }
+  next();
+});
 
 // mounting the routes
 app.use('/api/v1/auth', authRouter);
