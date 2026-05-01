@@ -152,53 +152,56 @@ financesSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
 
 // Virtual properties = computed fields that are not stored in the database
 
+// Helper to round monetary values to 2 decimal places, preventing floating-point display errors
+const roundMoney = (value) => Math.round(value * 100) / 100;
+
 financesSchema.virtual('totalMonthlyBudget').get(function () {
-  return this.monthlyBudget.reduce((sum, exp) => sum + exp.amount, 0);
+  return roundMoney(this.monthlyBudget.reduce((sum, exp) => sum + exp.amount, 0));
 });
 
 // Total recurring budget = sum of all recurring expenses in the monthly budget
 financesSchema.virtual('totalRecurringExpenses').get(function () {
-  return this.monthlyBudget
+  return roundMoney(this.monthlyBudget
     .filter((item) => item.isRecurring)
-    .reduce((sum, item) => sum + item.amount, 0);
+    .reduce((sum, item) => sum + item.amount, 0));
 });
 
 // Total non-recurring expenses = sum of all non-recurring expenses in the monthly budget
 financesSchema.virtual('totalNonRecurringExpenses').get(function () {
-  return this.monthlyBudget
+  return roundMoney(this.monthlyBudget
     .filter((item) => !item.isRecurring)
-    .reduce((sum, item) => sum + item.amount, 0);
+    .reduce((sum, item) => sum + item.amount, 0));
 });
 
 // total expenses
 financesSchema.virtual('expensesTotal').get(function () {
-  return this.transactions
+  return roundMoney(this.transactions
     .filter((t) => t.type === 'expense')
-    .reduce((sum, tx) => sum + tx.amount, 0);
+    .reduce((sum, tx) => sum + tx.amount, 0));
 });
 
 // total income
 financesSchema.virtual('incomeTotal').get(function () {
-  return this.transactions
+  return roundMoney(this.transactions
     .filter((t) => t.type === 'income')
-    .reduce((sum, tx) => sum + tx.amount, 0);
+    .reduce((sum, tx) => sum + tx.amount, 0));
 });
 
 // total savings (goal contributions/investments)
 financesSchema.virtual('savingsTotal').get(function () {
-  return this.transactions
+  return roundMoney(this.transactions
     .filter((t) => t.type === 'savings')
-    .reduce((sum, tx) => sum + tx.amount, 0);
+    .reduce((sum, tx) => sum + tx.amount, 0));
 });
 
 // total outflow = expenses + savings
 financesSchema.virtual('outflow').get(function () {
-  return this.expensesTotal + this.savingsTotal;
+  return roundMoney(this.expensesTotal + this.savingsTotal);
 });
 
 financesSchema.virtual('budgetBalance').get(function () {
   // Budget Balance = Planned Budget + Rollover - Actual Expenses (Non-Excluded)
-  return (this.totalMonthlyBudget + (this.rolloverAmount || 0)) - this.expensesTotal;
+  return roundMoney((this.totalMonthlyBudget + (this.rolloverAmount || 0)) - this.expensesTotal);
 });
 
 // expenses performance
@@ -217,7 +220,7 @@ financesSchema.virtual('expensesPerformance').get(function () {
 // Planned savings = expected monthly income - total budget
 financesSchema.virtual('plannedSavings').get(function () {
   if (typeof this.expectedMonthlyIncome !== 'number') return 0;
-  return this.expectedMonthlyIncome - this.totalMonthlyBudget;
+  return roundMoney(this.expectedMonthlyIncome - this.totalMonthlyBudget);
 });
 
 const Finances = mongoose.model('Finances', financesSchema);

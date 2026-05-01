@@ -1,6 +1,10 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import * as authService from "@/services/auth";
+import { useTransactionsStore } from "@/stores/transactions";
+import { useCategoriesStore } from "@/stores/categories";
+import { useBudgetStore } from "@/stores/budget";
+import { useDashboardStore } from "@/stores/dashboard";
 
 export const useAuthStore = defineStore("auth", () => {
   // State
@@ -64,12 +68,26 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
+  // Helper to reset all data stores, preventing stale state between users
+  const _resetAllDataStores = () => {
+    try {
+      useTransactionsStore().$reset();
+      useCategoriesStore().$reset();
+      useBudgetStore().$reset();
+      useDashboardStore().$reset();
+    } catch (e) {
+      // Stores may not be initialized yet during early lifecycle
+      console.warn("Could not reset data stores:", e.message);
+    }
+  };
+
   const logout = async () => {
     isLoading.value = true;
     try {
       await authService.logout();
       user.value = null;
       isAuthenticated.value = false;
+      _resetAllDataStores();
       return { success: true };
     } catch (err) {
       // Error is handled by the global interceptor
@@ -86,6 +104,17 @@ export const useAuthStore = defineStore("auth", () => {
       if (response.data?.status === "success") {
         user.value = response.data.data.user;
         isAuthenticated.value = true;
+
+        // Subscription expiry sync: if the expiry date has passed,
+        // locally downgrade to 'free' before the next render cycle
+        if (
+          user.value.subscriptionStatus === "premium" &&
+          user.value.subscriptionExpires &&
+          new Date(user.value.subscriptionExpires) <= new Date()
+        ) {
+          user.value.subscriptionStatus = "free";
+        }
+
         return true;
       }
       user.value = null;
@@ -182,6 +211,7 @@ export const useAuthStore = defineStore("auth", () => {
       await authService.deleteMyAccount(); // Clear user state after successful deletion
       user.value = null;
       isAuthenticated.value = false;
+      _resetAllDataStores();
       return { success: true };
     } catch (err) {
       // Error is handled by the global interceptor

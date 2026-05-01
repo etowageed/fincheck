@@ -49,7 +49,7 @@ const sendErrorProd = (err, res) => {
     // 1) Log the original, full error for internal debugging
     console.error('ERROR 💥', err);
 
-    // 2) Send generic message to the client
+    // 2) Send generic message to the client — no error object, no stack, no DB codes
     res.status(500).json({
       status: 'error',
       message: 'Something went wrong!',
@@ -65,9 +65,9 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     // In development, send detailed error information
     sendErrorDev(err, res);
-  } else if (process.env.NODE_ENV === 'production') {
-    // In production, transform specific errors into operational AppErrors
-    // Use the original 'err' object, and reassign 'error' if transformed
+  } else {
+    // In production (or any non-development env), transform specific errors
+    // into operational AppErrors to prevent leaking internal details
     let error = err;
 
     if (error.name === 'CastError') {
@@ -85,10 +85,7 @@ module.exports = (err, req, res, next) => {
       // JWT expired token
       error = handleJWTExpiredError();
     }
-    // Add more specific error handling here for other known error types if needed
 
-    // After potential transformation, send the error (which should now be operational
-    // with a specific message if it was one of the handled types)
     sendErrorProd(error, res);
   }
 };

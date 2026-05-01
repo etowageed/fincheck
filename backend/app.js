@@ -11,6 +11,7 @@ const MongoStore = require('connect-mongo').default;
 const paymentController = require('./controllers/paymentController');
 const morgan = require('morgan'); // For logging requests in development
 const cors = require('cors'); // For handling CORS
+const mongoSanitize = require('express-mongo-sanitize'); // NoSQL injection protection
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./middleware/errorHandler'); // Import the global error handler
@@ -20,6 +21,7 @@ const app = express();
 app.set('trust proxy', 'loopback'); // uncomment in production
 
 app.use(helmet()); // Set security headers
+app.use(mongoSanitize()); // Sanitize req.body, req.query, req.params against NoSQL injection
 // TODO uncomment this code when in production to enforce HTTPS
 // Only use this in production where a load balancer/proxy handles SSL termination
 // Only use this in production where a load balancer/proxy handles SSL termination
@@ -48,10 +50,15 @@ app.use(cors(corsOptions));
 
 app.use(cookieParser());
 
+// Fail fast in production if SESSION_SECRET is not configured
+if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+  throw new Error('FATAL: SESSION_SECRET must be set in production environment variables.');
+}
+
 // Add session middleware
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key', // Use a strong, unique secret
+    secret: process.env.SESSION_SECRET || 'dev-only-fallback-secret',
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({

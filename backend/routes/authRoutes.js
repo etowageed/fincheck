@@ -25,7 +25,11 @@ router.get('/logout', authController.logout);
 router.get('/isLoggedIn', authController.isLoggedIn);
 router.post('/forgotpassword', loginLimiter, authController.forgotPassword);
 router.patch('/resetpassword/:token', authController.resetPassword);
-router.patch('/:id/updatepassword', authController.updatePassword);
+router.patch(
+  '/:id/updatepassword',
+  authController.protect,
+  authController.updatePassword,
+);
 
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
