@@ -274,8 +274,8 @@
           <BrandLogo :size="20" variant="on-light" />
         </div>
         <div class="flex gap-6 text-sm font-bold text-ink-400">
-          <a href="#" class="hover:text-ink-900">Privacy</a>
-          <a href="#" class="hover:text-ink-900">Terms</a>
+          <router-link to="/privacy" class="hover:text-ink-900">Privacy</router-link>
+          <router-link to="/terms" class="hover:text-ink-900">Terms</router-link>
           <a href="#" class="hover:text-ink-900">Twitter</a>
         </div>
         <div class="text-ink-400 text-sm font-medium">

@@ -29,12 +29,17 @@
                     financial decisions.</p>
 
                 <div class="mt-8 pt-6 border-t border-default">
-                    <RouterLink to="/signup"
-                        class="text-accent-blue hover:text-blue-800  font-medium">
-                        &larr; Back to Sign Up
-                    </RouterLink>
+                    <a @click.prevent="router.back()" href="#"
+                        class="text-accent-blue hover:text-blue-800 font-medium cursor-pointer">
+                        &larr; Back
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+<script setup>
+import { useRouter } from 'vue-router';
+const router = useRouter();
+</script>
