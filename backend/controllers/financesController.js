@@ -163,14 +163,31 @@ exports.addTransaction = catchAsync(async (req, res, next) => {
 
   let expenseDoc = await Finances.findOne({ user: req.user.id, month, year });
 
-  // If no document exists, return an error.
+  // If no document exists, silently create a skeleton budget for this month.
+  // This prevents a 404 for new or onboarding users and allows immediate transaction logging.
   if (!expenseDoc) {
-    return next(
-      new AppError(
-        'No budget document found for this month. Please create a budget first.',
-        404
-      )
-    );
+    let expectedMonthlyIncome = 0;
+
+    // Attempt to carry over expectedMonthlyIncome from the previous month
+    const prevMonth = parseInt(month) === 0 ? 11 : parseInt(month) - 1;
+    const prevYear = parseInt(month) === 0 ? parseInt(year) - 1 : parseInt(year);
+    const prevDoc = await Finances.findOne({
+      user: req.user.id,
+      month: prevMonth,
+      year: prevYear,
+    });
+
+    if (prevDoc && prevDoc.expectedMonthlyIncome) {
+      expectedMonthlyIncome = prevDoc.expectedMonthlyIncome;
+    }
+
+    expenseDoc = await Finances.create({
+      user: req.user.id,
+      month,
+      year,
+      monthlyBudget: [],
+      expectedMonthlyIncome,
+    });
   }
 
   let categoryId = category;

@@ -18,7 +18,11 @@ router.get(
   financesController.getMonthlyTrends
 );
 router.get('/compare', financesController.comparePeriods);
-router.post('/seed-data', financesController.seedData);
+
+// Only register seed-data route in non-production environments
+if (process.env.NODE_ENV !== 'production') {
+  router.post('/seed-data', financesController.seedData);
+}
 router.get(
   '/reports/category-breakdown',
   enforceLookbackLimit(365),

@@ -11,6 +11,7 @@ const MongoStore = require('connect-mongo').default;
 const paymentController = require('./controllers/paymentController');
 const morgan = require('morgan'); // For logging requests in development
 const cors = require('cors'); // For handling CORS
+const sanitize = require('mongo-sanitize'); // NoSQL injection protection (Express 5 compatible)
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./middleware/errorHandler'); // Import the global error handler
@@ -20,6 +21,7 @@ const app = express();
 app.set('trust proxy', 'loopback'); // uncomment in production
 
 app.use(helmet()); // Set security headers
+
 // TODO uncomment this code when in production to enforce HTTPS
 // Only use this in production where a load balancer/proxy handles SSL termination
 // Only use this in production where a load balancer/proxy handles SSL termination
@@ -48,10 +50,15 @@ app.use(cors(corsOptions));
 
 app.use(cookieParser());
 
+// Fail fast in production if SESSION_SECRET is not configured
+if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+  throw new Error('FATAL: SESSION_SECRET must be set in production environment variables.');
+}
+
 // Add session middleware
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key', // Use a strong, unique secret
+    secret: process.env.SESSION_SECRET || 'dev-only-fallback-secret',
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
@@ -93,6 +100,19 @@ app.post(
 );
 
 app.use(express.json({ limit: '10kb' }));
+
+// Custom Mongo Sanitize for Express 5 compatibility
+// Express 5 makes req.query a read-only getter, so we must mutate it in-place
+app.use((req, res, next) => {
+  if (req.body) req.body = sanitize(req.body);
+  if (req.params) req.params = sanitize(req.params);
+  if (req.query) {
+    const sanitizedQuery = sanitize(req.query);
+    Object.keys(req.query).forEach((key) => delete req.query[key]);
+    Object.assign(req.query, sanitizedQuery);
+  }
+  next();
+});
 
 // mounting the routes
 app.use('/api/v1/auth', authRouter);

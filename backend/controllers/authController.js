@@ -14,13 +14,17 @@ const createToken = (id) => {
   });
 };
 
+// Shared cookie options to ensure consistency across login, logout, and deletion
+const getCookieOptions = (overrides = {}) => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'Lax',
+  maxAge: 24 * 60 * 60 * 1000, // 1 day
+  ...overrides,
+});
+
 function sendTokenWithCookie(res, token) {
-  res.cookie('jwt', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'Lax',
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
-  });
+  res.cookie('jwt', token, getCookieOptions());
 }
 
 // Function to clone user object and strip sensitive data before sending
@@ -55,6 +59,7 @@ const filterUserForResponse = (user) => {
 
 exports.createToken = createToken;
 exports.sendTokenWithCookie = sendTokenWithCookie;
+exports.getCookieOptions = getCookieOptions;
 
 // sign up
 exports.signup = catchAsync(async (req, res, next) => {
@@ -114,7 +119,6 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   res.status(201).json({
     status: 'success',
-    token,
     data: {
       user: filterUserForResponse(newUser),
     },
@@ -153,7 +157,6 @@ exports.login = catchAsync(async (req, res, next) => {
   // 5) send user data
   res.status(200).json({
     status: 'success',
-    token,
     data: {
       user: filterUserForResponse(user),
     },
@@ -293,7 +296,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       message: 'Token sent to email',
-      resetURL, // we don't send this in production
     });
   } catch (err) {
     // If email sending fails, revert the token fields and then throw an operational error
@@ -336,10 +338,10 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   // 4) log the user in and send jwt
   const token = createToken(user._id);
+  sendTokenWithCookie(res, token);
 
   res.status(200).json({
     status: 'success',
-    token,
     data: {
       user: {
         id: user._id,
@@ -393,10 +395,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 exports.logout = (req, res) => {
   // This can remain synchronous
   // clear Jwt
-  res.cookie('jwt', 'loggedout', {
-    expires: new Date(0), // jwt token expires immediately
-    httpOnly: true,
-  });
+  res.cookie('jwt', 'loggedout', getCookieOptions({ expires: new Date(0), maxAge: undefined }));
 
   res.status(200).json({
     status: 'success',

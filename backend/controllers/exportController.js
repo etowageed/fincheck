@@ -72,21 +72,31 @@ const _processBudget = (documents) => {
 const _mapCategoryIds = async (data) => {
   if (data.length === 0) return data;
 
+  // Only query IDs that look like valid MongoDB ObjectIds (24-char hex strings)
+  const objectIdRegex = /^[0-9a-fA-F]{24}$/;
   const categoryIds = new Set();
-  data.forEach((item) => categoryIds.add(item.category));
-
-  const categories = await Category.find({
-    _id: { $in: Array.from(categoryIds).map((id) => id.toString()) },
+  data.forEach((item) => {
+    if (item.category && objectIdRegex.test(item.category.toString())) {
+      categoryIds.add(item.category.toString());
+    }
   });
 
-  const categoryMap = categories.reduce((map, cat) => {
-    map[cat._id.toString()] = cat.name;
-    return map;
-  }, {});
+  let categoryMap = {};
+  if (categoryIds.size > 0) {
+    const categories = await Category.find({
+      _id: { $in: Array.from(categoryIds) },
+    });
+
+    categoryMap = categories.reduce((map, cat) => {
+      map[cat._id.toString()] = cat.name;
+      return map;
+    }, {});
+  }
 
   return data.map((item) => ({
     ...item,
-    categoryName: categoryMap[item.category] || 'Uncategorized',
+    // If the category is a valid ObjectId, look it up; otherwise use the raw string or fallback
+    categoryName: categoryMap[item.category] || item.category || 'Uncategorized',
   }));
 };
 
@@ -110,7 +120,16 @@ const _generateExcel = async (data, format, res, user) => {
     'December',
   ];
 
-  if (data.transactions.length > 0) {
+  // Resolve all async data BEFORE setting response headers to prevent
+  // ERR_HTTP_HEADERS_SENT if category lookup fails
+  const mappedTransactions = data.transactions.length > 0
+    ? await _mapCategoryIds(data.transactions)
+    : [];
+  const mappedBudget = data.budget.length > 0
+    ? await _mapCategoryIds(data.budget)
+    : [];
+
+  if (mappedTransactions.length > 0) {
     const sheet = workbook.addWorksheet('Transactions');
     sheet.columns = [
       { header: 'Date', key: 'date', width: 12 },
@@ -121,8 +140,6 @@ const _generateExcel = async (data, format, res, user) => {
       { header: 'Month', key: 'monthName', width: 15 },
       { header: 'Year', key: 'year', width: 10 },
     ];
-
-    const mappedTransactions = await _mapCategoryIds(data.transactions);
 
     mappedTransactions.forEach((tx) => {
       sheet.addRow({
@@ -138,7 +155,7 @@ const _generateExcel = async (data, format, res, user) => {
       .replace('1', '0');
   }
 
-  if (data.budget.length > 0) {
+  if (mappedBudget.length > 0) {
     const sheet = workbook.addWorksheet('Budget Items');
     sheet.columns = [
       { header: 'Month', key: 'monthName', width: 15 },
@@ -149,8 +166,6 @@ const _generateExcel = async (data, format, res, user) => {
       { header: 'Recurring', key: 'isRecurring', width: 15 },
       { header: 'Description', key: 'description', width: 40 },
     ];
-
-    const mappedBudget = await _mapCategoryIds(data.budget);
 
     mappedBudget.forEach((item) => {
       sheet.addRow({
@@ -182,7 +197,6 @@ const _generateExcel = async (data, format, res, user) => {
  * Generates a PDF file (simplified).
  */
 const _generatePDF = async (data, format, res, user) => {
-  const doc = new PDFDocument();
   const monthNames = [
     'January',
     'February',
@@ -198,6 +212,17 @@ const _generatePDF = async (data, format, res, user) => {
     'December',
   ];
 
+  // Resolve all async data BEFORE piping to response to prevent
+  // ERR_HTTP_HEADERS_SENT if category lookup fails
+  const mappedTransactions = data.transactions.length > 0
+    ? await _mapCategoryIds(data.transactions)
+    : [];
+  const mappedBudget = data.budget.length > 0
+    ? await _mapCategoryIds(data.budget)
+    : [];
+
+  // Now safe to set headers and start streaming — all DB queries are done
+  const doc = new PDFDocument();
   const filename = `${format.type}-${format.days}days-report.pdf`;
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
@@ -214,13 +239,11 @@ const _generatePDF = async (data, format, res, user) => {
   doc.moveDown();
 
   // --- Transactions Section ---
-  if (data.transactions.length > 0) {
-    const mappedTransactions = await _mapCategoryIds(data.transactions);
-
+  if (mappedTransactions.length > 0) {
     doc.fontSize(14).text('Transactions', { underline: true });
     doc.moveDown();
 
-    mappedTransactions.forEach((tx, i) => {
+    mappedTransactions.forEach((tx) => {
       const amountFormatted = formatCurrency(tx.amount, user, true);
       const categoryName = tx.categoryName;
       const docLabel = `${monthNames[tx.month]} ${tx.year}`;
@@ -235,13 +258,11 @@ const _generatePDF = async (data, format, res, user) => {
   }
 
   // --- Budget Section ---
-  if (data.budget.length > 0) {
-    const mappedBudget = await _mapCategoryIds(data.budget);
-
+  if (mappedBudget.length > 0) {
     doc.fontSize(14).text('Budget Items', { underline: true });
     doc.moveDown();
 
-    mappedBudget.forEach((item, i) => {
+    mappedBudget.forEach((item) => {
       const amountFormatted = formatCurrency(item.amount, user, true);
       const categoryName = item.categoryName;
       const docLabel = `${monthNames[item.month]} ${item.year}`;
@@ -257,7 +278,7 @@ const _generatePDF = async (data, format, res, user) => {
     doc.moveDown();
   }
 
-  if (data.transactions.length === 0 && data.budget.length === 0) {
+  if (mappedTransactions.length === 0 && mappedBudget.length === 0) {
     doc
       .fontSize(12)
       .text('No data found for the selected criteria.', { align: 'center' });
@@ -269,6 +290,13 @@ const _generatePDF = async (data, format, res, user) => {
 // --- Main Controller Function ---
 
 exports.generateReport = catchAsync(async (req, res, next) => {
+  // Defense-in-depth: verify premium status even if route middleware was bypassed
+  if (req.user.subscriptionStatus !== 'premium') {
+    return next(
+      new AppError('Access Denied. This feature requires a Premium subscription.', 403),
+    );
+  }
+
   const format = req.query.format; // 'pdf' or 'excel'
   const type = req.query.type; // 'transactions', 'budget', or 'all'
   const days = parseInt(req.query.days, 10) || 30; // 30, 90, 180, 365

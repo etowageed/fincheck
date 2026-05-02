@@ -4,6 +4,7 @@ const Finances = require('../models/financesModel');
 const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const { getCookieOptions } = require('./authController');
 
 // getting all users
 exports.getAllUsers = catchAsync(async (req, res, next) => {
@@ -132,11 +133,8 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
 exports.deleteMe = catchAsync(async (req, res, next) => {
   await User.findByIdAndDelete(req.user.id);
 
-  // It's good practice to clear the JWT cookie on account deletion
-  res.cookie('jwt', 'loggedout', {
-    expires: new Date(0),
-    httpOnly: true,
-  });
+  // Clear the JWT cookie on account deletion with consistent security flags
+  res.cookie('jwt', 'loggedout', getCookieOptions({ expires: new Date(0), maxAge: undefined }));
 
   res.status(204).json({
     status: 'success',

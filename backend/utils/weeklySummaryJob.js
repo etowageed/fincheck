@@ -17,9 +17,16 @@ const sendWeeklySummaries = async () => {
   const month = now.getMonth();
   const year = now.getFullYear();
 
-  for await (const user of cursor) {
+  const BATCH_SIZE = 5; // Process emails in small batches to balance throughput vs SMTP limits
+  const BATCH_DELAY_MS = 2000; // Delay between batches (not individual emails)
+  let batch = [];
+  let totalSent = 0;
+  let totalFailed = 0;
+
+  // Helper to process a single user's summary email
+  const processUser = async (user) => {
     const finances = await Finances.findOne({ user: user._id, month, year });
-    if (!finances) continue;
+    if (!finances) return; // Skip users without finance data
 
     const weeklyTransactions = finances.transactions.filter((tx) => {
       const txDate = new Date(tx.date);
@@ -70,12 +77,41 @@ const sendWeeklySummaries = async () => {
       percentUsed,
       comparisonText,
     });
+  };
 
-    // ⏱️ Add a small delay (2s) to respect SMTP rate limits (e.g. Mailtrap)
-    await new Promise((resolve) => {
-      setTimeout(resolve, 2000);
+  // Process users in batches
+  for await (const user of cursor) {
+    batch.push(processUser(user));
+
+    if (batch.length >= BATCH_SIZE) {
+      const results = await Promise.allSettled(batch);
+      results.forEach((r) => {
+        if (r.status === 'fulfilled') totalSent++;
+        else {
+          totalFailed++;
+          console.error('❌ Weekly summary email failed:', r.reason?.message);
+        }
+      });
+      batch = [];
+
+      // ⏱️ Delay between batches to respect SMTP rate limits
+      await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+    }
+  }
+
+  // Process remaining users in the final partial batch
+  if (batch.length > 0) {
+    const results = await Promise.allSettled(batch);
+    results.forEach((r) => {
+      if (r.status === 'fulfilled') totalSent++;
+      else {
+        totalFailed++;
+        console.error('❌ Weekly summary email failed:', r.reason?.message);
+      }
     });
   }
+
+  console.log(`📊 Weekly summary complete: ${totalSent} sent, ${totalFailed} failed`);
 };
 
 // Run manually or via cron

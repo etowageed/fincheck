@@ -367,6 +367,13 @@ const handleSubmit = async () => {
         if (props.formType === 'transaction') {
             const selectedDate = formData.value.date;
 
+            // Client-side date boundary validation (matches backend enforceLookbackLimit)
+            if (selectedDate < minDateRange.value || selectedDate > maxDateRange.value) {
+                errors.value.date = 'Date must be within the last 10 years and not more than 5 years in the future.';
+                isLoading.value = false;
+                return;
+            }
+
             // 1. Get the local timezone offset in minutes (e.g., BST is -60)
             const offsetMinutes = selectedDate.getTimezoneOffset();
 
