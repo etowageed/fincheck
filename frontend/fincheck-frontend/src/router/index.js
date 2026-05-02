@@ -115,18 +115,16 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  // Public routes logic remains the same
-  const publicRoutes = [
+  // Guest-only routes that authenticated users shouldn't see
+  const guestOnlyRoutes = [
     "/login",
     "/signup",
     "/forgot-password",
     "/reset-password",
-    "/terms",
-    "/privacy",
   ];
-  const isPublicRoute = publicRoutes.some((path) => to.path.startsWith(path));
+  const isGuestOnlyRoute = guestOnlyRoutes.some((path) => to.path.startsWith(path));
 
-  if (isPublicRoute) {
+  if (isGuestOnlyRoute) {
     if (authStore.isAuthenticated) {
       return next("/transactions");
     }
