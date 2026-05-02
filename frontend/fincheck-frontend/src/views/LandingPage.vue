@@ -240,7 +240,7 @@
             </div>
             <h3 class="text-2xl font-bold mb-2 text-pop-purple">The Pro</h3>
             <div class="text-5xl font-black mb-6">
-              $5<span class="text-lg text-gray-400 font-medium">/mo</span>
+              $3.99<span class="text-lg text-gray-400 font-medium">/mo</span>
             </div>
             <p class="text-gray-400 mb-8 font-medium">
               For those who want to dominate their future.
