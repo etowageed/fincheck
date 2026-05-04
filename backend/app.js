@@ -1,9 +1,12 @@
 const path = require('path');
 const express = require('express');
+const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const xss = require('xss-clean'); // Prevent XSS attacks
+const compression = require('compression'); // Compress responses
 const enforce = require('express-sslify'); // Add this for HTTPS enforcement
 const session = require('express-session'); // Add this
 require('dotenv').config();
@@ -21,6 +24,7 @@ const app = express();
 app.set('trust proxy', 'loopback'); // uncomment in production
 
 app.use(helmet()); // Set security headers
+app.use(compression()); // Compress text/json payloads
 
 // TODO uncomment this code when in production to enforce HTTPS
 // Only use this in production where a load balancer/proxy handles SSL termination
@@ -65,14 +69,18 @@ app.use(
       mongoUrl: process.env.DATABASE,
       ttl: 24 * 60 * 60, // 1 day
     }),
-    cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 1 day
+    cookie: { 
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true
+    },
   }),
 );
 
 // apply rate limiting to all requests
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Limit each IP to 100 requests per windowMs
+  max: 200, // Limit each IP to 200 requests per windowMs
   message: 'Too many requests from this IP, please try again later.',
 });
 
@@ -101,6 +109,9 @@ app.post(
 
 app.use(express.json({ limit: '10kb' }));
 
+// Data sanitization against XSS
+app.use(xss());
+
 // Custom Mongo Sanitize for Express 5 compatibility
 // Express 5 makes req.query a read-only getter, so we must mutate it in-place
 app.use((req, res, next) => {
@@ -120,6 +131,16 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/finances', financesRouter);
 app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/payment', paymentRouter);
+
+// Health Check Endpoint for Render deployment
+app.get('/health', (req, res) => {
+  const isDbConnected = mongoose.connection.readyState === 1;
+  if (isDbConnected) {
+    res.status(200).json({ status: 'ok', database: 'connected' });
+  } else {
+    res.status(503).json({ status: 'error', database: 'disconnected' });
+  }
+});
 
 // Handle undefined routes
 app.all('/{*any}', (req, res, next) => {
