@@ -5,13 +5,33 @@ const { convert } = require('html-to-text');
 const formatCurrency = require('./formatCurrency');
 
 class EmailService {
-  constructor(user, url) {
+  constructor(user, url, sender = 'hello') {
     this.to = user.email;
     [this.firstName] = user.name.split(' ');
     this.url = url;
     this.user = user;
-    const fromName = process.env.EMAIL_FROM_NAME || 'Plete Finance';
-    const fromEmail = process.env.EMAIL_FROM || 'hello@plete.finance';
+
+    let fromEmail;
+    let fromName;
+
+    switch (sender) {
+      case 'no-reply':
+        fromEmail =
+          process.env.EMAIL_FROM_NOREPLY || 'no-reply@pletefinance.com';
+        fromName = 'Plete';
+        break;
+      case 'support':
+        fromEmail =
+          process.env.EMAIL_FROM_SUPPORT || 'support@pletefinance.com';
+        fromName = 'Plete Support';
+        break;
+      case 'hello':
+      default:
+        fromEmail = process.env.EMAIL_FROM_HELLO || 'hello@pletefinance.com';
+        fromName = 'Morena from Plete';
+        break;
+    }
+
     this.from = `${fromName} <${fromEmail}>`;
   }
 
@@ -20,6 +40,9 @@ class EmailService {
       return nodemailer.createTransport({
         host: process.env.BREVO_EMAIL_HOST,
         port: process.env.BREVO_EMAIL_PORT,
+        pool: true,
+        maxConnections: 10,
+        maxMessages: 100,
         auth: {
           user: process.env.BREVO_EMAIL_USERNAME,
           pass: process.env.BREVO_EMAIL_PASSWORD,
@@ -30,6 +53,9 @@ class EmailService {
     return nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
+      pool: true,
+      maxConnections: 10,
+      maxMessages: 100,
       auth: {
         user: process.env.EMAIL_USERNAME,
         pass: process.env.EMAIL_PASSWORD,
@@ -108,9 +134,10 @@ class EmailService {
       preferredCurrency: this.user?.preferredCurrency,
     });
 
-    const friendlyComment = percentUsed <= 100
-      ? "🎉 Awesome! You're doing great and staying within your budget. Keep it up!"
-      : "😬 You've spent more than your monthly budget. Review your categories.";
+    const friendlyComment =
+      percentUsed <= 100
+        ? "🎉 Awesome! You're doing great and staying within your budget. Keep it up!"
+        : "😬 You've spent more than your monthly budget. Review your categories.";
 
     await this.send('weeklySummary', 'Your Weekly Plete Finance Summary 🌟', {
       startOfWeek: startOfWeek.toDateString(),

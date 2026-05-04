@@ -17,7 +17,7 @@ const sendWeeklySummaries = async () => {
   const month = now.getMonth();
   const year = now.getFullYear();
 
-  const BATCH_SIZE = 5; // Process emails in small batches to balance throughput vs SMTP limits
+  const BATCH_SIZE = 10; // Process emails in small batches to balance throughput vs SMTP limits
   const BATCH_DELAY_MS = 2000; // Delay between batches (not individual emails)
   let batch = [];
   let totalSent = 0;
