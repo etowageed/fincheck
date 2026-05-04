@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const xss = require('xss-clean'); // Prevent XSS attacks
 const compression = require('compression'); // Compress responses
 const enforce = require('express-sslify'); // Add this for HTTPS enforcement
 const session = require('express-session'); // Add this
@@ -108,9 +107,6 @@ app.post(
 );
 
 app.use(express.json({ limit: '10kb' }));
-
-// Data sanitization against XSS
-app.use(xss());
 
 // Custom Mongo Sanitize for Express 5 compatibility
 // Express 5 makes req.query a read-only getter, so we must mutate it in-place
