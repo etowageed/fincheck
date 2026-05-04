@@ -1,4 +1,4 @@
-// frontend/fincheck-frontend/src/stores/dashboard.js
+// frontend/src/stores/dashboard.js
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 
