@@ -20,7 +20,7 @@ const globalErrorHandler = require('./middleware/errorHandler'); // Import the g
 
 const app = express();
 
-app.set('trust proxy', 'loopback'); // uncomment in production
+app.set('trust proxy', 1);
 
 app.use(helmet()); // Set security headers
 app.use(compression()); // Compress text/json payloads
@@ -55,7 +55,9 @@ app.use(cookieParser());
 
 // Fail fast in production if SESSION_SECRET is not configured
 if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
-  throw new Error('FATAL: SESSION_SECRET must be set in production environment variables.');
+  throw new Error(
+    'FATAL: SESSION_SECRET must be set in production environment variables.',
+  );
 }
 
 // Add session middleware
@@ -68,10 +70,10 @@ app.use(
       mongoUrl: process.env.DATABASE,
       ttl: 24 * 60 * 60, // 1 day
     }),
-    cookie: { 
+    cookie: {
       maxAge: 1000 * 60 * 60 * 24, // 1 day
       secure: process.env.NODE_ENV === 'production',
-      httpOnly: true
+      httpOnly: true,
     },
   }),
 );
