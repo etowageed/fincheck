@@ -19,10 +19,7 @@ process.on('uncaughtException', (err) => {
 
 // MongoDB connection
 mongoose
-  .connect(process.env.DATABASE, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.DATABASE)
   .then(() => {
     console.log('DB connection successful');
     server = app.listen(PORT, () => {

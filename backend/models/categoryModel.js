@@ -56,7 +56,6 @@ const categorySchema = new mongoose.Schema(
 // Compound indexes for efficient queries
 categorySchema.index({ userId: 1, isActive: 1 });
 categorySchema.index({ isGlobalDefault: 1, isActive: 1 });
-categorySchema.index({ overridesGlobalDefault: 1 });
 
 // Ensure unique category names per user (excluding global defaults)
 categorySchema.index(
