@@ -5,7 +5,18 @@
                 Welcome to Plete Finance, {{ authStore.user?.name || 'User' }}!
             </h1>
             
-            <p class="text-secondary mb-8 text-lg">You're almost there. Let's set up your financial foundation.</p>
+            <p class="text-secondary mb-6 text-lg">You're almost there. Let's set up your financial foundation.</p>
+
+            <!-- Email Notice -->
+            <div class="mb-8 p-4 bg-accent-blue/10 border border-accent-blue/30 rounded-lg text-sm text-left mx-auto max-w-lg">
+                <div class="flex items-start gap-3">
+                    <span class="text-accent-blue text-lg">ℹ️</span>
+                    <div>
+                        <p class="font-bold text-primary mb-1">Check your inbox!</p>
+                        <p class="text-secondary">We just sent you a welcome email. If you don't see it, check your <strong>Promotions</strong> folder and drag it to your Primary tab so you don't miss important updates.</p>
+                    </div>
+                </div>
+            </div>
 
             <!-- Endowed Progress Effect -->
             <div class="mb-10 w-full max-w-lg mx-auto">
