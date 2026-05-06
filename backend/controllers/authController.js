@@ -104,7 +104,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   } catch (emailError) {
     console.error(
       `Failed to send welcome email to ${newUser.email}:`,
-      emailError
+      emailError,
     );
     // Optionally, you could still send a response here or log it for monitoring
     // but don't prevent user creation if email sending fails.
@@ -136,7 +136,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 2a) find user by email
   const user = await User.findOne({ email }).select(
-    '+password subscriptionStatus subscriptionExpires goals'
+    '+password subscriptionStatus subscriptionExpires goals',
   );
 
   // 2b) If no user, or if password doesn't match, send error
@@ -190,7 +190,7 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
 
   // 3) check if user still exists
   const user = await User.findById(decoded.id).select(
-    'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name goals'
+    'subscriptionStatus subscriptionExpires preferredCurrency preferredLocale name goals',
   );
   if (!user) {
     return res.status(200).json({
@@ -232,7 +232,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   if (!token) {
     return next(
-      new AppError('You are not logged in. Please log in for access', 401)
+      new AppError('You are not logged in. Please log in for access', 401),
     );
   }
 
@@ -244,13 +244,13 @@ exports.protect = catchAsync(async (req, res, next) => {
   const user = await User.findById(decoded.id);
   if (!user) {
     return next(
-      new AppError('The user belonging to this token no longer exists', 401)
+      new AppError('The user belonging to this token no longer exists', 401),
     );
   }
   // 4) check if user changed password after the token was issued
   if (user.changedPasswordAfter(decoded.iat)) {
     return next(
-      new AppError('User recently changed password! Please login again', 401)
+      new AppError('User recently changed password! Please login again', 401),
     );
   }
 
@@ -265,7 +265,7 @@ exports.restrictTo = (...roles) => {
     // roles is an array like ['admin', 'lead-guide']
     if (!req.user || !roles.includes(req.user.role)) {
       return next(
-        new AppError('You do not have permission to perform this action', 403)
+        new AppError('You do not have permission to perform this action', 403),
       );
     }
     next();
@@ -291,7 +291,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   try {
     // send email about password reset
-    await new EmailService(user, resetURL).sendPasswordReset();
+    await new EmailService(user, resetURL, 'no-reply').sendPasswordReset();
 
     res.status(200).json({
       status: 'success',
@@ -359,7 +359,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
   if (!currentPassword || !newPassword) {
     return next(
-      new AppError('Current password and new password are required', 400)
+      new AppError('Current password and new password are required', 400),
     );
   }
 
@@ -373,7 +373,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // Verify current password
   const isCurrentPasswordValid = await bcrypt.compare(
     currentPassword,
-    user.password
+    user.password,
   );
   if (!isCurrentPasswordValid) {
     return next(new AppError('Current password is incorrect', 400));
@@ -395,7 +395,11 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 exports.logout = (req, res) => {
   // This can remain synchronous
   // clear Jwt
-  res.cookie('jwt', 'loggedout', getCookieOptions({ expires: new Date(0), maxAge: undefined }));
+  res.cookie(
+    'jwt',
+    'loggedout',
+    getCookieOptions({ expires: new Date(0), maxAge: undefined }),
+  );
 
   res.status(200).json({
     status: 'success',

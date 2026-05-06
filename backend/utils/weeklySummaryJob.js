@@ -111,16 +111,18 @@ const sendWeeklySummaries = async () => {
     });
   }
 
-  console.log(`📊 Weekly summary complete: ${totalSent} sent, ${totalFailed} failed`);
+  console.log(
+    `📊 Weekly summary complete: ${totalSent} sent, ${totalFailed} failed`,
+  );
 };
 
 // Run manually or via cron
 
 // every monday at 12pm
-// cron.schedule('0 12 * * 1', () => {
-//   console.log('⏰ Sending weekly summaries...');
-//   sendWeeklySummaries().catch(console.error);
-// });
+cron.schedule('0 12 * * 1', () => {
+  console.log('⏰ Sending weekly summaries...');
+  sendWeeklySummaries().catch(console.error);
+});
 
 // every minute - for testing
 // cron.schedule('* * * * *', () => {
