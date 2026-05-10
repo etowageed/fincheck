@@ -78,6 +78,16 @@ app.use(
   }),
 );
 
+// Health Check Endpoint for Render deployment
+app.get('/health', (req, res) => {
+  const isDbConnected = mongoose.connection.readyState === 1;
+  if (isDbConnected) {
+    res.status(200).json({ status: 'ok', database: 'connected' });
+  } else {
+    res.status(503).json({ status: 'error', database: 'disconnected' });
+  }
+});
+
 // apply rate limiting to all requests
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -129,16 +139,6 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/finances', financesRouter);
 app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/payment', paymentRouter);
-
-// Health Check Endpoint for Render deployment
-app.get('/health', (req, res) => {
-  const isDbConnected = mongoose.connection.readyState === 1;
-  if (isDbConnected) {
-    res.status(200).json({ status: 'ok', database: 'connected' });
-  } else {
-    res.status(503).json({ status: 'error', database: 'disconnected' });
-  }
-});
 
 // Handle undefined routes
 app.all('/{*any}', (req, res, next) => {
