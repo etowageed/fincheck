@@ -1,0 +1,16 @@
+# Plete Finance — robots.txt
+# https://pletefinance.com
+
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /transactions
+Disallow: /budget
+Disallow: /categories
+Disallow: /goals
+Disallow: /settings
+Disallow: /pricing
+Disallow: /admin
+Disallow: /onboarding
+
+Sitemap: https://pletefinance.com/sitemap.xml

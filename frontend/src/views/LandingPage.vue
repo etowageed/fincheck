@@ -1,7 +1,7 @@
 <template>
   <div
     class="bg-cream-50 text-ink-900 font-sans selection:bg-pop-lime selection:text-ink-900 overflow-x-hidden min-h-screen">
-    <nav class="fixed w-full z-50 top-0 px-6 py-4">
+    <nav class="fixed w-full z-50 top-0 px-6 py-4" aria-label="Main navigation">
       <div
         class="max-w-7xl mx-auto bg-white/70 backdrop-blur-xl border border-white/40 rounded-full px-6 py-3 flex justify-between items-center shadow-lg shadow-black/5">
         <div class="flex items-center gap-2 cursor-pointer">
@@ -29,27 +29,26 @@
       <div class="max-w-7xl mx-auto text-center relative z-10">
         <div
           class="inline-block mb-6 px-4 py-1.5 rounded-full bg-pop-yellow/10 text-yellow-700 border border-pop-yellow/30 font-bold text-xs uppercase tracking-wider animate-bounce-slow">
-          ✨ Voted #1 "Adulting" Tool
+          🎯 Built for real life
         </div>
 
         <h1 class="text-6xl md:text-8xl font-extrabold tracking-tight leading-[1.1] mb-8 text-ink-900">
-          Money doesn't have<br />
-          to be
+          Know exactly where<br />
+          your money
           <span
-            class="text-transparent bg-clip-text bg-gradient-to-r from-pop-purple via-pop-pink to-pop-yellow">scary.</span>
+            class="text-transparent bg-clip-text bg-gradient-to-r from-pop-purple via-pop-pink to-pop-yellow">goes.</span>
         </h1>
 
         <p class="text-xl md:text-2xl text-ink-400 max-w-2xl mx-auto mb-12 font-medium">
-          Stop wondering where your salary went. Plete Finance is the
-          colorful, non-judgmental way to track transactions, crush budgets,
-          and actually save.
+          Track spending, set budgets, and hit your savings goals, all in
+          one place. Simple, visual, and completely free to start.
         </p>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-24">
           <router-link to="/signup">
             <button
               class="btn-cta px-8 py-4 bg-pop-lime text-ink-900 rounded-2xl font-black text-lg shadow-[0_10px_40px_-10px_rgba(132,204,22,0.5)] hover:-translate-y-1 transition-all">
-              Start for Free 🚀
+              Get Started for free
             </button>
           </router-link>
         </div>
@@ -109,15 +108,15 @@
       </div>
     </section>
 
-    <section class="py-24 px-4 bg-white">
+    <section id="features" class="py-24 px-4 bg-white">
       <div class="max-w-7xl mx-auto">
         <div class="text-center mb-16">
-          <h2 id="features" class="text-4xl md:text-5xl font-black mb-6 text-ink-900">
-            Organize your chaos.
+          <h2 class="text-4xl md:text-5xl font-black mb-6 text-ink-900">
+            Everything you need to stay on track.
           </h2>
           <p class="text-ink-400 text-lg max-w-2xl mx-auto">
-            Financial freedom isn't about being boring. It's about knowing
-            exactly how much you can spend on the fun stuff.
+            From daily spending to long-term savings, Plete gives you the
+            full picture without the spreadsheet headaches.
           </p>
         </div>
 
@@ -129,11 +128,11 @@
                 📊
               </div>
               <h3 class="text-3xl font-bold mb-3 text-ink-900">
-                Deep Dive Analytics
+                Spending Insights
               </h3>
               <p class="text-ink-400 max-w-sm font-medium">
-                Visualize your spending patterns. See exactly which category
-                is eating your wallet (spoiler: it's food).
+                See where your money actually goes. Visual breakdowns by
+                category, month, and trend, no guesswork.
               </p>
             </div>
             <div
@@ -148,10 +147,10 @@
                 class="w-14 h-14 bg-ink-800 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm border border-white/10">
                 📅
               </div>
-              <h3 class="text-3xl font-bold mb-3">Recurring Nightmares?</h3>
+              <h3 class="text-3xl font-bold mb-3">Subscription Tracker</h3>
               <p class="text-gray-400 font-medium">
-                We track subscriptions so Netflix doesn't charge you for the
-                50th month without you knowing.
+                Keep tabs on every recurring charge. No more surprise
+                deductions sneaking past you.
               </p>
             </div>
 
@@ -179,7 +178,19 @@
               Smart Categories
             </h3>
             <p class="text-ink-400 text-sm font-bold">
-              Your money, your labels.
+              Organise transactions your way.
+            </p>
+          </div>
+
+          <div
+            class="bg-pop-yellow/10 rounded-[2.5rem] p-10 border border-pop-yellow/20 group hover:bg-pop-yellow/20 transition-colors">
+            <div
+              class="w-14 h-14 bg-pop-yellow text-ink-900 rounded-2xl flex items-center justify-center text-2xl mb-6 font-bold shadow-sm group-hover:scale-110 transition-transform">
+              🎯
+            </div>
+            <h3 class="text-2xl font-bold mb-2 text-ink-900">Savings Goals</h3>
+            <p class="text-ink-400 text-sm font-bold">
+              Set targets, track progress, and watch your savings grow.
             </p>
           </div>
 
@@ -191,17 +202,17 @@
             </div>
             <h3 class="text-2xl font-bold mb-2 text-ink-900">Data Export</h3>
             <p class="text-ink-400 text-sm font-bold">
-              PDF or Excel. You own your data.
+              Download your data as PDF or Excel, anytime.
             </p>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="py-24 px-4 bg-cream-50">
+    <section id="pricing" class="py-24 px-4 bg-cream-50">
       <div class="max-w-4xl mx-auto text-center">
-        <h2 id="pricing" class="text-4xl md:text-5xl font-black mb-12 text-ink-900">
-          Fair pricing. No hidden math.
+        <h2 class="text-4xl md:text-5xl font-black mb-12 text-ink-900">
+          Simple, honest pricing.
         </h2>
 
         <div class="grid md:grid-cols-2 gap-8 items-stretch">
@@ -210,7 +221,7 @@
             <h3 class="text-2xl font-bold mb-2 text-ink-900">The Starter</h3>
             <div class="text-5xl font-black mb-6 text-ink-900">$0</div>
             <p class="text-ink-400 mb-8 font-medium">
-              Perfect for tracking this month's survival.
+              Everything you need to get started.
             </p>
             <ul class="text-left space-y-4 mb-8 flex-1 text-ink-800 font-medium">
               <li class="flex items-center gap-3">
@@ -243,7 +254,7 @@
               $3.99<span class="text-lg text-gray-400 font-medium">/mo</span>
             </div>
             <p class="text-gray-400 mb-8 font-medium">
-              For those who want to dominate their future.
+              For those ready to take full control.
             </p>
             <ul class="text-left space-y-4 mb-8 flex-1 font-medium">
               <li class="flex items-center gap-3">
@@ -276,10 +287,10 @@
         <div class="flex gap-6 text-sm font-bold text-ink-400">
           <router-link to="/privacy" class="hover:text-ink-900">Privacy</router-link>
           <router-link to="/terms" class="hover:text-ink-900">Terms</router-link>
-          <a href="#" class="hover:text-ink-900">Twitter</a>
+          <a href="https://twitter.com/pletefinance" target="_blank" rel="noopener noreferrer" class="hover:text-ink-900">Twitter</a>
         </div>
         <div class="text-ink-400 text-sm font-medium">
-          © 2025 Plete Finance Inc.
+          © 2026 Plete Finance Inc.
         </div>
       </div>
     </footer>

@@ -4,46 +4,105 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Plete Finance - Lifestyle Finance Tracker</title>
-    
+    <link rel="canonical" href="https://pletefinance.com/" />
+    <title>Plete Finance — Track Spending, Set Budgets & Hit Your Savings Goals</title>
+
     <meta
       name="description"
-      content="Track your income, expenses, and budget with Plete Finance. The simple, secure way to manage your personal finances."
+      content="Plete Finance helps you track spending, set budgets, and reach your savings goals — all in one simple, visual dashboard. Free to start."
     />
+    <meta name="keywords" content="personal finance tracker, budget app, expense tracker, savings goals, money management, spending insights" />
+    <meta name="author" content="Plete Finance Inc." />
+    <meta name="theme-color" content="#0F172A" />
+    <meta name="robots" content="index, follow" />
 
+    <!-- Preconnect to Google Fonts for faster loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    
-    <!-- Assuming PrimeVue theme doesn't load PrimeIcons by default or you still rely on CDN for it here -->
-    <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css" />
-    
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://fincheck.com/" />
-    <meta property="og:title" content="Plete Finance - Personal Finance Tracker" />
+    <meta property="og:url" content="https://pletefinance.com/" />
+    <meta property="og:site_name" content="Plete Finance" />
+    <meta property="og:title" content="Plete Finance — Track Spending, Set Budgets & Hit Your Savings Goals" />
     <meta
       property="og:description"
-      content="Track your income, expenses, and budget with Plete Finance. The simple, secure way to manage your personal finances."
+      content="Plete Finance helps you track spending, set budgets, and reach your savings goals — all in one simple, visual dashboard. Free to start."
     />
-    <meta property="og:image" content="https://fincheck.com/og-image.jpg" />
+    <meta property="og:image" content="https://pletefinance.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Plete Finance — Personal finance tracking dashboard" />
+    <meta property="og:locale" content="en_US" />
 
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://fincheck.com/" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://pletefinance.com/" />
+    <meta name="twitter:title" content="Plete Finance — Track Spending, Set Budgets & Hit Your Savings Goals" />
     <meta
-      property="twitter:title"
-      content="Plete Finance - Personal Finance Tracker"
+      name="twitter:description"
+      content="Plete Finance helps you track spending, set budgets, and reach your savings goals — all in one simple, visual dashboard. Free to start."
     />
-    <meta
-      property="twitter:description"
-      content="Track your income, expenses, and budget with Plete Finance. The simple, secure way to manage your personal finances."
-    />
-    <meta
-      property="twitter:image"
-      content="https://fincheck.com/og-image.jpg"
-    />
+    <meta name="twitter:image" content="https://pletefinance.com/og-image.png" />
+    <meta name="twitter:image:alt" content="Plete Finance — Personal finance tracking dashboard" />
+
+    <!-- Structured Data: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Plete Finance",
+      "url": "https://pletefinance.com",
+      "logo": "https://pletefinance.com/favicon.svg",
+      "description": "Plete Finance helps you track spending, set budgets, and reach your savings goals.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "support@pletefinance.com",
+        "contactType": "Customer Support"
+      }
+    }
+    </script>
+
+    <!-- Structured Data: WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Plete Finance",
+      "url": "https://pletefinance.com",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "description": "Track spending, set budgets, and hit your savings goals — all in one simple, visual dashboard.",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "The Starter",
+          "price": "0",
+          "priceCurrency": "USD",
+          "description": "Current month history, basic budgeting, unlimited transactions."
+        },
+        {
+          "@type": "Offer",
+          "name": "The Pro",
+          "price": "3.99",
+          "priceCurrency": "USD",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "billingDuration": "P1M"
+          },
+          "description": "10+ years history, Excel & PDF exports, trend comparisons."
+        }
+      ],
+      "creator": {
+        "@type": "Organization",
+        "name": "Plete Finance Inc."
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="app"></div>
