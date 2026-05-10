@@ -1,7 +1,7 @@
 <template>
   <div
     class="bg-cream-50 text-ink-900 font-sans selection:bg-pop-lime selection:text-ink-900 overflow-x-hidden min-h-screen">
-    <nav class="fixed w-full z-50 top-0 px-6 py-4">
+    <nav class="fixed w-full z-50 top-0 px-6 py-4" aria-label="Main navigation">
       <div
         class="max-w-7xl mx-auto bg-white/70 backdrop-blur-xl border border-white/40 rounded-full px-6 py-3 flex justify-between items-center shadow-lg shadow-black/5">
         <div class="flex items-center gap-2 cursor-pointer">
@@ -108,10 +108,10 @@
       </div>
     </section>
 
-    <section class="py-24 px-4 bg-white">
+    <section id="features" class="py-24 px-4 bg-white">
       <div class="max-w-7xl mx-auto">
         <div class="text-center mb-16">
-          <h2 id="features" class="text-4xl md:text-5xl font-black mb-6 text-ink-900">
+          <h2 class="text-4xl md:text-5xl font-black mb-6 text-ink-900">
             Everything you need to stay on track.
           </h2>
           <p class="text-ink-400 text-lg max-w-2xl mx-auto">
@@ -209,9 +209,9 @@
       </div>
     </section>
 
-    <section class="py-24 px-4 bg-cream-50">
+    <section id="pricing" class="py-24 px-4 bg-cream-50">
       <div class="max-w-4xl mx-auto text-center">
-        <h2 id="pricing" class="text-4xl md:text-5xl font-black mb-12 text-ink-900">
+        <h2 class="text-4xl md:text-5xl font-black mb-12 text-ink-900">
           Simple, honest pricing.
         </h2>
 
@@ -287,7 +287,7 @@
         <div class="flex gap-6 text-sm font-bold text-ink-400">
           <router-link to="/privacy" class="hover:text-ink-900">Privacy</router-link>
           <router-link to="/terms" class="hover:text-ink-900">Terms</router-link>
-          <a href="#" class="hover:text-ink-900">Twitter</a>
+          <a href="https://twitter.com/pletefinance" target="_blank" rel="noopener noreferrer" class="hover:text-ink-900">Twitter</a>
         </div>
         <div class="text-ink-400 text-sm font-medium">
           © 2026 Plete Finance Inc.
