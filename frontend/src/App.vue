@@ -1,24 +1,18 @@
 <template>
+  <Analytics />
   <div id="app">
     <GlobalErrorToast />
 
     <Header v-if="!route.meta.hideHeader" @toggle-sidebar="toggleMobileSidebar" />
 
-    <Sidebar 
-      v-if="showSidebar" 
-      :is-mobile-open="isMobileSidebarOpen"
-      @close-mobile="isMobileSidebarOpen = false"
-    />
+    <Sidebar v-if="showSidebar" :is-mobile-open="isMobileSidebarOpen" @close-mobile="isMobileSidebarOpen = false" />
 
     <!-- Overlay for mobile sidebar -->
-    <div 
-      v-if="showSidebar && isMobileSidebarOpen" 
-      class="fixed inset-0 bg-black/50 z-20 lg:hidden"
-      @click="isMobileSidebarOpen = false"
-    ></div>
+    <div v-if="showSidebar && isMobileSidebarOpen" class="fixed inset-0 bg-black/50 z-20 lg:hidden"
+      @click="isMobileSidebarOpen = false"></div>
 
-    <main :class="{ 
-      'lg:ml-64 pt-20': showSidebar, 
+    <main :class="{
+      'lg:ml-64 pt-20': showSidebar,
       'pt-20': !showSidebar && !route.meta.hideHeader,
       'pt-0': !showSidebar && route.meta.hideHeader
     }">
@@ -31,6 +25,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { Analytics } from "@vercel/analytics/vue"
 import { useRoute } from 'vue-router';
 import { useCategoriesStore } from '@/stores/categories';
 import { useAuthStore } from '@/stores/auth';
