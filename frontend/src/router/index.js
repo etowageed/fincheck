@@ -9,8 +9,10 @@ const routes = [
     meta: {
       hideSidebar: true,
       hideHeader: true,
-      title: "Plete Finance — Track Spending, Set Budgets & Hit Your Savings Goals",
-      description: "Plete Finance helps you track spending, set budgets, and reach your savings goals — all in one simple, visual dashboard. Free to start.",
+      title:
+        "Plete Finance — Track Spending, Set Budgets & Hit Your Savings Goals",
+      description:
+        "Plete Finance helps you track spending, set budgets, and reach your savings goals — all in one simple, visual dashboard. Free to start.",
     },
   },
   {
@@ -20,7 +22,8 @@ const routes = [
     meta: {
       hideSidebar: true,
       title: "Log In — Plete Finance",
-      description: "Log in to your Plete Finance account to track your spending, budgets, and savings goals.",
+      description:
+        "Log in to your Plete Finance account to track your spending, budgets, and savings goals.",
     },
   },
   {
@@ -30,7 +33,8 @@ const routes = [
     meta: {
       hideSidebar: true,
       title: "Sign Up — Plete Finance",
-      description: "Create your free Plete Finance account and start tracking your income, expenses, and savings goals today.",
+      description:
+        "Create your free Plete Finance account and start tracking your income, expenses, and savings goals today.",
     },
   },
   {
@@ -41,7 +45,8 @@ const routes = [
       requiresAuth: true,
       hideSidebar: true,
       title: "Get Started — Plete Finance",
-      description: "Set up your Plete Finance account with your preferences and categories.",
+      description:
+        "Set up your Plete Finance account with your preferences and categories.",
     },
   },
   {
@@ -61,7 +66,8 @@ const routes = [
     meta: {
       requiresAuth: true,
       title: "Dashboard — Plete Finance",
-      description: "Your financial overview — spending insights, category breakdowns, and trends.",
+      description:
+        "Your financial overview — spending insights, category breakdowns, and trends.",
     },
   },
   {
@@ -81,7 +87,8 @@ const routes = [
     meta: {
       requiresAuth: true,
       title: "Categories — Plete Finance",
-      description: "Manage your transaction categories for better spending insights.",
+      description:
+        "Manage your transaction categories for better spending insights.",
     },
   },
   {
@@ -91,7 +98,8 @@ const routes = [
     meta: {
       requiresAuth: true,
       title: "Financial Goals — Plete Finance",
-      description: "Set savings targets and track your progress towards financial goals.",
+      description:
+        "Set savings targets and track your progress towards financial goals.",
     },
   },
   {
@@ -101,7 +109,8 @@ const routes = [
     meta: {
       requiresAuth: true,
       title: "Settings — Plete Finance",
-      description: "Manage your account settings, preferences, and subscription.",
+      description:
+        "Manage your account settings, preferences, and subscription.",
     },
   },
   {
@@ -111,7 +120,8 @@ const routes = [
     meta: {
       requiresAuth: true,
       title: "Pricing — Plete Finance",
-      description: "Compare free and premium plans. Upgrade to unlock unlimited history, exports, and trend analysis.",
+      description:
+        "Compare free and premium plans. Upgrade to unlock unlimited history, exports, and trend analysis.",
     },
   },
   {
@@ -141,7 +151,8 @@ const routes = [
     meta: {
       hideSidebar: true,
       title: "Terms of Service — Plete Finance",
-      description: "Read the terms and conditions governing your use of Plete Finance.",
+      description:
+        "Read the terms and conditions governing your use of Plete Finance.",
     },
   },
   {
@@ -151,14 +162,19 @@ const routes = [
     meta: {
       hideSidebar: true,
       title: "Privacy Policy — Plete Finance",
-      description: "Learn how Plete Finance collects, uses, and protects your personal data.",
+      description:
+        "Learn how Plete Finance collects, uses, and protects your personal data.",
     },
   },
   {
     path: "/admin",
     name: "AdminDashboard",
     component: () => import("@/views/AdminDashboard.vue"),
-    meta: { requiresAuth: true, requiresAdmin: true, title: "Admin Dashboard — Plete Finance" },
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: "Admin Dashboard — Plete Finance",
+    },
   },
 
   {
@@ -189,6 +205,23 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
+  // ── Domain Enforcement Guard ──
+  const hostname = window.location.hostname;
+  const isProductionMain =
+    hostname === "pletefinance.com" || hostname === "www.pletefinance.com";
+  const isProductionApp = hostname === "app.pletefinance.com";
+
+  // 1. Force Application logic to the App subdomain
+  if (isProductionMain && to.path !== "/") {
+    window.location.href = `https://app.pletefinance.com${to.fullPath}`;
+    return; // Stop router execution
+  }
+
+  // 2. Prevent the App subdomain from showing the Landing Page
+  if (isProductionApp && to.path === "/") {
+    return next("/dashboard");
+  }
+
   const authStore = useAuthStore();
 
   // ── Update document title & meta description for EVERY route ──
@@ -216,7 +249,9 @@ router.beforeEach(async (to, from, next) => {
     "/forgot-password",
     "/reset-password",
   ];
-  const isGuestOnlyRoute = guestOnlyRoutes.some((path) => to.path.startsWith(path));
+  const isGuestOnlyRoute = guestOnlyRoutes.some((path) =>
+    to.path.startsWith(path),
+  );
 
   if (isGuestOnlyRoute) {
     if (authStore.isAuthenticated) {
