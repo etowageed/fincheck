@@ -41,11 +41,12 @@ if (process.env.NODE_ENV === 'development') {
 const allowedOrigins =
   process.env.NODE_ENV === 'production'
     ? [
-        process.env.FRONTEND_URL, // https://app.pletefinance.com
+        process.env.FRONTEND_URL, // e.g. https://app.pletefinance.com
+        'https://app.pletefinance.com', // Explicitly allow the app subdomain
         'https://pletefinance.com', // Main landing page
         'https://www.pletefinance.com', // WWW version
       ]
-    : 'http://localhost:5173';
+    : ['http://localhost:5173', 'http://127.0.0.1:5173'];
 
 const corsOptions = {
   origin: function (origin, callback) {
