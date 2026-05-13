@@ -38,11 +38,23 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // CORS Configuration
+const allowedOrigins =
+  process.env.NODE_ENV === 'production'
+    ? [
+        process.env.FRONTEND_URL, // https://app.pletefinance.com
+        'https://pletefinance.com', // Main landing page
+        'https://www.pletefinance.com', // WWW version
+      ]
+    : 'http://localhost:5173';
+
 const corsOptions = {
-  origin:
-    process.env.NODE_ENV === 'production'
-      ? process.env.FRONTEND_URL
-      : 'http://localhost:5173',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
