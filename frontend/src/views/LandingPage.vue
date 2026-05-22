@@ -8,13 +8,13 @@
           <BrandLogo :size="24" variant="on-light" />
         </div>
 
-        <div class="hidden md:flex items-center gap-8 font-medium text-sm text-ink-800">
-          <a href="#features" class="hover:text-pop-purple transition-colors">Features</a>
-          <a href="#pricing" class="hover:text-pop-purple transition-colors">Pricing</a>
-          <router-link to="/login" class="hover:text-pop-purple transition-colors">Log in</router-link>
+        <div class="flex items-center gap-3 sm:gap-6 md:gap-8 font-medium text-sm text-ink-800">
+          <a href="#features" class="hidden md:inline-block hover:text-pop-purple transition-colors">Features</a>
+          <a href="#pricing" class="hidden md:inline-block hover:text-pop-purple transition-colors">Pricing</a>
+          <router-link to="/login" class="hover:text-pop-purple transition-colors text-xs md:text-sm font-bold md:font-medium">Log in</router-link>
           <router-link to="/signup">
             <button
-              class="btn-cta bg-pop-lime text-ink-900 px-6 py-2.5 rounded-full font-bold hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-ink-900/20">
+              class="btn-cta bg-pop-lime text-ink-900 px-3.5 py-2 md:px-6 md:py-2.5 rounded-full text-xs md:text-sm font-bold hover:scale-105 transition-transform active:scale-95 shadow-lg shadow-ink-900/20">
               Get Started
             </button>
           </router-link>
