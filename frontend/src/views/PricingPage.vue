@@ -13,7 +13,7 @@
             </Message>
 
             <div class="grid grid-cols-1 gap-4 text-left">
-                <div class="p-4 border border-default rounded-lg bg-blue-50 ">
+                <div class="p-4 border border-default rounded-lg bg-blue-50 dark:bg-blue-950/30">
                     <h3 class="font-semibold text-accent-blue mb-2">Premium Tier - Unlock Everything</h3>
                     <ul class="text-sm text-secondary space-y-2 mb-4">
                         <li class="flex items-center gap-2"><i class="pi pi-check text-accent-green"></i> Unlimited

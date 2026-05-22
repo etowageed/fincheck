@@ -12,15 +12,15 @@
 
 
                     <RouterLink to="/transactions"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-list mr-3"></i>
                         Transactions
                     </RouterLink>
 
                     <RouterLink to="/dashboard"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-home mr-3"></i>
                         Dashboard
                     </RouterLink>
@@ -28,29 +28,29 @@
 
 
                     <RouterLink to="/budget"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-wallet mr-3"></i>
                         Budget
                     </RouterLink>
 
                     <RouterLink to="/categories"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-tags mr-3"></i>
                         Categories
                     </RouterLink>
 
                     <RouterLink to="/goals"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-star mr-3"></i>
                         Goals
                     </RouterLink>
 
                     <RouterLink v-if="isAdmin" to="/admin"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-users mr-3"></i>
                         Admin
                     </RouterLink>
@@ -61,10 +61,18 @@
             <div class="px-4 py-6 border-t border-default">
                 <div class="space-y-2">
 
+                    <!-- Dark Mode Toggle -->
+                    <button @click="themeStore.toggle()"
+                        class="flex items-center w-full px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
+                        :aria-label="themeStore.isDark ? 'Switch to light mode' : 'Switch to dark mode'">
+                        <i :class="themeStore.isDark ? 'pi pi-sun' : 'pi pi-moon'" class="mr-3 transition-transform duration-300"></i>
+                        {{ themeStore.isDark ? 'Light Mode' : 'Dark Mode' }}
+                    </button>
+
                     <!-- Settings Link -->
                     <RouterLink to="/settings"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50  hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50  text-accent-blue" @click="$emit('close-mobile')">
+                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
                         <i class="pi pi-cog mr-3"></i>
                         Settings
                     </RouterLink>
@@ -82,8 +90,10 @@
 import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useThemeStore } from '@/stores/theme';
 
 const authStore = useAuthStore();
+const themeStore = useThemeStore();
 const isAdmin = computed(() => authStore.user?.role === 'admin');
 
 const router = useRouter();

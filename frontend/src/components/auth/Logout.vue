@@ -1,6 +1,6 @@
 <template>
     <Button @click="handleLogout" icon="pi pi-sign-out" label="Logout"
-        class="w-full !justify-start !text-left text-gray-700 hover:bg-blue-50 hover:text-blue-600" severity="secondary"
+        class="w-full !justify-start !text-left text-secondary hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue" severity="secondary"
         :loading="authStore.isLoading" text />
 </template>
 

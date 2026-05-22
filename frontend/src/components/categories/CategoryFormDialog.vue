@@ -3,11 +3,11 @@
         :header="isEdit ? 'Edit Category' : 'Add Category'" :style="{ width: '500px' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
         <form @submit.prevent="handleSubmit" class="space-y-4">
             <!-- Premium Lock -->
-            <div v-if="!authStore.isPremium" class="p-3 bg-red-50 border border-red-200 rounded">
+            <div v-if="!authStore.isPremium" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded">
                 <div class="flex items-start gap-2">
                     <i class="pi pi-lock text-accent-red mt-0.5"></i>
                     <div>
-                        <p class="text-sm text-red-800">
+                        <p class="text-sm text-red-800 dark:text-red-300">
                             <strong>Premium Feature:</strong> Custom categories and auto-categorization are available for Premium users only.
                         </p>
                     </div>
@@ -46,11 +46,11 @@
             </div>
 
             <!-- Override Notice (for global defaults) -->
-            <div v-if="isEdit && category?.isGlobalDefault" class="p-3 bg-yellow-50 border border-yellow-200 rounded">
+            <div v-if="isEdit && category?.isGlobalDefault" class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/40 rounded">
                 <div class="flex items-start gap-2">
-                    <i class="pi pi-info-circle text-yellow-600 mt-0.5"></i>
+                    <i class="pi pi-info-circle text-yellow-600 dark:text-yellow-400 mt-0.5"></i>
                     <div>
-                        <p class="text-sm text-yellow-800">
+                        <p class="text-sm text-yellow-800 dark:text-yellow-300">
                             <strong>Note:</strong> Editing this default category will create your personal version.
                             The original default will be replaced with your custom version.
                         </p>
