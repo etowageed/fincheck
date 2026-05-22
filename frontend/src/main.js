@@ -105,8 +105,9 @@ app.use(PrimeVue, {
 });
 app.use(ToastService);
 
-// Initialize auth before mounting
-// const authStore = useAuthStore();
-// await authStore.initializeAuth();
+// Initialize theme before mounting to prevent flash
+import { useThemeStore } from './stores/theme';
+const themeStore = useThemeStore();
+themeStore.initTheme();
 
 app.mount("#app");

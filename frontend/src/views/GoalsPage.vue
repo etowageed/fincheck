@@ -35,7 +35,7 @@
                     </div>
                     
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-accent-blue">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center text-accent-blue">
                             <i :class="['pi', goal.icon || 'pi-star']" class="text-xl"></i>
                         </div>
                         <h3 class="text-lg font-bold text-primary">{{ goal.name }}</h3>

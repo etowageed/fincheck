@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+      <h1 class="text-2xl font-bold text-primary">Admin Dashboard</h1>
     </div>
 
-    <div class="card bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+    <div class="card bg-primary p-4 rounded-xl shadow-sm border border-default">
       <DataTable :value="users" :loading="loading" dataKey="_id" tableStyle="min-width: 50rem" removableSort paginator
         :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]">
         <template #empty> No users found. </template>
@@ -15,8 +15,8 @@
         <Column field="role" header="Role" sortable style="width: 15%">
           <template #body="{ data }">
             <span :class="{
-              'bg-blue-100 text-blue-800': data.role === 'admin',
-              'bg-gray-100 text-gray-800': data.role === 'user'
+              'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300': data.role === 'admin',
+              'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300': data.role === 'user'
             }" class="px-2 py-1 rounded text-xs font-semibold capitalize">
               {{ data.role }}
             </span>
@@ -25,9 +25,9 @@
         <Column field="subscriptionStatus" header="Subscription" sortable style="width: 15%">
           <template #body="{ data }">
             <span :class="{
-              'bg-green-100 text-green-800': data.subscriptionStatus === 'premium',
-              'bg-yellow-100 text-yellow-800': data.subscriptionStatus === 'free',
-              'bg-red-100 text-red-800': data.subscriptionStatus === 'canceled'
+              'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300': data.subscriptionStatus === 'premium',
+              'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300': data.subscriptionStatus === 'free',
+              'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300': data.subscriptionStatus === 'canceled'
             }" class="px-2 py-1 rounded text-xs font-semibold capitalize">
               {{ data.subscriptionStatus }}
             </span>

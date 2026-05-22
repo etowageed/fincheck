@@ -5,17 +5,17 @@
             <div>
                 <h3 class="font-semibold text-primary">{{ category.name }}</h3>
                 <div class="mt-2 flex gap-2">
-                    <span v-if="!category.isActive" class="px-2 py-1 text-xs rounded bg-gray-200 text-gray-800">
+                    <span v-if="!category.isActive" class="px-2 py-1 text-xs rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                         Hidden
                     </span>
-                    <span v-if="category.isGlobalDefault" class="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">
+                    <span v-if="category.isGlobalDefault" class="px-2 py-1 text-xs rounded bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
                         Default
                     </span>
                     <span v-else-if="category.overridesGlobalDefault"
-                        class="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-800">
+                        class="px-2 py-1 text-xs rounded bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300">
                         Custom
                     </span>
-                    <span v-else class="px-2 py-1 text-xs rounded bg-green-100 text-green-800">
+                    <span v-else class="px-2 py-1 text-xs rounded bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300">
                         Personal
                     </span>
                 </div>

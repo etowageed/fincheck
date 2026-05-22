@@ -4,7 +4,7 @@ import { preset } from "primevue/themes";
 export default {
   content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   presets: [preset], // Enables bg-primary, text-primary, etc.
-  darkMode: "false",
+  darkMode: "class",
   theme: {
     extend: {
       fontFamily: {

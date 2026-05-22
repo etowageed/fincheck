@@ -36,7 +36,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label for="category" class="font-semibold">
-                        Category <span v-if="formType === 'transaction'" class="text-gray-400 font-normal">(Optional)</span>
+                        Category <span v-if="formType === 'transaction'" class="text-muted font-normal">(Optional)</span>
                     </label>
                     <div class="flex gap-2">
                         <Dropdown id="category" v-model="formData.category" :options="categoryOptions"
@@ -65,7 +65,7 @@
                             v-tooltip.top="'Add new category'" />
                     </div>
                     <small v-if="errors.category" class="p-error">{{ errors.category }}</small>
-                    <small v-if="categoriesStore.isLoading" class="text-gray-500">Loading categories...</small>
+                    <small v-if="categoriesStore.isLoading" class="text-muted">Loading categories...</small>
                     <small v-else-if="categoriesStore.error" class="text-red-500">{{ categoriesStore.error }}</small>
                 </div>
 
@@ -79,7 +79,7 @@
 
                 <div class="flex flex-col gap-2">
                     <label :for="descriptionFieldId" class="font-semibold">
-                        {{ descriptionFieldLabel }} <span class="text-gray-400">(Optional)</span>
+                        {{ descriptionFieldLabel }} <span class="text-muted">(Optional)</span>
                     </label>
                     <Textarea :id="descriptionFieldId" v-model="formData.description"
                         :placeholder="descriptionFieldPlaceholder" rows="3" :disabled="isLoading"
@@ -92,7 +92,7 @@
                     <div class="flex items-center gap-2">
                         <ToggleButton id="isRecurring" v-model="formData.isRecurring" onLabel="Yes" offLabel="No"
                             :disabled="isLoading" />
-                        <small class="text-gray-500">
+                        <small class="text-muted">
                             {{ formData.isRecurring ? 'This expense repeats monthly' : 'This is a one-time expense' }}
                         </small>
                     </div>
