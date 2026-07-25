@@ -91,7 +91,7 @@ app.use(
   }),
 );
 
-// Health Check Endpoint for Render deployment
+// Health Check Endpoint for backend deployment
 app.get('/health', (req, res) => {
   const isDbConnected = mongoose.connection.readyState === 1;
   if (isDbConnected) {
