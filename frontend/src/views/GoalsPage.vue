@@ -15,12 +15,12 @@
 
             <div v-else class="space-y-6">
                 <!-- Free Tier Banner -->
-                <div v-if="!authStore.isPremium" class="bg-yellow-50 dark:bg-accent-yellow/10 border border-yellow-300 dark:border-accent-yellow/30 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div v-if="!authStore.isPremium" class="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/50 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
-                        <i class="pi pi-lock text-2xl text-accent-yellow"></i>
+                        <i class="pi pi-lock text-2xl text-amber-600 dark:text-amber-400"></i>
                         <div>
-                            <h4 class="font-bold text-primary text-sm">Goal Limit Reached</h4>
-                            <p class="text-xs text-secondary mt-1">You are using your 1 free goal. Upgrade to Premium to create unlimited goals!</p>
+                            <h4 class="font-bold text-amber-950 dark:text-amber-200 text-sm">Goal Limit Reached</h4>
+                            <p class="text-xs text-amber-800 dark:text-amber-300/90 mt-1 font-medium">You are using your 1 free goal. Upgrade to Premium to create unlimited goals!</p>
                         </div>
                     </div>
                     <RouterLink to="/pricing">

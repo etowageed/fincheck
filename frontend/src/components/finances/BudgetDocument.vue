@@ -89,13 +89,13 @@
 
         <!-- Suggested Items (Draft Mode) -->
         <div v-if="budget.suggestions && budget.suggestions.length > 0"
-            class="bg-yellow-50 dark:bg-accent-yellow/10 border border-yellow-300 dark:border-accent-yellow/30 rounded-lg p-4 mb-6">
+            class="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/50 rounded-lg p-4 mb-6">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
                 <div class="flex items-center gap-3">
-                    <i class="pi pi-calendar-plus text-2xl text-accent-yellow"></i>
+                    <i class="pi pi-calendar-plus text-2xl text-amber-600 dark:text-amber-400"></i>
                     <div>
-                        <h4 class="font-bold text-primary text-sm">Suggested recurring items</h4>
-                        <p class="text-xs text-secondary mt-1">We found {{ budget.suggestions.length }} recurring items
+                        <h4 class="font-bold text-amber-950 dark:text-amber-200 text-sm">Suggested recurring items</h4>
+                        <p class="text-xs text-amber-800 dark:text-amber-300/90 mt-1 font-medium">We found {{ budget.suggestions.length }} recurring items
                             from
                             your previous month.</p>
                     </div>

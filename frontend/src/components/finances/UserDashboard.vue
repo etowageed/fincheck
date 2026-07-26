@@ -10,12 +10,12 @@
             <div v-if="!isLoading && !error">
                 <!-- Rollover Prompt -->
                 <div v-if="metrics.potentialRollover > 0 && !metrics.rolloverDismissed"
-                    class="bg-yellow-50 dark:bg-accent-yellow/10 border border-yellow-300 dark:border-accent-yellow/30 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+                    class="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/50 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
                     <div class="flex items-center gap-3">
-                        <i class="pi pi-wallet text-2xl text-accent-yellow"></i>
+                        <i class="pi pi-wallet text-2xl text-amber-600 dark:text-amber-400"></i>
                         <div>
-                            <h4 class="font-bold text-primary text-sm">Rollover Available</h4>
-                            <p class="text-xs text-secondary mt-1">You saved {{
+                            <h4 class="font-bold text-amber-950 dark:text-amber-200 text-sm">Rollover Available</h4>
+                            <p class="text-xs text-amber-800 dark:text-amber-300/90 mt-1 font-medium">You saved {{
                                 formatCurrency(metrics.potentialRollover) }} last month. Would you like to roll it over
                                 into this month's budget?</p>
                         </div>

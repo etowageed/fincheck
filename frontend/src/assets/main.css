@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-cream-50: #fdfbf7;
   --color-cream-100: #f7f4eb;
