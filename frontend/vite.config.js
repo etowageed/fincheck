@@ -23,12 +23,7 @@ export default defineConfig({
   server: {
     // 💡 NEW: Allow the host provided by the tunnelling service (e.g., Ngrok)
     // This host needs to be updated every time Ngrok assigns a new URL.
-    allowedHosts: [
-      "twana-uncleft-annually.ngrok-free.dev",
-      "shy-light.outray.app",
-      "localhost",
-      "127.0.0.1",
-    ],
+    allowedHosts: ["localhost", "127.0.0.1"],
     proxy: {
       "/api": {
         target: "http://localhost:5000", // Change to your backend port if different
