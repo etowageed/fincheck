@@ -207,8 +207,7 @@
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <i class="pi pi-star text-xl text-yellow-500"></i>
-                    <h3 class="text-lg font-bold text-primary leading-snug">Your Savings, Investments and Financial
-                        Goals</h3>
+                    <h3 class="text-lg font-bold text-primary leading-snug">Goals, Savings and Investments</h3>
                 </div>
                 <RouterLink to="/goals">
                     <Button label="Manage" icon="pi pi-arrow-right" iconPos="right" size="small" outlined />
