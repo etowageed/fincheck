@@ -1061,27 +1061,64 @@ exports.getAllTransactionsReport = catchAsync(async (req, res, next) => {
   const fromDate = new Date();
   fromDate.setDate(fromDate.getDate() - days);
 
-  // NEW: Get optional category filter
+  // Optional filters
   const categoryId = req.query.category;
+  const typeFilter = req.query.type; // NEW: e.g. ?type=savings
 
   // Build the initial pipeline stages
   const pipeline = [
     { $match: { user: req.user._id } },
     { $unwind: '$transactions' },
     { $match: { 'transactions.date': { $gte: fromDate } } },
-    // 1. Add sort stage before the final projection
-    { $sort: { 'transactions.date': -1 } },
   ];
 
-  // 2. Add category filter if provided
-  if (categoryId) {
-    pipeline.push({
-      $match: { 'transactions.category': categoryId },
-    });
+  // Filter by type if provided (e.g. savings, expense, income)
+  if (typeFilter) {
+    pipeline.push({ $match: { 'transactions.type': typeFilter } });
   }
 
-  // 3. Add the root replacement stage last
+  // Filter by category ID if provided
+  if (categoryId) {
+    pipeline.push({ $match: { 'transactions.category': categoryId } });
+  }
+
+  // Sort by date descending
+  pipeline.push({ $sort: { 'transactions.date': -1 } });
+
+  // Promote transaction fields to root
   pipeline.push({ $replaceRoot: { newRoot: '$transactions' } });
+
+  // Resolve category IDs to names via lookup
+  pipeline.push(
+    {
+      $addFields: {
+        convertedCategoryId: {
+          $convert: {
+            input: '$category',
+            to: 'objectId',
+            onError: null,
+            onNull: null,
+          },
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: 'categories',
+        localField: 'convertedCategoryId',
+        foreignField: '_id',
+        as: 'categoryInfo',
+      },
+    },
+    {
+      $addFields: {
+        categoryName: {
+          $ifNull: [{ $arrayElemAt: ['$categoryInfo.name', 0] }, 'Uncategorized'],
+        },
+      },
+    },
+    { $unset: ['categoryInfo', 'convertedCategoryId'] },
+  );
 
   const transactions = await Finances.aggregate(pipeline);
 

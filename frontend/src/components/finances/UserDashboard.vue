@@ -153,7 +153,7 @@
                                 <span class="text-sm text-secondary">Recurring Expenses</span>
                             </div>
                             <span class="font-semibold text-primary">{{ formatCurrency(metrics.totalRecurringExpenses)
-                                }}</span>
+                            }}</span>
                         </div>
 
                         <div class="flex justify-between items-center p-3 bg-secondary rounded border border-default">
@@ -171,7 +171,7 @@
                                 <span class="text-sm text-secondary">Savings Contributions</span>
                             </div>
                             <span class="font-semibold text-primary">{{ formatCurrency(metrics.savingsTotal)
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
                 </div>
@@ -194,15 +194,16 @@
                                 <span class="text-sm text-secondary">Overall Status</span>
                             </div>
                             <span class="font-medium" :style="{ color: getHealthColor() }">{{ getHealthStatus()
-                                }}</span>
+                            }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Financial Goals -->
+        <!-- Savings, Investments & Goals Card -->
         <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6 mt-6">
+            <!-- Header -->
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <i class="pi pi-star text-xl text-yellow-500"></i>
@@ -213,44 +214,155 @@
                     <Button label="Manage" icon="pi pi-arrow-right" iconPos="right" size="small" outlined />
                 </RouterLink>
             </div>
-            <div v-if="authStore.user?.goals?.length > 0"
-                class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-secondary rounded border border-default p-4">
-                <div class="h-64">
-                    <Doughnut :data="goalsChartData" :options="goalsChartOptions" />
-                </div>
-                <div class="max-h-64 overflow-y-auto pr-2">
-                    <ul class="space-y-3">
-                        <li v-for="(goal, index) in authStore.user.goals" :key="goal._id"
-                            class="flex justify-between items-center text-sm">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full"
-                                    :style="{ backgroundColor: goalsChartData.datasets[0].backgroundColor[index] }"></span>
-                                <span class="text-primary font-semibold">{{ goal.name }}</span>
-                            </div>
-                            <div class="text-right flex flex-col items-end">
-                                <div>
-                                    <span class="font-semibold text-primary">{{ formatCurrency(goal.currentAmount, true)
-                                    }}</span>
-                                    <span class="text-xs text-muted mx-1">/</span>
-                                    <span class="text-xs text-secondary">{{ formatCurrency(goal.targetAmount, true)
-                                    }}</span>
+
+            <!-- Tab switcher -->
+            <div class="flex gap-1 mb-4 bg-secondary rounded-lg p-1 w-fit">
+                <button v-for="tab in savingsTabs" :key="tab.key" @click="activeSavingsTab = tab.key"
+                    class="px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200" :class="activeSavingsTab === tab.key
+                        ? 'bg-accent-blue text-white shadow-sm'
+                        : 'text-secondary hover:text-primary'">
+                    <i :class="tab.icon" class="mr-1.5 text-xs"></i>{{ tab.label }}
+                </button>
+            </div>
+
+            <!-- ─── TAB 1: Goals ─── -->
+            <div v-if="activeSavingsTab === 'goals'">
+                <div v-if="authStore.user?.goals?.length > 0"
+                    class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-secondary rounded border border-default p-4">
+                    <div class="h-64">
+                        <Doughnut :data="goalsChartData" :options="savingsChartOptions" />
+                    </div>
+                    <div class="max-h-64 overflow-y-auto pr-2">
+                        <ul class="space-y-3">
+                            <li v-for="(goal, index) in authStore.user.goals" :key="goal._id"
+                                class="flex justify-between items-center text-sm">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full flex-shrink-0"
+                                        :style="{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }"></span>
+                                    <span class="text-primary font-semibold">{{ goal.name }}</span>
                                 </div>
-                                <span class="text-xs font-bold mt-1"
-                                    :class="goal.currentAmount >= goal.targetAmount ? 'text-accent-green' : 'text-accent-blue'">
-                                    {{ Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100) }}%
-                                    target
-                                </span>
-                            </div>
-                        </li>
-                    </ul>
+                                <div class="text-right flex flex-col items-end ml-4">
+                                    <div>
+                                        <span class="font-semibold text-primary">{{ formatCurrency(goal.currentAmount,
+                                            true) }}</span>
+                                        <span class="text-xs text-muted mx-1">/</span>
+                                        <span class="text-xs text-secondary">{{ formatCurrency(goal.targetAmount, true)
+                                            }}</span>
+                                    </div>
+                                    <!-- Progress bar -->
+                                    <div class="w-24 h-1.5 bg-default rounded-full mt-1 overflow-hidden">
+                                        <div class="h-full rounded-full transition-all duration-500"
+                                            :class="goal.currentAmount >= goal.targetAmount ? 'bg-accent-green' : 'bg-accent-blue'"
+                                            :style="{ width: Math.min((goal.currentAmount / goal.targetAmount) * 100, 100) + '%' }">
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-bold mt-1"
+                                        :class="goal.currentAmount >= goal.targetAmount ? 'text-accent-green' : 'text-accent-blue'">
+                                        {{ Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100) }}%
+                                        target
+                                    </span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div v-else class="text-center py-6 text-secondary bg-secondary rounded border border-default">
+                    <i class="pi pi-star text-2xl mb-2 text-muted"></i>
+                    <p>You haven't set any financial goals yet.</p>
+                    <RouterLink to="/goals">
+                        <Button label="Go to Goals" class="mt-3 btn-cta" />
+                    </RouterLink>
                 </div>
             </div>
-            <div v-else class="text-center py-6 text-secondary bg-secondary rounded border border-default">
-                <i class="pi pi-star text-2xl mb-2 text-muted"></i>
-                <p>You haven't set any financial goals yet.</p>
-                <RouterLink to="/goals">
-                    <Button label="Go to Goals" class="mt-3 btn-cta" />
-                </RouterLink>
+
+            <!-- ─── TAB 2: By Category ─── -->
+            <div v-else-if="activeSavingsTab === 'categories'">
+                <div v-if="isSavingsLoading" class="flex items-center justify-center py-10">
+                    <i class="pi pi-spinner pi-spin text-2xl text-accent-blue"></i>
+                </div>
+                <div v-else-if="categoryChartData.labels.length > 0"
+                    class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-secondary rounded border border-default p-4">
+                    <div class="h-64">
+                        <Doughnut :data="categoryChartData" :options="savingsChartOptions" />
+                    </div>
+                    <div class="max-h-64 overflow-y-auto pr-2">
+                        <p class="text-xs text-muted mb-3">Savings transactions grouped by category (last 365 days)</p>
+                        <ul class="space-y-3">
+                            <li v-for="(label, index) in categoryChartData.labels" :key="label"
+                                class="flex justify-between items-center text-sm">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full flex-shrink-0"
+                                        :style="{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }"></span>
+                                    <span class="text-primary font-semibold">{{ label }}</span>
+                                </div>
+                                <div class="text-right ml-4">
+                                    <span class="font-semibold text-accent-blue">
+                                        {{ formatCurrency(categoryChartData.datasets[0].data[index], true) }}
+                                    </span>
+                                    <span class="text-xs text-muted block">
+                                        {{ Math.round((categoryChartData.datasets[0].data[index] / categoryTotal) * 100)
+                                        }}% of savings
+                                    </span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div v-else class="text-center py-6 text-secondary bg-secondary rounded border border-default">
+                    <i class="pi pi-wallet text-2xl mb-2 text-muted"></i>
+                    <p>No savings or investment transactions recorded yet.</p>
+                    <p class="text-xs text-muted mt-1">Add a transaction with type "Savings &amp; Investments" to see
+                        the breakdown.</p>
+                </div>
+            </div>
+
+            <!-- ─── TAB 3: All Savings ─── -->
+            <div v-else-if="activeSavingsTab === 'all'">
+                <div v-if="isSavingsLoading" class="flex items-center justify-center py-10">
+                    <i class="pi pi-spinner pi-spin text-2xl text-accent-blue"></i>
+                </div>
+                <div v-else class="bg-secondary rounded border border-default p-4">
+                    <!-- Total banner -->
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-default">
+                        <div>
+                            <p class="text-xs text-muted uppercase tracking-wider">Total Saved &amp; Invested (365 days)
+                            </p>
+                            <p class="text-2xl font-bold text-accent-blue mt-1">{{ formatCurrency(categoryTotal, true)
+                                }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-muted uppercase tracking-wider">This Month</p>
+                            <p class="text-xl font-bold text-accent-blue mt-1">{{ formatCurrency(metrics.savingsTotal ||
+                                0, true) }}</p>
+                        </div>
+                    </div>
+                    <!-- Stacked breakdown rows -->
+                    <div v-if="categoryChartData.labels.length > 0" class="space-y-3">
+                        <div v-for="(label, index) in categoryChartData.labels" :key="label">
+                            <div class="flex justify-between items-center text-sm mb-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                        :style="{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }"></span>
+                                    <span class="text-primary">{{ label }}</span>
+                                </div>
+                                <span class="font-semibold text-primary">
+                                    {{ formatCurrency(categoryChartData.datasets[0].data[index], true) }}
+                                </span>
+                            </div>
+                            <!-- Mini progress bar showing proportion of total savings -->
+                            <div class="w-full h-1.5 bg-default rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-700" :style="{
+                                    width: Math.round((categoryChartData.datasets[0].data[index] / categoryTotal) * 100) + '%',
+                                    backgroundColor: CHART_COLORS[index % CHART_COLORS.length]
+                                }">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p v-else class="text-secondary text-sm text-center py-4">
+                        No savings transactions in the last 365 days.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -277,46 +389,95 @@ const isLoading = ref(true);
 const error = ref('');
 const isRollingOver = ref(false);
 
-const goalsChartData = computed(() => {
-    const goals = authStore.user?.goals || [];
-    const colors = [
-        '#4A90E2', '#50E3C2', '#F5A623', '#F8E71C', '#BD10E0',
-        '#9013FE', '#417505', '#D0021B', '#B8E986', '#7ED321'
-    ];
-    return {
-        labels: goals.map(g => g.name),
-        datasets: [
-            {
-                backgroundColor: goals.map((_, i) => colors[i % colors.length]),
-                data: goals.map(g => g.currentAmount)
-            }
-        ]
-    };
-});
+// ── Shared colour palette ──────────────────────────────────────────────────
+const CHART_COLORS = [
+    '#60A5FA', '#34D399', '#F59E0B', '#A78BFA', '#F87171',
+    '#22D3EE', '#FB923C', '#4ADE80', '#E879F9', '#FACC15'
+];
 
-const goalsChartOptions = ref({
+// ── Shared chart options ───────────────────────────────────────────────────
+const savingsChartOptions = computed(() => ({
     responsive: true,
     maintainAspectRatio: false,
+    cutout: '68%',
     plugins: {
-        legend: {
-            display: false
-        },
+        legend: { display: false },
         tooltip: {
             callbacks: {
-                label: function (context) {
-                    let label = context.label || '';
-                    if (label) {
-                        label += ': ';
-                    }
-                    if (context.parsed !== null) {
-                        label += formatCurrency(context.parsed, true);
-                    }
+                label(context) {
+                    let label = context.label ? context.label + ': ' : '';
+                    if (context.parsed !== null) label += formatCurrency(context.parsed, true);
                     return label;
                 }
             }
         }
     }
+}));
+
+// ── Tab config ─────────────────────────────────────────────────────────────
+const savingsTabs = [
+    { key: 'goals', label: 'Goals', icon: 'pi pi-star' },
+    { key: 'categories', label: 'By Category', icon: 'pi pi-tag' },
+    { key: 'all', label: 'All Savings/Investments', icon: 'pi pi-wallet' },
+];
+const activeSavingsTab = ref('goals');
+
+// ── Goals chart data (unchanged logic) ────────────────────────────────────
+const goalsChartData = computed(() => {
+    const goals = authStore.user?.goals || [];
+    return {
+        labels: goals.map(g => g.name),
+        datasets: [{
+            backgroundColor: goals.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+            data: goals.map(g => g.currentAmount)
+        }]
+    };
 });
+
+// ── Category savings data ──────────────────────────────────────────────────
+const isSavingsLoading = ref(false);
+const savingsByCategory = ref({}); // { categoryName: totalAmount }
+
+const categoryChartData = computed(() => {
+    const entries = Object.entries(savingsByCategory.value)
+        .filter(([, v]) => v > 0)
+        .sort(([, a], [, b]) => b - a);
+    return {
+        labels: entries.map(([k]) => k),
+        datasets: [{
+            backgroundColor: entries.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]),
+            data: entries.map(([, v]) => v)
+        }]
+    };
+});
+
+const categoryTotal = computed(() =>
+    Object.values(savingsByCategory.value).reduce((s, v) => s + v, 0)
+);
+
+const loadSavingsByCategory = async () => {
+    isSavingsLoading.value = true;
+    try {
+        const res = await FinanceService.getAllTransactions({ days: 365, type: 'savings' });
+        if (res.status === 'success' && Array.isArray(res.data)) {
+            // The backend now resolves category IDs to names via $lookup and
+            // returns tx.categoryName on every transaction.
+            const grouped = {};
+            res.data.forEach(tx => {
+                const key = tx.categoryName || 'Uncategorized';
+                grouped[key] = (grouped[key] || 0) + (tx.amount || 0);
+            });
+            savingsByCategory.value = grouped;
+        }
+    } catch (err) {
+        console.warn('Could not load savings by category', err);
+    } finally {
+        isSavingsLoading.value = false;
+    }
+};
+
+// Remove the old standalone goalsChartOptions — replaced by savingsChartOptions
+
 
 const handleRollover = async (accept) => {
     isRollingOver.value = true;
@@ -445,5 +606,6 @@ const getHealthIcon = () => {
 
 onMounted(() => {
     loadMetrics();
+    loadSavingsByCategory();
 });
 </script>
