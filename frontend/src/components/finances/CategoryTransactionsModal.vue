@@ -18,7 +18,7 @@
                 </div>
                 <div class="text-right">
                     <p class="font-semibold text-lg"
-                        :class="tx.type === 'income' ? 'text-accent-green' : 'text-accent-red'">
+                        :class="tx.type === 'income' ? 'text-accent-green' : tx.type === 'savings' ? 'text-accent-blue' : 'text-accent-red'">
                         {{ formatCurrency(tx.amount, true) }}
                     </p>
                 </div>

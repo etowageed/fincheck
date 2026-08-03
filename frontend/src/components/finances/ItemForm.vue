@@ -24,6 +24,9 @@
                         optionValue="value" placeholder="Select transaction type" :disabled="isLoading"
                         :class="{ 'p-invalid': errors.type }" />
                     <small v-if="errors.type" class="p-error">{{ errors.type }}</small>
+                    <small v-if="formData.type === 'savings'" class="text-accent-blue">
+                        Use this for money moved into savings accounts, ISAs, investment accounts, or financial goals.
+                    </small>
                 </div>
 
                 <div v-if="formType === 'transaction' && formData.type === 'savings'" class="flex flex-col gap-2">
@@ -264,7 +267,7 @@ const formData = ref(getInitialFormData());
 const transactionTypes = [
     { label: 'Income', value: 'income' },
     { label: 'Expense', value: 'expense' },
-    { label: 'Savings Contribution', value: 'savings' }
+    { label: 'Savings & Investments', value: 'savings' }
 ];
 
 const minDateRange = computed(() => {

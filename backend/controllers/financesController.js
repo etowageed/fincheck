@@ -753,12 +753,29 @@ exports.getMonthlyTrends = catchAsync(async (req, res, next) => {
             ],
           },
         },
+        totalSavings: {
+          $sum: {
+            $cond: [
+              { $eq: ['$transactions.type', 'savings'] },
+              '$transactions.amount',
+              0,
+            ],
+          },
+        },
       },
     },
-    // 5. Add a field for net savings
+    // 5. Add derived fields:
+    //    - netSavings: income - expenses (surplus/cashflow) — PRESERVED for backwards compat
+    //    - availableCash: income - expenses - savings (actual cash remaining)
     {
       $addFields: {
         netSavings: { $subtract: ['$totalIncome', '$totalExpenses'] },
+        availableCash: {
+          $subtract: [
+            { $subtract: ['$totalIncome', '$totalExpenses'] },
+            '$totalSavings',
+          ],
+        },
       },
     },
     // 6. Sort the results chronologically
@@ -774,7 +791,9 @@ exports.getMonthlyTrends = catchAsync(async (req, res, next) => {
         day: '$_id.day', // will be null if grouped by month
         totalIncome: 1,
         totalExpenses: 1,
-        netSavings: 1,
+        totalSavings: 1,
+        netSavings: 1, // backwards-compat: income - expenses (surplus)
+        availableCash: 1, // income - expenses - savings
       },
     },
   ]);

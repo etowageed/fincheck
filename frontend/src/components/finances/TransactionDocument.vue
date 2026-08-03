@@ -7,7 +7,7 @@
                 <Button label="Export Transactions" icon="pi pi-download" severity="secondary" size="small"
                     @click="showExportModal = true" />
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                     <p class="text-sm text-muted">Total Transactions</p>
                     <p class="font-medium text-primary">{{ transactionsStore.recentTransactions.length }}</p>
@@ -18,8 +18,11 @@
                 </div>
                 <div>
                     <p class="text-sm text-muted">Total Expenses</p>
-                    <p class="font-medium text-accent-red">{{ formatCurrency(transactionsStore.totalExpenses) }}
-                    </p>
+                    <p class="font-medium text-accent-red">{{ formatCurrency(transactionsStore.totalExpenses) }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-muted">Saved or Invested</p>
+                    <p class="font-medium text-accent-blue">{{ formatCurrency(transactionsStore.totalSavings) }}</p>
                 </div>
             </div>
         </div>
@@ -199,7 +202,14 @@ const getTypeClass = (type) => {
 };
 
 const getAmountClass = (amount, type) => {
-    return type === 'income' ? 'text-accent-green' : 'text-accent-red';
+    switch (type) {
+        case 'income':
+            return 'text-accent-green';
+        case 'savings':
+            return 'text-accent-blue';
+        default:
+            return 'text-accent-red'; // expense
+    }
 };
 
 // Action handlers

@@ -76,7 +76,7 @@ const fetchTrends = async () => {
 
         const response = await FinanceService.getMonthlyTrends(params);
         if (response.status === 'success' && response.data) {
-            let labels, incomeData, expensesData, savingsData;
+            let labels, incomeData, expensesData, savingsData, availableCashData;
 
             // If viewing the current month, build a full monthly calendar view
             if (params.period === 'currentMonth') {
@@ -92,6 +92,7 @@ const fetchTrends = async () => {
                 incomeData = Array(daysInMonth).fill(0);
                 expensesData = Array(daysInMonth).fill(0);
                 savingsData = Array(daysInMonth).fill(0);
+                availableCashData = Array(daysInMonth).fill(0);
 
                 for (let i = 0; i < daysInMonth; i++) {
                     const day = i + 1;
@@ -99,7 +100,8 @@ const fetchTrends = async () => {
                         const dayData = dataMap.get(day);
                         incomeData[i] = dayData.totalIncome;
                         expensesData[i] = dayData.totalExpenses;
-                        savingsData[i] = dayData.netSavings;
+                        savingsData[i] = dayData.totalSavings || 0;
+                        availableCashData[i] = dayData.availableCash ?? dayData.netSavings;
                     }
                 }
             } else {
@@ -109,33 +111,41 @@ const fetchTrends = async () => {
                     : response.data.map(d => `${monthNames[d.month - 1]} ${d.year}`);
                 incomeData = response.data.map(d => d.totalIncome);
                 expensesData = response.data.map(d => d.totalExpenses);
-                savingsData = response.data.map(d => d.netSavings);
+                savingsData = response.data.map(d => d.totalSavings || 0);
+                availableCashData = response.data.map(d => d.availableCash ?? d.netSavings);
             }
 
             chartData.value = {
                 labels,
                 datasets: [
                     {
-                        label: 'Total Income',
+                        label: 'Income',
                         backgroundColor: 'rgba(74, 222, 128, 0.5)',
                         borderColor: 'rgb(22, 163, 74)',
                         data: incomeData,
                         tension: 0.1,
                     },
                     {
-                        label: 'Total Expenses',
+                        label: 'Expenses',
                         backgroundColor: 'rgba(248, 113, 113, 0.5)',
                         borderColor: 'rgb(220, 38, 38)',
                         data: expensesData,
                         tension: 0.1,
                     },
                     {
-                        label: 'Net Savings',
-                        backgroundColor: 'rgba(96, 165, 250, 0.5)',
+                        label: 'Saved & Invested',
+                        backgroundColor: 'rgba(96, 165, 250, 0.4)',
                         borderColor: 'rgb(37, 99, 235)',
                         data: savingsData,
                         tension: 0.1,
-                    }
+                    },
+                    {
+                        label: 'Available Cash',
+                        backgroundColor: 'rgba(167, 139, 250, 0.4)',
+                        borderColor: 'rgb(124, 58, 237)',
+                        data: availableCashData,
+                        tension: 0.1,
+                    },
                 ],
             };
         }

@@ -73,6 +73,19 @@
                 <div class="bg-secondary rounded-lg p-4 border border-default">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
+                            <i class="pi pi-wallet text-accent-blue"></i>
+                            <span class="text-sm font-medium text-secondary">Saved or Invested</span>
+                        </div>
+                        <span :class="getComparisonDisplay('savingsTotal').class" class="text-xs font-medium">
+                            {{ getComparisonDisplay('savingsTotal').text }}
+                        </span>
+                    </div>
+                    <p class="text-2xl font-bold text-accent-blue">{{ formatCurrency(metrics.savingsTotal) }}</p>
+                </div>
+
+                <div class="bg-secondary rounded-lg p-4 border border-default">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
                             <i class="pi pi-calendar text-primary"></i>
                             <span class="text-sm font-medium text-secondary">This Month's Budget</span>
                         </div>
@@ -193,13 +206,15 @@
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <i class="pi pi-star text-xl text-yellow-500"></i>
-                    <h3 class="text-lg font-bold text-primary leading-snug">Your Financial Goals</h3>
+                    <h3 class="text-lg font-bold text-primary leading-snug">Your Savings, Investments and Financial
+                        Goals</h3>
                 </div>
                 <RouterLink to="/goals">
                     <Button label="Manage" icon="pi pi-arrow-right" iconPos="right" size="small" outlined />
                 </RouterLink>
             </div>
-            <div v-if="authStore.user?.goals?.length > 0" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-secondary rounded border border-default p-4">
+            <div v-if="authStore.user?.goals?.length > 0"
+                class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-secondary rounded border border-default p-4">
                 <div class="h-64">
                     <Doughnut :data="goalsChartData" :options="goalsChartOptions" />
                 </div>
@@ -214,13 +229,16 @@
                             </div>
                             <div class="text-right flex flex-col items-end">
                                 <div>
-                                    <span class="font-semibold text-primary">{{ formatCurrency(goal.currentAmount, true) }}</span>
+                                    <span class="font-semibold text-primary">{{ formatCurrency(goal.currentAmount, true)
+                                    }}</span>
                                     <span class="text-xs text-muted mx-1">/</span>
-                                    <span class="text-xs text-secondary">{{ formatCurrency(goal.targetAmount, true) }}</span>
+                                    <span class="text-xs text-secondary">{{ formatCurrency(goal.targetAmount, true)
+                                    }}</span>
                                 </div>
                                 <span class="text-xs font-bold mt-1"
                                     :class="goal.currentAmount >= goal.targetAmount ? 'text-accent-green' : 'text-accent-blue'">
-                                    {{ Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100) }}% target
+                                    {{ Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100) }}%
+                                    target
                                 </span>
                             </div>
                         </li>

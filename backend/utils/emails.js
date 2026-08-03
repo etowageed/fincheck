@@ -121,6 +121,7 @@ class EmailService {
     endOfWeek,
     totalIncome,
     totalExpenses,
+    totalSavings = 0,
     percentUsed,
     comparisonText,
   }) {
@@ -130,6 +131,11 @@ class EmailService {
     });
 
     const expensesFormatted = formatCurrency(totalExpenses, {
+      preferredLocale: this.user?.preferredLocale,
+      preferredCurrency: this.user?.preferredCurrency,
+    });
+
+    const savingsFormatted = formatCurrency(totalSavings, {
       preferredLocale: this.user?.preferredLocale,
       preferredCurrency: this.user?.preferredCurrency,
     });
@@ -144,6 +150,7 @@ class EmailService {
       endOfWeek: endOfWeek.toDateString(),
       incomeFormatted,
       expensesFormatted,
+      savingsFormatted,
       percentUsed: Math.round(percentUsed),
       comparisonText,
       friendlyComment,

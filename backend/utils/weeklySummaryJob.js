@@ -41,6 +41,10 @@ const sendWeeklySummaries = async () => {
       .filter((tx) => tx.type === 'expense')
       .reduce((sum, tx) => sum + tx.amount, 0);
 
+    const totalSavings = weeklyTransactions
+      .filter((tx) => tx.type === 'savings')
+      .reduce((sum, tx) => sum + tx.amount, 0);
+
     const prevStartOfWeek = new Date(startOfWeek);
     prevStartOfWeek.setDate(prevStartOfWeek.getDate() - 7);
     const prevEndOfWeek = new Date(endOfWeek);
@@ -74,6 +78,7 @@ const sendWeeklySummaries = async () => {
       endOfWeek,
       totalIncome,
       totalExpenses,
+      totalSavings,
       percentUsed,
       comparisonText,
     });

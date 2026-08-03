@@ -307,10 +307,10 @@ exports.generateReport = catchAsync(async (req, res, next) => {
     );
   }
 
-  if (!['transactions', 'budget', 'all', 'income', 'expense'].includes(type)) {
+  if (!['transactions', 'budget', 'all', 'income', 'expense', 'savings'].includes(type)) {
     return next(
       new AppError(
-        'Invalid content type. Use ?type=transactions, ?type=budget, ?type=income, ?type=expense or ?type=all',
+        'Invalid content type. Use ?type=transactions, ?type=budget, ?type=income, ?type=expense, ?type=savings or ?type=all',
         400,
       ),
     );
@@ -334,13 +334,15 @@ exports.generateReport = catchAsync(async (req, res, next) => {
     budget: [],
   };
 
-  // 1. Collect Transactions/Income/Expense
+  // 1. Collect Transactions/Income/Expense/Savings
   if (type === 'transactions' || type === 'all') {
     data.transactions = _processTransactions(documents, 'all');
   } else if (type === 'income') {
     data.transactions = _processTransactions(documents, 'income');
   } else if (type === 'expense') {
     data.transactions = _processTransactions(documents, 'expense');
+  } else if (type === 'savings') {
+    data.transactions = _processTransactions(documents, 'savings');
   }
 
   // 2. Collect Budget Items (if requested)

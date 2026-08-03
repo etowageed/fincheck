@@ -83,7 +83,7 @@ const props = defineProps({
     defaultType: {
         type: String,
         default: 'all',
-        validator: (value) => ['transactions', 'budget', 'income', 'expense', 'all'].includes(value)
+        validator: (value) => ['transactions', 'budget', 'income', 'expense', 'savings', 'all'].includes(value)
     },
     /**
      * The label for the button that opens the modal (used by the parent).
@@ -123,6 +123,7 @@ const typeOptions = computed(() => {
             { label: 'Transactions (All)', value: 'transactions' },
             { label: 'Income Only', value: 'income' },
             { label: 'Expenses Only', value: 'expense' },
+            { label: 'Savings & Investments Only', value: 'savings' },
             { label: 'Budget Items Only', value: 'budget' },
         ];
     } else if (props.defaultType === 'transactions') {
@@ -130,11 +131,12 @@ const typeOptions = computed(() => {
             { label: 'All Transactions', value: 'transactions' },
             { label: 'Income Only', value: 'income' },
             { label: 'Expenses Only', value: 'expense' },
+            { label: 'Savings & Investments Only', value: 'savings' },
         ];
     } else if (props.defaultType === 'budget') {
         return [{ label: 'Budget Items Only', value: 'budget' }];
     }
-    // Fallback for income/expense only pages if they are ever created
+    // Fallback for income/expense/savings only pages if they are ever created
     return [{ label: 'Selected Data Type', value: props.defaultType }];
 });
 

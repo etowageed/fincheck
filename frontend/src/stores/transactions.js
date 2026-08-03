@@ -21,13 +21,39 @@ export const useTransactionsStore = defineStore("transactions", () => {
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
   });
 
+  // Expenses only — savings are NOT included here
   const totalExpenses = computed(() => {
     return transactions.value
-      .filter((t) => t.type === "expense" || t.type === "savings")
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+      .filter((t) => t.type === "expense")
+      .reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
   });
 
-  const netTotal = computed(() => totalIncome.value - totalExpenses.value);
+  // Savings / investment contributions only
+  const totalSavings = computed(() => {
+    return transactions.value
+      .filter((t) => t.type === "savings")
+      .reduce((sum, t) => sum + Math.abs(Number(t.amount) || 0), 0);
+  });
+
+  // Total cash leaving the account (expenses + savings)
+  const totalOutflow = computed(
+    () => totalExpenses.value + totalSavings.value
+  );
+
+  // How much income remains after expenses, before saving anything
+  const surplusBeforeSavings = computed(
+    () => totalIncome.value - totalExpenses.value
+  );
+
+  // Cash actually available after all outflows
+  const availableCash = computed(
+    () => totalIncome.value - totalExpenses.value - totalSavings.value
+  );
+
+  // Backwards-compatible alias — previously was income - (expenses + savings),
+  // which is numerically identical to availableCash now that totalExpenses is
+  // correctly expenses-only. Prefer availableCash for new code.
+  const netTotal = computed(() => availableCash.value);
 
   // MODIFIED: This action now accepts a 'days' parameter
   const fetchTransactions = async (params = { days: 30 }) => {
@@ -87,7 +113,11 @@ export const useTransactionsStore = defineStore("transactions", () => {
     recentTransactions,
     totalIncome,
     totalExpenses,
-    netTotal,
+    totalSavings,
+    totalOutflow,
+    surplusBeforeSavings,
+    availableCash,
+    netTotal, // backwards-compatible alias for availableCash
     fetchTransactions,
     addTransaction,
     updateTransaction,
