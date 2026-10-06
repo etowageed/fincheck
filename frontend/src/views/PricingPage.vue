@@ -1,77 +1,109 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-tertiary">
-        <div class="max-w-xl mx-auto p-8 bg-primary shadow rounded-lg text-center space-y-6 border border-default">
-            <h1 class="text-3xl font-bold text-accent-blue">Plete Finance Premium</h1>
-            <p class="text-lg text-secondary">Unlock unlimited access to your financial data!</p>
+    <div class="min-h-screen flex items-center justify-center bg-tertiary py-12 px-4">
+        <div class="max-w-2xl mx-auto p-8 bg-primary shadow rounded-2xl text-center space-y-6 border border-default">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-accent-blue border border-blue-200 dark:border-blue-800">
+                <i class="pi pi-sparkles text-amber-500"></i> Google Gemini Powered
+            </div>
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Plete Finance Plans</h1>
+            <p class="text-base text-secondary">Compare Free vs Premium plans and unlock unlimited AI financial intelligence.</p>
 
             <!-- Status Indicator -->
             <Message v-if="authStore.isPremium" severity="success" :closable="false">
-                🎉 You are currently a **Premium** user! Thank you for your support.
+                🎉 You are currently a **Premium** subscriber! Thank you for your support.
             </Message>
             <Message v-else-if="authStore.isAuthenticated" severity="info" :closable="false">
-                Switch to Premium to enjoy unlimited access to your financial data!
+                Upgrade to Premium to unlock unlimited AI entries, receipt scans, financial forecasts, and 10+ year data history!
             </Message>
 
-            <div class="grid grid-cols-1 gap-4 text-left">
-                <div class="p-4 border border-default rounded-lg bg-blue-50 dark:bg-blue-950/30">
-                    <h3 class="font-semibold text-accent-blue mb-2">Premium Tier - Unlock Everything</h3>
-                    <ul class="text-sm text-secondary space-y-2 mb-4">
-                        <li class="flex items-center gap-2"><i class="pi pi-check text-accent-green"></i> Unlimited
-                            Historical Data (10+ Years)</li>
-                        <li class="flex items-center gap-2"><i class="pi pi-check text-accent-green"></i> **Unlimited
-                            Data Export** (PDF/Excel)</li>
-                        <li class="flex items-center gap-2"><i class="pi pi-check text-accent-green"></i> Comprehensive
-                            Dashboard Metrics</li>
-                        <li class="flex items-center gap-2"><i class="pi pi-check text-accent-green"></i> Priority
-                            Support</li>
-                    </ul>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left pt-2">
+                <!-- Premium Card -->
+                <div class="p-6 border-2 border-accent-blue rounded-2xl bg-blue-50/40 dark:bg-blue-950/30 flex flex-col justify-between relative shadow-sm">
+                    <div class="absolute -top-3 right-4 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-accent-blue text-white">
+                        Recommended
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-accent-blue mb-1">Premium Tier</h3>
+                        <p class="text-xs text-secondary mb-4">Unlimited standard usage across all features.</p>
+                        <ul class="text-xs text-secondary space-y-2.5 mb-6">
+                            <li class="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
+                                <i class="pi pi-check text-emerald-500 font-bold"></i> Unlimited AI Quick-Log Entries
+                            </li>
+                            <li class="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
+                                <i class="pi pi-check text-emerald-500 font-bold"></i> Unlimited Receipt & Note Scans
+                            </li>
+                            <li class="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
+                                <i class="pi pi-check text-emerald-500 font-bold"></i> Unlimited AI Coach & Ask Plete
+                            </li>
+                            <li class="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
+                                <i class="pi pi-check text-emerald-500 font-bold"></i> Budget Forecasts & Scenarios
+                            </li>
+                            <li class="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
+                                <i class="pi pi-check text-emerald-500 font-bold"></i> Unlimited History (10+ Years)
+                            </li>
+                            <li class="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
+                                <i class="pi pi-check text-emerald-500 font-bold"></i> Data Export (PDF/Excel)
+                            </li>
+                        </ul>
+                    </div>
 
-                    <Button :label="authStore.isPremium ? 'Manage Subscription' : 'Upgrade Now'" icon="pi pi-bolt"
-                        size="large" class="w-full" :loading="isLoading"
+                    <Button :label="authStore.isPremium ? 'Manage Subscription' : 'Upgrade to Premium'" icon="pi pi-bolt"
+                        size="large" class="w-full font-semibold" :loading="isLoading"
                         :disabled="!authStore.isAuthenticated || isLoading"
                         @click="handleUpgrade" />
-                    <p v-if="!authStore.isAuthenticated" class="text-xs text-muted mt-2">Please log in to upgrade.</p>
                 </div>
 
-                <div class="p-4 border border-default rounded-lg">
-                    <h3 class="font-semibold text-primary mb-2">Free Tier</h3>
-                    <ul class="text-sm text-secondary space-y-1">
-                        <li class="flex items-center gap-2"><i class="pi pi-check text-accent-green"></i> Transaction
-                            tracking (Current Month Only)</li>
-                        <li class="flex items-center gap-2"><i class="pi pi-check text-accent-green"></i> Basic
-                            Budgeting</li>
-                        <li class="flex items-center gap-2"><i class="pi pi-times text-accent-red"></i> Restricted
-                            Historical Trends</li>
-                        <li class="flex items-center gap-2"><i class="pi pi-times text-accent-red"></i> No Data Export
-                        </li>
-                    </ul>
+                <!-- Free Card -->
+                <div class="p-6 border border-default rounded-2xl bg-primary flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-1">Free Tier</h3>
+                        <p class="text-xs text-secondary mb-4">Generous monthly allowances renewed automatically.</p>
+                        <ul class="text-xs text-secondary space-y-2.5 mb-6">
+                            <li class="flex items-center gap-2">
+                                <i class="pi pi-check text-emerald-500"></i> 15 AI Quick-Logs / month
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <i class="pi pi-check text-emerald-500"></i> 3 Receipt Scans / month
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <i class="pi pi-check text-emerald-500"></i> 3 AI Coach Questions / month
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <i class="pi pi-check text-emerald-500"></i> 5 Ask Plete Messages / month
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <i class="pi pi-check text-emerald-500"></i> 1 Forecast & 2 Simulations / month
+                            </li>
+                            <li class="flex items-center gap-2 text-muted">
+                                <i class="pi pi-times text-rose-400"></i> Current Month Data View Only
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="text-xs text-secondary text-center p-3 rounded-xl bg-secondary border border-default font-medium">
+                        Always free with monthly limits
+                    </div>
                 </div>
             </div>
 
-
-            <router-link to="/transactions" class="text-sm text-accent-blue hover:text-blue-800 ">
-                Back to my dashboard
-            </router-link>
+            <div class="pt-4">
+                <router-link to="/dashboard" class="text-xs font-semibold text-accent-blue hover:underline">
+                    &larr; Back to Dashboard
+                </router-link>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from 'primevue/usetoast';
 
-const router = useRouter();
-const route = useRoute();
 const authStore = useAuthStore();
 const toast = useToast();
-
 const isLoading = ref(false);
 
 const handleUpgrade = async () => {
-    // If user is already premium, route them to the Customer Portal
     if (authStore.isPremium) {
         isLoading.value = true;
         try {
@@ -80,8 +112,7 @@ const handleUpgrade = async () => {
                 {},
                 { withCredentials: true }
             );
-            
-            if (response.data.portalUrl) {
+            if (response.data?.portalUrl) {
                 window.location.href = response.data.portalUrl;
             } else {
                 throw new Error("Did not receive a valid portal URL.");
@@ -91,8 +122,8 @@ const handleUpgrade = async () => {
             toast.add({
                 severity: 'error',
                 summary: 'Access Failed',
-                detail: error.response?.data?.message || 'Failed to access subscription portal. Please try again.',
-                life: 5000
+                detail: error.response?.data?.message || 'Failed to access subscription portal.',
+                life: 5000,
             });
         } finally {
             isLoading.value = false;
@@ -101,19 +132,14 @@ const handleUpgrade = async () => {
     }
 
     isLoading.value = true;
-
     try {
-        // Call the backend endpoint to create the session
         const response = await axios.post(
             `${import.meta.env.VITE_API_BASE_URL}/payment/checkout`,
             {},
             { withCredentials: true }
         );
-
-        const sessionUrl = response.data.sessionUrl;
-
+        const sessionUrl = response.data?.sessionUrl;
         if (sessionUrl) {
-            // Redirect the user to the checkout page
             window.location.href = sessionUrl;
         } else {
             throw new Error("Did not receive a valid session URL.");
@@ -123,15 +149,11 @@ const handleUpgrade = async () => {
         toast.add({
             severity: 'error',
             summary: 'Upgrade Failed',
-            detail: error.response?.data?.message || 'Failed to initiate payment. Please try again.',
-            life: 5000
+            detail: error.response?.data?.message || 'Failed to initiate checkout.',
+            life: 5000,
         });
     } finally {
         isLoading.value = false;
     }
 };
-
-onMounted(() => {
-    // Logic for payment success/cancel redirection is now handled in TransactionsPage.vue
-});
 </script>

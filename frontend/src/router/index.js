@@ -103,6 +103,17 @@ const routes = [
     },
   },
   {
+    path: "/ai-coach",
+    name: "AiCoach",
+    component: () => import("@/views/AiFinancialCoachPage.vue"),
+    meta: {
+      requiresAuth: true,
+      title: "AI Financial Coach — Plete Finance",
+      description:
+        "AI-powered financial insights, budget forecasts, savings simulations, and coaching.",
+    },
+  },
+  {
     path: "/settings",
     name: "Settings",
     component: () => import("@/views/SettingsPage.vue"),

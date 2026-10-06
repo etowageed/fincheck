@@ -81,7 +81,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.DATABASE,
+      clientPromise: mongoose.connection
+        .asPromise()
+        .then((conn) => conn.getClient()),
       ttl: 24 * 60 * 60, // 1 day
     }),
     cookie: {
@@ -123,6 +125,7 @@ const userRouter = require('./routes/userRoutes');
 const financesRouter = require('./routes/financesRoutes');
 const categoryRouter = require('./routes/categoryRoutes');
 const paymentRouter = require('./routes/paymentRoutes');
+const aiRouter = require('./routes/aiRoutes');
 
 // 4.1 Webhook Body Parser: Must run BEFORE express.json()
 // This middleware processes the raw body for the Polar webhook route only.
@@ -153,6 +156,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/finances', financesRouter);
 app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/payment', paymentRouter);
+app.use('/api/v1/ai', aiRouter);
 
 // Handle undefined routes
 app.all('/{*any}', (req, res, next) => {

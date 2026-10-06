@@ -48,6 +48,13 @@
                         Goals
                     </RouterLink>
 
+                    <RouterLink to="/ai-coach"
+                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
+                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
+                        <i class="pi pi-sparkles text-amber-500 mr-3"></i>
+                        AI Coach & Suite
+                    </RouterLink>
+
                     <RouterLink v-if="isAdmin" to="/admin"
                         class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
                         active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest tests/aiQuota.test.js --forceExit",
     "start": "nodemon server.js",
     "dev": "nodemon server.js",
     "start:prod": "NODE_ENV=production node server.js",
@@ -15,6 +15,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/genai": "^2.27.0",
     "@polar-sh/sdk": "^0.42.2",
     "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
@@ -36,6 +37,7 @@
     "mongodb": "^6.15.0",
     "mongoose": "^8.13.2",
     "morgan": "^1.10.0",
+    "multer": "^2.4.0",
     "node-cron": "^3.0.3",
     "nodemailer": "^7.0.3",
     "passport": "^0.7.0",
@@ -50,6 +52,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
+    "jest": "^30.5.2",
     "mongodb-memory-server": "^10.1.4",
     "nodemon": "^3.1.9",
     "supertest": "^7.1.1"

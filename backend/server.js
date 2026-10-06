@@ -19,7 +19,9 @@ process.on('uncaughtException', (err) => {
 
 // MongoDB connection
 mongoose
-  .connect(process.env.DATABASE)
+  .connect(process.env.DATABASE, {
+    serverSelectionTimeoutMS: 10000,
+  })
   .then(() => {
     console.log('DB connection successful');
     server = app.listen(PORT, () => {
@@ -27,7 +29,12 @@ mongoose
     });
   })
   .catch((err) => {
-    console.error('DB connection error:', err);
+    console.error('❌ DB Connection Error:', err.message);
+    if (err.name === 'MongoServerSelectionError' || err.message.includes('tlsv1 alert')) {
+      console.error(
+        '👉 IP Whitelist Check: Please ensure your current IP address is whitelisted in MongoDB Atlas Network Access (https://cloud.mongodb.com).'
+      );
+    }
   });
 
 // Handle unhandled promise rejections (async errors)

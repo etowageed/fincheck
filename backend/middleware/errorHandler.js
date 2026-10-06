@@ -28,7 +28,21 @@ const handleJWTError = () =>
 const handleJWTExpiredError = () =>
   new AppError('Your token has expired! Please log in again.', 401);
 
+const handleMongoConnectionError = () =>
+  new AppError(
+    'Database Connection Error: Unable to reach MongoDB. Please check your internet connection or verify your IP address is whitelisted in MongoDB Atlas Network Access.',
+    500
+  );
+
 const sendErrorDev = (err, res) => {
+  if (err.name === 'MongoServerSelectionError' || (err.message && err.message.includes('tlsv1 alert'))) {
+    const customErr = handleMongoConnectionError();
+    return res.status(500).json({
+      status: 'error',
+      message: customErr.message,
+      error: err,
+    });
+  }
   res.status(err.statusCode).json({
     status: err.status,
     error: err,
@@ -84,6 +98,8 @@ module.exports = (err, req, res, next) => {
     } else if (error.name === 'TokenExpiredError') {
       // JWT expired token
       error = handleJWTExpiredError();
+    } else if (error.name === 'MongoServerSelectionError' || (error.message && error.message.includes('tlsv1 alert'))) {
+      error = handleMongoConnectionError();
     }
 
     sendErrorProd(error, res);
