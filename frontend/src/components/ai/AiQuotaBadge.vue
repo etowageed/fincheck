@@ -10,11 +10,15 @@
     <button
       v-if="!quota.isPremium && showUpgradeBtn"
       @click.stop="$emit('open-upgrade')"
-      class="ml-1 underline hover:text-blue-900 dark:hover:text-blue-100 transition-colors"
+      class="ml-1 underline font-semibold hover:text-blue-900 dark:hover:text-blue-100 transition-colors cursor-pointer"
       title="Upgrade to Premium"
     >
       Upgrade
     </button>
+  </div>
+  <div v-else-if="loading" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-secondary border border-default animate-pulse">
+    <i class="pi pi-spin pi-spinner text-accent-blue"></i>
+    <span>Loading quota...</span>
   </div>
 </template>
 
@@ -31,6 +35,10 @@ defineProps({
   showUpgradeBtn: {
     type: Boolean,
     default: true,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
   },
 });
 

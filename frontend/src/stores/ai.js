@@ -66,9 +66,15 @@ export const useAiStore = defineStore('ai', {
 
     handleQuotaExhaustedError(err, featureKey) {
       if (err.response?.status === 403 && err.response?.data?.code === 'QUOTA_EXHAUSTED') {
-        this.exhaustedFeatureKey = featureKey;
-        this.showUpgradePromptModal = true;
+        this.openUpgradeModal(featureKey);
       }
+    },
+
+    openUpgradeModal(featureKey = null) {
+      if (featureKey) {
+        this.exhaustedFeatureKey = featureKey;
+      }
+      this.showUpgradePromptModal = true;
     },
 
     async submitQuickLog(text) {

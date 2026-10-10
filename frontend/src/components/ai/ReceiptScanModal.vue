@@ -7,9 +7,21 @@
     :dismissableMask="true"
   >
     <div class="space-y-4 py-1">
-      <div class="flex items-center justify-between text-xs text-secondary">
+      <!-- AI Quota Counter Banner -->
+      <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-secondary border border-default rounded-xl text-xs">
+        <div class="flex items-center gap-2 text-secondary font-medium">
+          <i class="pi pi-bolt text-amber-500"></i>
+          <span>AI Receipt Scan Usage</span>
+        </div>
+        <AiQuotaBadge
+          :quota="quota"
+          :loading="aiStore.isLoadingQuota"
+          @open-upgrade="aiStore.openUpgradeModal('receiptScan')"
+        />
+      </div>
+
+      <div class="text-xs text-secondary">
         <span>Upload physical receipt or handwritten financial note:</span>
-        <AiQuotaBadge :quota="quota" @open-upgrade="aiStore.showUpgradePromptModal = true" />
       </div>
 
       <!-- File Dropzone -->
@@ -74,7 +86,7 @@
         <button
           type="button"
           @click="visible = false"
-          class="px-4 py-2 text-sm text-secondary hover:text-gray-900 dark:hover:text-white transition-colors"
+          class="px-4 py-2 text-sm text-secondary hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
         >
           Cancel
         </button>
@@ -82,7 +94,7 @@
           type="button"
           @click="handleSubmit"
           :disabled="!selectedFile || aiStore.isProcessingReceipt"
-          class="px-5 py-2 text-sm bg-accent-blue hover:bg-blue-600 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors flex items-center gap-2"
+          class="px-5 py-2 text-sm bg-accent-blue hover:bg-blue-600 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
         >
           <i v-if="aiStore.isProcessingReceipt" class="pi pi-spin pi-spinner"></i>
           <i v-else class="pi pi-sparkles"></i>
@@ -94,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Dialog from 'primevue/dialog';
 import { useAiStore } from '@/stores/ai';
 import AiQuotaBadge from './AiQuotaBadge.vue';
@@ -119,6 +131,16 @@ const visible = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),
 });
+
+watch(
+  visible,
+  (newVal) => {
+    if (newVal) {
+      aiStore.fetchQuota();
+    }
+  },
+  { immediate: true }
+);
 
 const quota = computed(() => aiStore.getQuotaForKey('receiptScan'));
 

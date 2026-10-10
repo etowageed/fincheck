@@ -20,6 +20,8 @@
         <router-view />
       </div>
     </main>
+
+    <UpgradePromptModal />
   </div>
 </template>
 
@@ -32,6 +34,7 @@ import { useAuthStore } from '@/stores/auth';
 import GlobalErrorToast from '@/components/common/GlobalErrorToast.vue';
 import Header from '@/components/layout/Header.vue';
 import Sidebar from '@/components/layout/Sidebar.vue';
+import UpgradePromptModal from '@/components/ai/UpgradePromptModal.vue';
 
 const route = useRoute();
 const authStore = useAuthStore();

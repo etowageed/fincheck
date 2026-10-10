@@ -7,9 +7,21 @@
     :dismissableMask="true"
   >
     <div class="space-y-4 py-1">
-      <div class="flex items-center justify-between text-xs text-secondary">
+      <!-- AI Quota Counter Banner -->
+      <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-secondary border border-default rounded-xl text-xs">
+        <div class="flex items-center gap-2 text-secondary font-medium">
+          <i class="pi pi-bolt text-amber-500"></i>
+          <span>AI Quick Log Usage</span>
+        </div>
+        <AiQuotaBadge
+          :quota="quota"
+          :loading="aiStore.isLoadingQuota"
+          @open-upgrade="aiStore.openUpgradeModal('quickLog')"
+        />
+      </div>
+
+      <div class="text-xs text-secondary">
         <span>Type or paste natural language expense text:</span>
-        <AiQuotaBadge :quota="quota" @open-upgrade="aiStore.showUpgradePromptModal = true" />
       </div>
 
       <div>
@@ -32,7 +44,7 @@
             :key="example"
             type="button"
             @click="inputText = example"
-            class="text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-secondary transition-colors"
+            class="text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-secondary transition-colors cursor-pointer"
           >
             "{{ example }}"
           </button>
@@ -44,7 +56,7 @@
         <button
           type="button"
           @click="visible = false"
-          class="px-4 py-2 text-sm text-secondary hover:text-gray-900 dark:hover:text-white transition-colors"
+          class="px-4 py-2 text-sm text-secondary hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
         >
           Cancel
         </button>
@@ -52,7 +64,7 @@
           type="button"
           @click="handleSubmit"
           :disabled="!inputText.trim() || aiStore.isProcessingQuickLog"
-          class="px-5 py-2 text-sm bg-accent-blue hover:bg-blue-600 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors flex items-center gap-2"
+          class="px-5 py-2 text-sm bg-accent-blue hover:bg-blue-600 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
         >
           <i v-if="aiStore.isProcessingQuickLog" class="pi pi-spin pi-spinner"></i>
           <i v-else class="pi pi-sparkles"></i>
@@ -64,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import Dialog from 'primevue/dialog';
 import { useAiStore } from '@/stores/ai';
 import AiQuotaBadge from './AiQuotaBadge.vue';
@@ -85,6 +97,16 @@ const visible = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),
 });
+
+watch(
+  visible,
+  (newVal) => {
+    if (newVal) {
+      aiStore.fetchQuota();
+    }
+  },
+  { immediate: true }
+);
 
 const quota = computed(() => aiStore.getQuotaForKey('quickLog'));
 

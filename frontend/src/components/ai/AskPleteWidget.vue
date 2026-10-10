@@ -13,7 +13,7 @@
           <p class="text-[11px] text-secondary">Your conversational financial assistant</p>
         </div>
       </div>
-      <AiQuotaBadge :quota="quota" @open-upgrade="aiStore.showUpgradePromptModal = true" />
+      <AiQuotaBadge :quota="quota" @open-upgrade="aiStore.openUpgradeModal('askPlete')" />
     </div>
 
     <!-- Messages Container -->

@@ -3,9 +3,6 @@
     <!-- Header Banner -->
     <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 text-white rounded-2xl p-6 sm:p-8 shadow-md relative overflow-hidden">
       <div class="relative z-10 space-y-2 max-w-2xl">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 backdrop-blur-md text-amber-300 border border-white/20">
-          <i class="pi pi-sparkles"></i> Powered by Google Gemini AI
-        </div>
         <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
           AI Financial Coach & Suite
         </h1>
@@ -49,7 +46,7 @@
               </h2>
               <p class="text-xs text-secondary">Get personalized spending guidance grounded in your records.</p>
             </div>
-            <AiQuotaBadge :quota="aiStore.getQuotaForKey('financialCoach')" @open-upgrade="aiStore.showUpgradePromptModal = true" />
+            <AiQuotaBadge :quota="aiStore.getQuotaForKey('financialCoach')" @open-upgrade="aiStore.openUpgradeModal('financialCoach')" />
           </div>
 
           <div class="space-y-3">
@@ -94,7 +91,7 @@
               </h2>
               <p class="text-xs text-secondary">Predictive spending trends & risk analysis for month end.</p>
             </div>
-            <AiQuotaBadge :quota="aiStore.getQuotaForKey('budgetForecast')" @open-upgrade="aiStore.showUpgradePromptModal = true" />
+            <AiQuotaBadge :quota="aiStore.getQuotaForKey('budgetForecast')" @open-upgrade="aiStore.openUpgradeModal('budgetForecast')" />
           </div>
 
           <div v-if="!aiStore.forecastData" class="text-center py-8 space-y-3">
@@ -132,7 +129,7 @@
               </h2>
               <p class="text-xs text-secondary">Simulate what-if changes without modifying real financial records.</p>
             </div>
-            <AiQuotaBadge :quota="aiStore.getQuotaForKey('savingsScenario')" @open-upgrade="aiStore.showUpgradePromptModal = true" />
+            <AiQuotaBadge :quota="aiStore.getQuotaForKey('savingsScenario')" @open-upgrade="aiStore.openUpgradeModal('savingsScenario')" />
           </div>
 
           <div class="space-y-3">
@@ -174,7 +171,7 @@
               </h2>
               <p class="text-xs text-secondary">Comprehensive executive summary of monthly performance.</p>
             </div>
-            <AiQuotaBadge :quota="aiStore.getQuotaForKey('monthlyReport')" @open-upgrade="aiStore.showUpgradePromptModal = true" />
+            <AiQuotaBadge :quota="aiStore.getQuotaForKey('monthlyReport')" @open-upgrade="aiStore.openUpgradeModal('monthlyReport')" />
           </div>
 
           <div v-if="!aiStore.reportData" class="text-center py-8 space-y-3">
@@ -208,7 +205,7 @@
               </h2>
               <p class="text-xs text-secondary">Detected spending spikes, anomalies, and trend patterns.</p>
             </div>
-            <AiQuotaBadge :quota="aiStore.getQuotaForKey('spendingInsights')" @open-upgrade="aiStore.showUpgradePromptModal = true" />
+            <AiQuotaBadge :quota="aiStore.getQuotaForKey('spendingInsights')" @open-upgrade="aiStore.openUpgradeModal('spendingInsights')" />
           </div>
 
           <div v-if="aiStore.insights.length === 0" class="text-center py-8 space-y-3">
@@ -261,9 +258,6 @@
         <AskPleteWidget />
       </div>
     </div>
-
-    <!-- Upgrade Prompt Modal -->
-    <UpgradePromptModal />
   </div>
 </template>
 
@@ -271,7 +265,6 @@
 import { ref, onMounted } from 'vue';
 import { useAiStore } from '@/stores/ai';
 import AiQuotaBadge from '@/components/ai/AiQuotaBadge.vue';
-import UpgradePromptModal from '@/components/ai/UpgradePromptModal.vue';
 import AskPleteWidget from '@/components/ai/AskPleteWidget.vue';
 
 const aiStore = useAiStore();

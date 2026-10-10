@@ -1,9 +1,6 @@
 <template>
     <div class="min-h-screen flex items-center justify-center bg-tertiary py-12 px-4">
         <div class="max-w-2xl mx-auto p-8 bg-primary shadow rounded-2xl text-center space-y-6 border border-default">
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-accent-blue border border-blue-200 dark:border-blue-800">
-                <i class="pi pi-sparkles text-amber-500"></i> Google Gemini Powered
-            </div>
             <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Plete Finance Plans</h1>
             <p class="text-base text-secondary">Compare Free vs Premium plans and unlock unlimited AI financial intelligence.</p>
 
