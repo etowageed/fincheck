@@ -3,14 +3,15 @@
     v-model:visible="visible"
     modal
     header="Scan Receipt or Note"
-    :style="{ width: '90vw', maxWidth: '520px' }"
+    :style="{ width: '34rem' }"
+    :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
     :dismissableMask="true"
   >
-    <div class="space-y-4 py-1">
+    <div class="bg-primary rounded-lg border border-default p-4 sm:p-6 shadow-sm space-y-4">
       <!-- AI Quota Counter Banner -->
-      <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-secondary border border-default rounded-xl text-xs">
-        <div class="flex items-center gap-2 text-secondary font-medium">
-          <i class="pi pi-bolt text-amber-500"></i>
+      <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-secondary border border-default rounded-lg text-xs">
+        <div class="flex items-center gap-2 text-primary font-semibold">
+          <i class="pi pi-sparkles text-accent-blue"></i>
           <span>AI Receipt Scan Usage</span>
         </div>
         <AiQuotaBadge
@@ -20,22 +21,23 @@
         />
       </div>
 
-      <div class="text-xs text-secondary">
-        <span>Upload physical receipt or handwritten financial note:</span>
-      </div>
+      <p class="text-sm font-medium text-secondary">
+        Upload a physical receipt or handwritten financial note for OCR extraction:
+      </p>
 
       <!-- File Dropzone -->
       <div
+        role="button"
+        tabindex="0"
+        aria-label="Upload receipt image"
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
         @drop.prevent="handleDrop"
-        class="border-2 border-dashed rounded-2xl p-6 text-center transition-colors cursor-pointer"
-        :class="[
-          isDragging
-            ? 'border-accent-blue bg-blue-50/50 dark:bg-blue-950/40'
-            : 'border-default bg-primary hover:border-gray-400 dark:hover:border-gray-600',
-        ]"
         @click="triggerFileInput"
+        @keydown.enter.prevent="triggerFileInput"
+        @keydown.space.prevent="triggerFileInput"
+        class="border-2 border-dashed border-default hover:border-accent-blue bg-secondary/50 rounded-lg p-6 transition-colors cursor-pointer text-center focus:outline-none focus:ring-2 focus:ring-accent-blue"
+        :class="{ 'border-accent-blue bg-secondary': isDragging }"
       >
         <input
           ref="fileInput"
@@ -46,14 +48,14 @@
         />
 
         <div v-if="!selectedFile" class="space-y-2">
-          <div class="w-12 h-12 bg-blue-50 dark:bg-blue-950/60 rounded-full flex items-center justify-center mx-auto text-accent-blue text-xl">
+          <div class="w-12 h-12 bg-tertiary rounded-full flex items-center justify-center mx-auto text-accent-blue text-xl border border-default">
             <i class="pi pi-camera"></i>
           </div>
           <div>
-            <span class="text-sm font-medium text-gray-900 dark:text-white block">
-              Click to upload or drag & drop receipt
+            <span class="text-sm font-semibold text-primary block">
+              Click to upload or drag &amp; drop receipt
             </span>
-            <span class="text-xs text-secondary block mt-0.5">
+            <span class="text-xs text-muted block mt-1">
               JPG, PNG, WebP or HEIC up to 5MB
             </span>
           </div>
@@ -61,44 +63,60 @@
 
         <!-- File Preview -->
         <div v-else class="space-y-3">
-          <div class="relative inline-block max-h-40 overflow-hidden rounded-lg border border-default">
-            <img :src="previewUrl" alt="Receipt preview" class="max-h-40 object-contain mx-auto" />
-            <button
+          <div class="relative inline-block max-h-40 overflow-hidden rounded-lg border border-default bg-primary p-1">
+            <img :src="previewUrl" alt="Receipt preview" class="max-h-36 object-contain mx-auto rounded" />
+            <Button
               type="button"
+              icon="pi pi-times"
+              size="small"
+              rounded
+              text
+              severity="danger"
+              aria-label="Remove selected file"
               @click.stop="clearFile"
-              class="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-xs hover:bg-black"
-            >
-              <i class="pi pi-times"></i>
-            </button>
+              class="!absolute top-1.5 right-1.5 bg-primary/90"
+            />
           </div>
-          <p class="text-xs text-secondary font-medium truncate max-w-xs mx-auto">
+          <p class="text-xs text-secondary font-medium truncate max-w-xs mx-auto font-numeric">
             {{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})
           </p>
         </div>
       </div>
 
-      <p v-if="errorMessage" class="text-xs text-rose-500 font-medium text-center">
-        {{ errorMessage }}
+      <!-- Scanning Skeleton State -->
+      <div v-if="aiStore.isProcessingReceipt" class="p-4 bg-secondary rounded-lg border border-default space-y-3">
+        <div class="flex items-center gap-2 text-xs font-semibold text-primary">
+          <i class="pi pi-spinner pi-spin text-accent-blue"></i>
+          <span>Extracting merchant, amount, and category from receipt...</span>
+        </div>
+        <Skeleton height="1.25rem" width="65%" class="rounded" />
+        <Skeleton height="1.25rem" width="40%" class="rounded" />
+      </div>
+
+      <p v-if="errorMessage" class="text-xs text-accent-red font-medium text-center">
+        <i class="pi pi-exclamation-triangle mr-1"></i>{{ errorMessage }}
       </p>
 
       <!-- Footer action -->
       <div class="pt-2 flex justify-end gap-2">
-        <button
+        <Button
           type="button"
+          label="Cancel"
+          severity="secondary"
+          outlined
+          size="small"
           @click="visible = false"
-          class="px-4 py-2 text-sm text-secondary hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
-        >
-          Cancel
-        </button>
+          :disabled="aiStore.isProcessingReceipt"
+        />
         <button
           type="button"
           @click="handleSubmit"
           :disabled="!selectedFile || aiStore.isProcessingReceipt"
-          class="px-5 py-2 text-sm bg-accent-blue hover:bg-blue-600 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+          class="btn-cta px-4 py-2 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <i v-if="aiStore.isProcessingReceipt" class="pi pi-spin pi-spinner"></i>
-          <i v-else class="pi pi-sparkles"></i>
-          Scan & Extract
+          <i v-if="aiStore.isProcessingReceipt" class="pi pi-spinner pi-spin text-accent-blue mr-2"></i>
+          <i v-else class="pi pi-sparkles mr-2"></i>
+          <span>Scan &amp; Extract</span>
         </button>
       </div>
     </div>
@@ -108,6 +126,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
+import Skeleton from 'primevue/skeleton';
+import { useToast } from 'primevue/usetoast';
 import { useAiStore } from '@/stores/ai';
 import AiQuotaBadge from './AiQuotaBadge.vue';
 
@@ -121,6 +142,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const aiStore = useAiStore();
+const toast = useToast();
 const fileInput = ref(null);
 const selectedFile = ref(null);
 const previewUrl = ref('');
@@ -154,6 +176,12 @@ const validateAndSetFile = (file) => {
 
   if (file.size > 5 * 1024 * 1024) {
     errorMessage.value = 'File size exceeds 5MB limit.';
+    toast.add({
+      severity: 'warn',
+      summary: 'File Too Large',
+      detail: 'Please upload an image smaller than 5MB.',
+      life: 4000,
+    });
     return;
   }
 
@@ -191,7 +219,12 @@ const handleSubmit = async () => {
     clearFile();
     visible.value = false;
   } catch (err) {
-    // Error handled in store/global toast
+    toast.add({
+      severity: 'error',
+      summary: 'Receipt Scan Failed',
+      detail: err.response?.data?.message || 'Unable to extract details from the receipt.',
+      life: 4000,
+    });
   }
 };
 </script>

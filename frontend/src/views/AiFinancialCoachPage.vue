@@ -1,17 +1,14 @@
 <template>
   <div class="space-y-6 pb-12">
-    <!-- Header Banner -->
-    <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 text-white rounded-2xl p-6 sm:p-8 shadow-md relative overflow-hidden">
-      <div class="relative z-10 space-y-2 max-w-2xl">
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-          AI Financial Coach & Suite
+    <!-- Header Card -->
+    <div class="bg-primary rounded-lg border border-default p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="space-y-1 max-w-2xl">
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight">
+          Your Personal AI Financial Coach
         </h1>
-        <p class="text-xs sm:text-sm text-blue-100/90 leading-relaxed">
+        <p class="text-sm font-medium text-secondary leading-relaxed">
           Ground-truth financial intelligence for your spending habits, budget forecasts, savings scenario simulations, and automated executive reports.
         </p>
-      </div>
-      <div class="absolute -right-8 -bottom-10 opacity-10 text-[180px] text-white font-bold pointer-events-none">
-        <i class="pi pi-bolt"></i>
       </div>
     </div>
 
@@ -20,234 +17,326 @@
       <!-- Left 2-Column Section: AI Tools -->
       <div class="lg:col-span-2 space-y-6">
         <!-- Tab Navigation -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 border-b border-default text-xs font-semibold">
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-default text-xs sm:text-sm font-semibold" role="tablist">
           <button
             v-for="tab in tabs"
             :key="tab.id"
+            type="button"
+            role="tab"
+            :aria-selected="activeTab === tab.id"
             @click="activeTab = tab.id"
-            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap flex items-center gap-2"
+            class="px-4 py-2 rounded-lg transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer"
             :class="[
               activeTab === tab.id
-                ? 'bg-accent-blue text-white shadow-sm'
-                : 'text-secondary hover:bg-gray-100 dark:hover:bg-gray-800',
+                ? 'btn-cta shadow-sm'
+                : 'bg-secondary text-primary border border-default hover:border-accent-blue',
             ]"
           >
             <i :class="tab.icon"></i>
-            {{ tab.name }}
+            <span>{{ tab.name }}</span>
           </button>
         </div>
 
         <!-- TAB 1: Financial Coach Q&A -->
-        <div v-if="activeTab === 'coach'" class="bg-primary border border-default rounded-2xl p-5 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
+        <div v-if="activeTab === 'coach'" class="bg-primary border border-default rounded-lg p-4 sm:p-6 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 class="font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
-                <i class="pi pi-user text-accent-blue"></i> AI Financial Coach
+              <h2 class="font-bold tracking-tight text-lg text-primary flex items-center gap-2">
+                <i class="pi pi-lightbulb text-accent-blue"></i>
+                <span>AI Financial Coach</span>
               </h2>
-              <p class="text-xs text-secondary">Get personalized spending guidance grounded in your records.</p>
+              <p class="text-xs sm:text-sm text-secondary mt-0.5">Get personalized spending guidance grounded in your records.</p>
             </div>
             <AiQuotaBadge :quota="aiStore.getQuotaForKey('financialCoach')" @open-upgrade="aiStore.openUpgradeModal('financialCoach')" />
           </div>
 
           <div class="space-y-3">
-            <textarea
+            <Textarea
               v-model="coachQuestion"
               rows="3"
               placeholder="e.g., 'How can I optimize my food & dining budget this month?'"
-              class="w-full p-3 text-xs bg-secondary border border-default rounded-xl focus:ring-2 focus:ring-accent-blue focus:outline-none text-gray-900 dark:text-white"
+              aria-label="Ask AI Financial Coach a question"
+              class="w-full text-sm bg-secondary border border-default rounded-lg text-primary"
               :disabled="aiStore.isProcessingCoach"
-            ></textarea>
+            />
 
             <div class="flex justify-end">
               <button
+                type="button"
                 @click="handleAskCoach"
                 :disabled="!coachQuestion.trim() || aiStore.isProcessingCoach"
-                class="px-5 py-2.5 text-xs bg-accent-blue hover:bg-blue-600 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors flex items-center gap-2"
+                class="btn-cta px-4 py-2.5 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <i v-if="aiStore.isProcessingCoach" class="pi pi-spin pi-spinner"></i>
-                <i v-else class="pi pi-send"></i>
-                Ask Coach
+                <i v-if="aiStore.isProcessingCoach" class="pi pi-spinner pi-spin text-accent-blue mr-2"></i>
+                <i v-else class="pi pi-sparkles mr-2"></i>
+                <span>Ask Coach</span>
               </button>
             </div>
           </div>
 
-          <!-- Coach Response Output -->
-          <div v-if="coachAdvice" class="mt-4 p-4 bg-secondary border border-default rounded-xl text-xs space-y-2">
-            <div class="font-bold text-gray-900 dark:text-white flex items-center gap-1.5 text-sm">
-              <i class="pi pi-check-circle text-emerald-500"></i> Coach Advice
+          <!-- Loading Skeleton -->
+          <div v-if="aiStore.isProcessingCoach" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-2.5">
+            <div class="flex items-center gap-2 text-xs font-semibold text-secondary">
+              <i class="pi pi-spinner pi-spin text-accent-blue"></i>
+              <span>Analyzing your spending habits and generating personalized coaching...</span>
             </div>
-            <div class="prose prose-sm dark:prose-invert text-secondary whitespace-pre-wrap leading-relaxed">
+            <Skeleton height="1.25rem" width="85%" class="rounded" />
+            <Skeleton height="1.25rem" width="70%" class="rounded" />
+            <Skeleton height="1.25rem" width="55%" class="rounded" />
+          </div>
+
+          <!-- Coach Response Output -->
+          <div v-else-if="coachAdvice" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-2">
+            <div class="font-bold tracking-tight text-primary flex items-center gap-2 text-sm sm:text-base">
+              <i class="pi pi-lightbulb text-accent-blue text-lg"></i>
+              <span>Coach Advice</span>
+            </div>
+            <div class="text-sm sm:text-base font-medium text-primary leading-relaxed whitespace-pre-wrap font-numeric">
               {{ coachAdvice }}
             </div>
           </div>
         </div>
 
         <!-- TAB 2: Budget Forecast -->
-        <div v-if="activeTab === 'forecast'" class="bg-primary border border-default rounded-2xl p-5 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
+        <div v-if="activeTab === 'forecast'" class="bg-primary border border-default rounded-lg p-4 sm:p-6 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 class="font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
-                <i class="pi pi-chart-line text-indigo-500"></i> Predictive Budget Forecast
+              <h2 class="font-bold tracking-tight text-lg text-primary flex items-center gap-2">
+                <i class="pi pi-chart-line text-accent-blue"></i>
+                <span>Predictive Budget Forecast</span>
               </h2>
-              <p class="text-xs text-secondary">Predictive spending trends & risk analysis for month end.</p>
+              <p class="text-xs sm:text-sm text-secondary mt-0.5">Predictive spending trends &amp; risk analysis for month end.</p>
             </div>
             <AiQuotaBadge :quota="aiStore.getQuotaForKey('budgetForecast')" @open-upgrade="aiStore.openUpgradeModal('budgetForecast')" />
           </div>
 
-          <div v-if="!aiStore.forecastData" class="text-center py-8 space-y-3">
-            <p class="text-xs text-secondary max-w-sm mx-auto">
+          <!-- Loading Skeleton -->
+          <div v-if="aiStore.isProcessingForecast" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-2.5">
+            <div class="flex items-center gap-2 text-xs font-semibold text-secondary">
+              <i class="pi pi-spinner pi-spin text-accent-blue"></i>
+              <span>Forecasting end-of-month budget trajectory...</span>
+            </div>
+            <Skeleton height="1.25rem" width="80%" class="rounded" />
+            <Skeleton height="1.25rem" width="65%" class="rounded" />
+            <Skeleton height="1.25rem" width="50%" class="rounded" />
+          </div>
+
+          <div v-else-if="!aiStore.forecastData" class="text-center py-8 space-y-3 bg-secondary rounded-lg border border-default p-6">
+            <i class="pi pi-chart-line text-2xl text-accent-blue"></i>
+            <p class="text-sm font-medium text-secondary max-w-md mx-auto leading-relaxed">
               Analyze your current spending velocity and recurring items to generate an end-of-month budget forecast.
             </p>
             <button
+              type="button"
               @click="handleFetchForecast"
               :disabled="aiStore.isProcessingForecast"
-              class="px-5 py-2.5 text-xs bg-accent-blue hover:bg-blue-600 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors inline-flex items-center gap-2"
+              class="btn-cta px-5 py-2.5 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50"
             >
-              <i v-if="aiStore.isProcessingForecast" class="pi pi-spin pi-spinner"></i>
-              <i v-else class="pi pi-sparkles"></i>
-              Generate Budget Forecast
+              <i class="pi pi-sparkles mr-2"></i>
+              <span>Generate Budget Forecast</span>
             </button>
           </div>
 
-          <div v-else class="p-4 bg-secondary border border-default rounded-xl text-xs space-y-3">
-            <div class="flex items-center justify-between border-b border-default pb-2">
-              <span class="font-bold text-gray-900 dark:text-white text-sm">Forecast Report</span>
-              <button @click="handleFetchForecast" class="text-[11px] text-accent-blue hover:underline">Regenerate</button>
+          <div v-else class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-default pb-3">
+              <div class="flex items-center gap-2">
+                <i class="pi pi-chart-line text-accent-blue text-lg"></i>
+                <span class="font-bold tracking-tight text-primary text-sm sm:text-base">Forecast Report</span>
+              </div>
+              <Button
+                label="Regenerate"
+                icon="pi pi-refresh"
+                severity="secondary"
+                outlined
+                size="small"
+                @click="handleFetchForecast"
+                :loading="aiStore.isProcessingForecast"
+              />
             </div>
-            <div class="whitespace-pre-wrap leading-relaxed text-secondary">
+            <div class="text-sm sm:text-base font-medium text-primary leading-relaxed whitespace-pre-wrap font-numeric">
               {{ aiStore.forecastData }}
             </div>
           </div>
         </div>
 
         <!-- TAB 3: Savings Scenario Simulator -->
-        <div v-if="activeTab === 'scenario'" class="bg-primary border border-default rounded-2xl p-5 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
+        <div v-if="activeTab === 'scenario'" class="bg-primary border border-default rounded-lg p-4 sm:p-6 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 class="font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
-                <i class="pi pi-calculator text-emerald-500"></i> Savings Scenario Simulator
+              <h2 class="font-bold tracking-tight text-lg text-primary flex items-center gap-2">
+                <i class="pi pi-chart-line text-accent-blue"></i>
+                <span>Savings Scenario Simulator</span>
               </h2>
-              <p class="text-xs text-secondary">Simulate what-if changes without modifying real financial records.</p>
+              <p class="text-xs sm:text-sm text-secondary mt-0.5">Simulate what-if changes without modifying real financial records.</p>
             </div>
             <AiQuotaBadge :quota="aiStore.getQuotaForKey('savingsScenario')" @open-upgrade="aiStore.openUpgradeModal('savingsScenario')" />
           </div>
 
           <div class="space-y-3">
-            <input
+            <InputText
               type="text"
               v-model="scenarioText"
-              placeholder="e.g., 'What if I reduce dining out by £50/month?'"
-              class="w-full p-3 text-xs bg-secondary border border-default rounded-xl focus:ring-2 focus:ring-accent-blue focus:outline-none text-gray-900 dark:text-white"
+              :placeholder="scenarioPlaceholder"
+              aria-label="Savings scenario input"
+              class="w-full text-sm"
               :disabled="aiStore.isProcessingScenario"
+              @keydown.enter.prevent="handleRunScenario"
             />
 
             <div class="flex justify-end">
               <button
+                type="button"
                 @click="handleRunScenario"
                 :disabled="!scenarioText.trim() || aiStore.isProcessingScenario"
-                class="px-5 py-2.5 text-xs bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors flex items-center gap-2"
+                class="btn-cta px-4 py-2.5 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <i v-if="aiStore.isProcessingScenario" class="pi pi-spin pi-spinner"></i>
-                <i v-else class="pi pi-play"></i>
-                Run Simulation
+                <i v-if="aiStore.isProcessingScenario" class="pi pi-spinner pi-spin text-accent-blue mr-2"></i>
+                <i v-else class="pi pi-sparkles mr-2"></i>
+                <span>Run Simulation</span>
               </button>
             </div>
           </div>
 
-          <div v-if="aiStore.scenarioResult" class="p-4 bg-secondary border border-default rounded-xl text-xs space-y-2">
-            <div class="font-bold text-gray-900 dark:text-white text-sm">Simulation Impact</div>
-            <div class="whitespace-pre-wrap leading-relaxed text-secondary">
+          <!-- Loading Skeleton -->
+          <div v-if="aiStore.isProcessingScenario" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-2.5">
+            <div class="flex items-center gap-2 text-xs font-semibold text-secondary">
+              <i class="pi pi-spinner pi-spin text-accent-blue"></i>
+              <span>Running savings projection simulation...</span>
+            </div>
+            <Skeleton height="1.25rem" width="75%" class="rounded" />
+            <Skeleton height="1.25rem" width="60%" class="rounded" />
+          </div>
+
+          <div v-else-if="aiStore.scenarioResult" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-2">
+            <div class="font-bold tracking-tight text-primary flex items-center gap-2 text-sm sm:text-base">
+              <i class="pi pi-check-circle text-accent-green text-lg"></i>
+              <span>Simulation Impact</span>
+            </div>
+            <div class="text-sm sm:text-base font-medium text-primary leading-relaxed whitespace-pre-wrap font-numeric">
               {{ aiStore.scenarioResult }}
             </div>
           </div>
         </div>
 
         <!-- TAB 4: Monthly Executive Report -->
-        <div v-if="activeTab === 'report'" class="bg-primary border border-default rounded-2xl p-5 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
+        <div v-if="activeTab === 'report'" class="bg-primary border border-default rounded-lg p-4 sm:p-6 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 class="font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
-                <i class="pi pi-file text-purple-500"></i> AI Monthly Report
+              <h2 class="font-bold tracking-tight text-lg text-primary flex items-center gap-2">
+                <i class="pi pi-lightbulb text-accent-blue"></i>
+                <span>AI Monthly Report</span>
               </h2>
-              <p class="text-xs text-secondary">Comprehensive executive summary of monthly performance.</p>
+              <p class="text-xs sm:text-sm text-secondary mt-0.5">Comprehensive executive summary of monthly performance.</p>
             </div>
             <AiQuotaBadge :quota="aiStore.getQuotaForKey('monthlyReport')" @open-upgrade="aiStore.openUpgradeModal('monthlyReport')" />
           </div>
 
-          <div v-if="!aiStore.reportData" class="text-center py-8 space-y-3">
-            <p class="text-xs text-secondary max-w-sm mx-auto">
+          <!-- Loading Skeleton -->
+          <div v-if="aiStore.isProcessingReport" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-2.5">
+            <div class="flex items-center gap-2 text-xs font-semibold text-secondary">
+              <i class="pi pi-spinner pi-spin text-accent-blue"></i>
+              <span>Compiling monthly executive financial report...</span>
+            </div>
+            <Skeleton height="1.25rem" width="85%" class="rounded" />
+            <Skeleton height="1.25rem" width="70%" class="rounded" />
+            <Skeleton height="1.25rem" width="60%" class="rounded" />
+          </div>
+
+          <div v-else-if="!aiStore.reportData" class="text-center py-8 space-y-3 bg-secondary rounded-lg border border-default p-6">
+            <i class="pi pi-file text-2xl text-accent-blue"></i>
+            <p class="text-sm font-medium text-secondary max-w-md mx-auto leading-relaxed">
               Generate an executive AI report compiling income, outflow, budget performance, and strategic tips.
             </p>
             <button
+              type="button"
               @click="handleFetchReport"
               :disabled="aiStore.isProcessingReport"
-              class="px-5 py-2.5 text-xs bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors inline-flex items-center gap-2"
+              class="btn-cta px-5 py-2.5 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50"
             >
-              <i v-if="aiStore.isProcessingReport" class="pi pi-spin pi-spinner"></i>
-              <i v-else class="pi pi-file"></i>
-              Generate Report
+              <i class="pi pi-sparkles mr-2"></i>
+              <span>Generate Report</span>
             </button>
           </div>
 
-          <div v-else class="p-4 bg-secondary border border-default rounded-xl text-xs space-y-3">
-            <div class="whitespace-pre-wrap leading-relaxed text-secondary">
+          <div v-else class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-default pb-3">
+              <div class="flex items-center gap-2">
+                <i class="pi pi-lightbulb text-accent-blue text-lg"></i>
+                <span class="font-bold tracking-tight text-primary text-sm sm:text-base">Monthly Executive Summary</span>
+              </div>
+              <Button
+                label="Refresh"
+                icon="pi pi-refresh"
+                severity="secondary"
+                outlined
+                size="small"
+                @click="handleFetchReport"
+                :loading="aiStore.isProcessingReport"
+              />
+            </div>
+            <div class="text-sm sm:text-base font-medium text-primary leading-relaxed whitespace-pre-wrap font-numeric">
               {{ aiStore.reportData }}
             </div>
           </div>
         </div>
 
         <!-- TAB 5: Spending Insights -->
-        <div v-if="activeTab === 'insights'" class="bg-primary border border-default rounded-2xl p-5 shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
+        <div v-if="activeTab === 'insights'" class="bg-primary border border-default rounded-lg p-4 sm:p-6 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 class="font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
-                <i class="pi pi-compass text-amber-500"></i> Automated Spending Insights
+              <h2 class="font-bold tracking-tight text-lg text-primary flex items-center gap-2">
+                <i class="pi pi-lightbulb text-accent-blue"></i>
+                <span>Automated Spending Insights</span>
               </h2>
-              <p class="text-xs text-secondary">Detected spending spikes, anomalies, and trend patterns.</p>
+              <p class="text-xs sm:text-sm text-secondary mt-0.5">Detected spending spikes, anomalies, and trend patterns.</p>
             </div>
             <AiQuotaBadge :quota="aiStore.getQuotaForKey('spendingInsights')" @open-upgrade="aiStore.openUpgradeModal('spendingInsights')" />
           </div>
 
-          <div v-if="aiStore.insights.length === 0" class="text-center py-8 space-y-3">
-            <p class="text-xs text-secondary">Analyze your records for automated spending insights.</p>
+          <!-- Loading Skeleton -->
+          <div v-if="aiStore.isProcessingInsights" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-2.5">
+            <div class="flex items-center gap-2 text-xs font-semibold text-secondary">
+              <i class="pi pi-spinner pi-spin text-accent-blue"></i>
+              <span>Scanning transactions for anomalies and spending patterns...</span>
+            </div>
+            <Skeleton height="1.25rem" width="80%" class="rounded" />
+            <Skeleton height="1.25rem" width="65%" class="rounded" />
+          </div>
+
+          <div v-else-if="aiStore.insights.length === 0" class="text-center py-8 space-y-3 bg-secondary rounded-lg border border-default p-6">
+            <i class="pi pi-lightbulb text-2xl text-accent-blue"></i>
+            <p class="text-sm font-medium text-secondary">Analyze your records for automated spending insights.</p>
             <button
+              type="button"
               @click="handleFetchInsights"
               :disabled="aiStore.isProcessingInsights"
-              class="px-5 py-2.5 text-xs bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors inline-flex items-center gap-2"
+              class="btn-cta px-5 py-2.5 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50"
             >
-              <i v-if="aiStore.isProcessingInsights" class="pi pi-spin pi-spinner"></i>
-              <i v-else class="pi pi-search"></i>
-              Fetch Insights
+              <i class="pi pi-sparkles mr-2"></i>
+              <span>Generate Insights</span>
             </button>
           </div>
 
-          <div v-else class="space-y-3">
+          <div v-else class="space-y-4">
             <div
               v-for="(insight, idx) in aiStore.insights"
               :key="idx"
-              class="p-4 border rounded-xl space-y-1 bg-secondary text-xs"
-              :class="[
-                insight.impactLevel === 'warning'
-                  ? 'border-amber-300 dark:border-amber-800'
-                  : insight.impactLevel === 'positive'
-                  ? 'border-emerald-300 dark:border-emerald-800'
-                  : 'border-default',
-              ]"
+              class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-2"
             >
-              <div class="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
+              <div class="font-bold tracking-tight text-primary flex items-center gap-2 text-sm sm:text-base">
                 <i
-                  class="pi"
+                  class="text-lg"
                   :class="[
                     insight.impactLevel === 'warning'
-                      ? 'pi-exclamation-triangle text-amber-500'
+                      ? 'pi pi-exclamation-triangle text-accent-red'
                       : insight.impactLevel === 'positive'
-                      ? 'pi-check-circle text-emerald-500'
-                      : 'pi-info-circle text-blue-500',
+                      ? 'pi pi-check-circle text-accent-green'
+                      : 'pi pi-lightbulb text-accent-blue',
                   ]"
                 ></i>
-                {{ insight.title }}
+                <span>{{ insight.title }}</span>
               </div>
-              <p class="text-secondary leading-relaxed">{{ insight.description }}</p>
+              <p class="text-sm sm:text-base font-medium text-primary leading-relaxed font-numeric">{{ insight.description }}</p>
             </div>
           </div>
         </div>
@@ -262,16 +351,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import Textarea from 'primevue/textarea';
+import Skeleton from 'primevue/skeleton';
+import { useToast } from 'primevue/usetoast';
 import { useAiStore } from '@/stores/ai';
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
 import AiQuotaBadge from '@/components/ai/AiQuotaBadge.vue';
 import AskPleteWidget from '@/components/ai/AskPleteWidget.vue';
 
 const aiStore = useAiStore();
+const toast = useToast();
+const { formatCurrency } = useCurrencyFormatter();
 const activeTab = ref('coach');
 
 const tabs = [
-  { id: 'coach', name: 'Coach Q&A', icon: 'pi pi-user' },
+  { id: 'coach', name: 'Coach Q&A', icon: 'pi pi-lightbulb' },
   { id: 'forecast', name: 'Forecast', icon: 'pi pi-chart-line' },
   { id: 'scenario', name: 'Simulator', icon: 'pi pi-calculator' },
   { id: 'report', name: 'Monthly Report', icon: 'pi pi-file' },
@@ -282,6 +379,10 @@ const coachQuestion = ref('');
 const coachAdvice = ref('');
 const scenarioText = ref('');
 
+const scenarioPlaceholder = computed(
+  () => `e.g., 'What if I reduce dining out by ${formatCurrency(50)}/month?'`
+);
+
 onMounted(async () => {
   await aiStore.fetchQuota();
 });
@@ -291,7 +392,12 @@ const handleAskCoach = async () => {
   try {
     coachAdvice.value = await aiStore.askCoach(coachQuestion.value.trim());
   } catch (err) {
-    // Handled in store
+    toast.add({
+      severity: 'error',
+      summary: 'Coach Request Failed',
+      detail: err.response?.data?.message || 'Unable to generate coaching advice.',
+      life: 4000,
+    });
   }
 };
 
@@ -299,7 +405,12 @@ const handleFetchForecast = async () => {
   try {
     await aiStore.fetchForecast();
   } catch (err) {
-    // Handled in store
+    toast.add({
+      severity: 'error',
+      summary: 'Forecast Failed',
+      detail: err.response?.data?.message || 'Unable to generate budget forecast.',
+      life: 4000,
+    });
   }
 };
 
@@ -308,7 +419,12 @@ const handleRunScenario = async () => {
   try {
     await aiStore.simulateScenario(scenarioText.value.trim());
   } catch (err) {
-    // Handled in store
+    toast.add({
+      severity: 'error',
+      summary: 'Simulation Failed',
+      detail: err.response?.data?.message || 'Unable to run savings scenario.',
+      life: 4000,
+    });
   }
 };
 
@@ -317,7 +433,12 @@ const handleFetchReport = async () => {
     const now = new Date();
     await aiStore.fetchMonthlyReport(now.getMonth(), now.getFullYear());
   } catch (err) {
-    // Handled in store
+    toast.add({
+      severity: 'error',
+      summary: 'Report Generation Failed',
+      detail: err.response?.data?.message || 'Unable to generate monthly report.',
+      life: 4000,
+    });
   }
 };
 
@@ -325,7 +446,12 @@ const handleFetchInsights = async () => {
   try {
     await aiStore.fetchSpendingInsights();
   } catch (err) {
-    // Handled in store
+    toast.add({
+      severity: 'error',
+      summary: 'Insights Failed',
+      detail: err.response?.data?.message || 'Unable to fetch spending insights.',
+      life: 4000,
+    });
   }
 };
 </script>

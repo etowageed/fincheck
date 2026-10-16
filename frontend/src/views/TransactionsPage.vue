@@ -1,19 +1,21 @@
 <template>
     <div>
-        <div class="flex items-center justify-between mb-4">
-            <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white">Transactions</h1>
-            <div class="flex items-center gap-2">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight">Transactions</h1>
+            <div class="flex items-center gap-2 flex-wrap">
                 <button
+                    type="button"
                     @click="showQuickLog = true"
-                    class="px-3.5 py-2 text-xs font-semibold bg-accent-blue hover:bg-blue-600 text-white rounded-xl shadow transition-all flex items-center gap-1.5"
+                    class="px-3.5 py-2 text-sm font-semibold rounded-lg bg-secondary text-primary border border-default hover:border-accent-blue transition-colors inline-flex items-center cursor-pointer"
                 >
-                    <i class="pi pi-sparkles"></i> AI Quick-Log
+                    <i class="pi pi-sparkles text-accent-blue mr-2"></i> Magic Entry
                 </button>
                 <button
+                    type="button"
                     @click="showReceiptScan = true"
-                    class="px-3.5 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow transition-all flex items-center gap-1.5"
+                    class="btn-cta px-3.5 py-2 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer"
                 >
-                    <i class="pi pi-camera"></i> Scan Receipt
+                    <i class="pi pi-sparkles mr-2"></i> Scan Receipt
                 </button>
             </div>
         </div>

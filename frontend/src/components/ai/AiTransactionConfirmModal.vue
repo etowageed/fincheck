@@ -2,98 +2,145 @@
   <Dialog
     v-model:visible="visible"
     modal
-    header="Review & Confirm Transactions"
-    :style="{ width: '95vw', maxWidth: '640px' }"
+    header="Review & Confirm AI Transactions"
+    :style="{ width: '40rem' }"
+    :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
     :dismissableMask="false"
   >
-    <div class="space-y-4 py-2">
-      <div class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2">
-        <i class="pi pi-info-circle text-base text-amber-600 dark:text-amber-400 mt-0.5"></i>
-        <div>
-          <span class="font-bold">Review required:</span> Verify or adjust details before saving to your financial records. No transactions are created until you confirm.
+    <div class="space-y-4 py-1">
+      <!-- Info Banner -->
+      <div class="bg-primary rounded-lg shadow-sm border border-default p-4 flex items-start justify-between gap-3">
+        <div class="flex items-start gap-2.5">
+          <i class="pi pi-lightbulb text-accent-blue text-lg mt-0.5"></i>
+          <div>
+            <div class="mb-1">
+              <span class="text-sm font-bold tracking-tight text-primary">Review Extracted Proposals</span>
+            </div>
+            <p class="text-xs sm:text-sm text-secondary leading-relaxed">
+              Verify or adjust extracted merchant names, amounts, and categories before saving. No records are created until you confirm.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div v-if="items.length === 0" class="text-center py-6 text-sm text-secondary">
-        No proposals extracted. Click cancel to try again.
+      <div v-if="items.length === 0" class="bg-primary rounded-lg border border-default p-6 text-center text-sm text-secondary shadow-sm">
+        No proposals remaining. Click cancel to close and try again.
       </div>
 
-      <div v-else class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+      <div v-else class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
         <div
           v-for="(item, index) in items"
           :key="index"
-          class="p-4 bg-primary border border-default rounded-xl space-y-3 relative group"
+          class="bg-primary rounded-lg border border-default p-4 sm:p-6 shadow-sm space-y-4 transition-colors"
+          :class="{ 'opacity-60': !item.selected }"
         >
-          <!-- Item Header & Low Confidence Warning -->
-          <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
+          <!-- Item Header & Confidence Actions -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-default">
+            <div class="flex flex-wrap items-center gap-2">
               <input
+                :id="`ai-item-select-${index}`"
                 type="checkbox"
                 v-model="item.selected"
-                class="rounded border-gray-300 text-accent-blue focus:ring-accent-blue"
+                class="w-4 h-4 rounded border-default text-accent-blue focus:ring-accent-blue cursor-pointer"
               />
-              <span class="text-xs font-semibold text-secondary uppercase tracking-wider">
+              <label :for="`ai-item-select-${index}`" class="text-xs font-bold text-primary uppercase tracking-wider cursor-pointer">
                 Item #{{ index + 1 }}
-              </span>
+              </label>
               <span
                 v-if="item.isLowConfidence"
-                class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300"
+                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-950/60 text-accent-yellow border border-amber-300 dark:border-amber-800/60"
               >
-                Needs Review
+                <i class="pi pi-exclamation-triangle text-[10px]"></i> Low Confidence
+              </span>
+              <span
+                v-else-if="item.confidenceApproved"
+                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-tertiary text-accent-green border border-default"
+              >
+                <i class="pi pi-check-circle text-[10px]"></i> Approved
               </span>
             </div>
-            <button
-              type="button"
-              @click="removeItem(index)"
-              class="text-xs text-rose-500 hover:text-rose-700 p-1 transition-colors"
-              title="Remove item"
-            >
-              <i class="pi pi-trash"></i>
-            </button>
+
+            <div class="flex items-center gap-2">
+              <span class="font-numeric font-bold text-sm text-primary">
+                {{ formatCurrency(item.amount || 0, true) }}
+              </span>
+              <div class="flex items-center gap-1">
+                <Button
+                  icon="pi pi-check"
+                  size="small"
+                  rounded
+                  text
+                  severity="success"
+                  aria-label="Approve suggestion"
+                  @click="approveItemConfidence(index)"
+                />
+                <Button
+                  icon="pi pi-times"
+                  size="small"
+                  rounded
+                  text
+                  severity="danger"
+                  aria-label="Reject suggestion"
+                  @click="removeItem(index)"
+                />
+              </div>
+            </div>
           </div>
 
-          <!-- Edit Form Fields -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div>
-              <label class="block font-medium text-secondary mb-1">Description / Payee</label>
-              <input
-                type="text"
+          <!-- Standard PrimeVue Form Inputs -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div class="flex flex-col gap-1.5">
+              <label :for="`ai-desc-${index}`" class="text-xs font-semibold text-secondary">
+                Description / Merchant
+              </label>
+              <InputText
+                :id="`ai-desc-${index}`"
                 v-model="item.description"
-                class="w-full p-2 border border-default rounded-lg bg-secondary focus:ring-2 focus:ring-accent-blue text-gray-900 dark:text-white"
-                placeholder="Description"
+                placeholder="Merchant or description"
+                class="w-full text-sm"
               />
             </div>
 
-            <div>
-              <label class="block font-medium text-secondary mb-1">Amount</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                v-model.number="item.amount"
-                class="w-full p-2 border border-default rounded-lg bg-secondary focus:ring-2 focus:ring-accent-blue text-gray-900 dark:text-white font-semibold"
+            <div class="flex flex-col gap-1.5">
+              <label :for="`ai-amount-${index}`" class="text-xs font-semibold text-secondary">
+                Amount
+              </label>
+              <InputNumber
+                :id="`ai-amount-${index}`"
+                v-model="item.amount"
+                mode="currency"
+                :currency="preferredCurrency"
+                :locale="preferredLocale"
                 placeholder="0.00"
+                class="w-full text-sm font-numeric"
+                inputClass="w-full font-numeric"
               />
             </div>
 
-            <div>
-              <label class="block font-medium text-secondary mb-1">Category</label>
-              <select
+            <div class="flex flex-col gap-1.5">
+              <label :for="`ai-category-${index}`" class="text-xs font-semibold text-secondary">
+                Proposed Category
+              </label>
+              <Dropdown
+                :id="`ai-category-${index}`"
                 v-model="item.category"
-                class="w-full p-2 border border-default rounded-lg bg-secondary focus:ring-2 focus:ring-accent-blue text-gray-900 dark:text-white"
-              >
-                <option v-for="cat in availableCategoryNames" :key="cat" :value="cat">
-                  {{ cat }}
-                </option>
-              </select>
+                :options="availableCategoryNames"
+                placeholder="Select a category"
+                filter
+                filterPlaceholder="Search categories..."
+                class="w-full text-sm"
+              />
             </div>
 
-            <div>
-              <label class="block font-medium text-secondary mb-1">Date</label>
-              <input
+            <div class="flex flex-col gap-1.5">
+              <label :for="`ai-date-${index}`" class="text-xs font-semibold text-secondary">
+                Date
+              </label>
+              <InputText
+                :id="`ai-date-${index}`"
                 type="date"
                 v-model="item.date"
-                class="w-full p-2 border border-default rounded-lg bg-secondary focus:ring-2 focus:ring-accent-blue text-gray-900 dark:text-white"
+                class="w-full text-sm font-numeric"
               />
             </div>
           </div>
@@ -101,28 +148,33 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="pt-3 border-t border-default flex items-center justify-between">
-        <span class="text-xs text-secondary">
-          Selected: {{ selectedCount }} of {{ items.length }}
-        </span>
+      <div class="pt-3 border-t border-default flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="text-xs sm:text-sm text-secondary font-medium">
+          Selected: <span class="font-bold text-primary font-numeric">{{ selectedCount }}</span> of <span class="font-numeric">{{ items.length }}</span>
+          <span v-if="selectedCount > 0" class="ml-2 text-primary font-bold font-numeric">
+            ({{ formatCurrency(selectedTotalAmount, true) }})
+          </span>
+        </div>
 
-        <div class="flex gap-2">
-          <button
+        <div class="flex justify-end gap-2">
+          <Button
             type="button"
+            label="Cancel"
+            severity="secondary"
+            outlined
+            size="small"
             @click="handleCancel"
-            class="px-4 py-2 text-sm text-secondary hover:text-gray-900 dark:hover:text-white transition-colors"
-          >
-            Cancel
-          </button>
+            :disabled="isSaving"
+          />
           <button
             type="button"
             @click="handleConfirm"
             :disabled="selectedCount === 0 || isSaving"
-            class="px-5 py-2 text-sm bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-medium rounded-xl shadow transition-colors flex items-center gap-2"
+            class="btn-cta px-4 py-2 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <i v-if="isSaving" class="pi pi-spin pi-spinner"></i>
-            <i v-else class="pi pi-check"></i>
-            Confirm & Save ({{ selectedCount }})
+            <i v-if="isSaving" class="pi pi-spinner pi-spin text-accent-blue mr-2"></i>
+            <i v-else class="pi pi-sparkles mr-2"></i>
+            <span class="font-numeric">Confirm &amp; Save ({{ selectedCount }})</span>
           </button>
         </div>
       </div>
@@ -133,15 +185,23 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
+import Dropdown from 'primevue/dropdown';
+import { useToast } from 'primevue/usetoast';
 import { useAiStore } from '@/stores/ai';
 import { useCategoriesStore } from '@/stores/categories';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useDashboardStore } from '@/stores/dashboard';
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
 
 const aiStore = useAiStore();
 const categoriesStore = useCategoriesStore();
 const transactionsStore = useTransactionsStore();
 const dashboardStore = useDashboardStore();
+const toast = useToast();
+const { preferredCurrency, preferredLocale, formatCurrency } = useCurrencyFormatter();
 
 const isSaving = ref(false);
 const items = ref([]);
@@ -173,12 +233,13 @@ watch(
       items.value = newVal.map((p) => ({
         description: p.description || p.merchant || 'Expense',
         merchant: p.merchant || '',
-        amount: p.amount || 0,
+        amount: Number(p.amount) || 0,
         category: p.category || 'Uncategorised',
         date: p.date ? p.date.split('T')[0] : new Date().toISOString().split('T')[0],
         type: p.type || 'expense',
         notes: p.notes || '',
         isLowConfidence: Boolean(p.isLowConfidence),
+        confidenceApproved: false,
         selected: true,
       }));
     } else {
@@ -189,6 +250,19 @@ watch(
 );
 
 const selectedCount = computed(() => items.value.filter((i) => i.selected).length);
+
+const selectedTotalAmount = computed(() =>
+  items.value
+    .filter((i) => i.selected)
+    .reduce((sum, i) => sum + (Number(i.amount) || 0), 0)
+);
+
+const approveItemConfidence = (idx) => {
+  if (!items.value[idx]) return;
+  items.value[idx].isLowConfidence = false;
+  items.value[idx].confidenceApproved = true;
+  items.value[idx].selected = true;
+};
 
 const removeItem = (idx) => {
   items.value.splice(idx, 1);
@@ -207,7 +281,6 @@ const handleConfirm = async () => {
   try {
     await aiStore.saveConfirmedTransactions(selectedItems);
 
-    // Refresh application stores
     if (transactionsStore.fetchTransactions) {
       await transactionsStore.fetchTransactions();
     }
@@ -215,9 +288,22 @@ const handleConfirm = async () => {
       await dashboardStore.fetchDashboardData();
     }
 
+    toast.add({
+      severity: 'success',
+      summary: 'Transactions Saved',
+      detail: `Successfully added ${selectedItems.length} AI-extracted transaction(s).`,
+      life: 4000,
+    });
+
     visible.value = false;
   } catch (err) {
     console.error('Failed to save confirmed transactions:', err);
+    toast.add({
+      severity: 'error',
+      summary: 'Save Failed',
+      detail: err.response?.data?.message || 'Could not save confirmed transactions.',
+      life: 4000,
+    });
   } finally {
     isSaving.value = false;
   }

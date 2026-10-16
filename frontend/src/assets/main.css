@@ -4,6 +4,7 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --color-cream-50: #fdfbf7;
   --color-cream-100: #f7f4eb;
   --color-ink-900: #0f172a;
@@ -156,6 +157,10 @@
     background-color: rgb(var(--color-bg-secondary));
   }
 
+  .bg-secondary\/50 {
+    background-color: rgb(var(--color-bg-secondary) / 0.5);
+  }
+
   .bg-tertiary {
     background-color: rgb(var(--color-bg-tertiary));
   }
@@ -166,6 +171,22 @@
 
   .text-accent-blue {
     color: rgb(var(--color-accent-blue));
+  }
+
+  .bg-accent-blue {
+    background-color: rgb(var(--color-accent-blue));
+  }
+
+  .border-accent-blue {
+    border-color: rgb(var(--color-accent-blue));
+  }
+
+  .hover\:border-accent-blue:hover {
+    border-color: rgb(var(--color-accent-blue));
+  }
+
+  .focus\:ring-accent-blue:focus {
+    --tw-ring-color: rgb(var(--color-accent-blue));
   }
 
   /* Accessible contrast for bright lime/green text */

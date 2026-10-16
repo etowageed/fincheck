@@ -1,13 +1,13 @@
 <template>
-    <div v-if="insights.length > 0" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-6">
+    <div v-if="insights.length > 0" class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4">
         <h3 class="text-sm font-bold uppercase tracking-wider text-accent-blue mb-3 flex items-center gap-2">
-            <i class="pi pi-lightbulb text-lg"></i>
+            <i class="pi pi-lightbulb text-accent-blue text-lg"></i>
             Insights
         </h3>
-        <ul class="space-y-2">
+        <ul class="space-y-2.5">
             <li v-for="(insight, index) in insights" :key="index"
-                class="flex items-center gap-2 text-sm sm:text-base font-medium text-primary leading-relaxed">
-                <i :class="insight.iconClass" class="text-lg"></i>
+                class="flex items-start sm:items-center gap-2.5 text-sm sm:text-base font-medium text-primary leading-relaxed font-numeric">
+                <i :class="insight.iconClass" class="text-lg shrink-0 mt-0.5 sm:mt-0"></i>
                 <span>{{ insight.message }}</span>
             </li>
         </ul>
@@ -17,8 +17,10 @@
 <script setup>
 import { computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
 
 const authStore = useAuthStore();
+const { formatCurrency } = useCurrencyFormatter();
 
 const props = defineProps({
     metrics: {
@@ -41,9 +43,9 @@ const insights = computed(() => {
     const list = [];
     const utilization = getBudgetUtilization.value;
     const expenseComparison = props.comparison.expensesTotal;
-    const budgetBalance = props.metrics.budgetBalance || 0; // Use the new metric
+    const budgetBalance = props.metrics.budgetBalance || 0;
 
-    // Insight 1: Budget Utilization Warning (KEEP)
+    // Insight 1: Budget Utilization Warning
     if (utilization >= 90) {
         list.push({
             message: `Attention! You've used ${utilization}% of your budget. Consider reducing spending to stay on track.`,
@@ -52,32 +54,32 @@ const insights = computed(() => {
     } else if (utilization >= 75) {
         list.push({
             message: `You are approaching your budget limit (${utilization}% used). Keep an eye on your remaining balance!`,
-            iconClass: 'pi pi-bell text-accent-red'
+            iconClass: 'pi pi-exclamation-triangle text-accent-red'
         });
     }
 
-    // Insight 2: High Spending Change (KEEP)
+    // Insight 2: High Spending Change
     if (expenseComparison?.percentChange > 10 && expenseComparison.direction === 'increase') {
         list.push({
             message: `Your expenses are up ${expenseComparison.displayValue} vs. last month. Review your Top Transactions.`,
-            iconClass: 'pi pi-arrow-up text-accent-red'
+            iconClass: 'pi pi-exclamation-triangle text-accent-red'
         });
     } else if (expenseComparison?.percentChange < -10 && expenseComparison.direction === 'decrease') {
         list.push({
             message: `Great job! Your spending is down ${Math.abs(expenseComparison.percentChange)}% this month.`,
-            iconClass: 'pi pi-arrow-down text-accent-green'
+            iconClass: 'pi pi-check-circle text-accent-green'
         });
     }
 
-    // Insight 3: Safety Net Check -> REPLACED WITH BUDGET HEALTH CHECK
+    // Insight 3: Budget Health Check
     if (budgetBalance < 0) {
         list.push({
-            message: `You are over budget. Your Budget Balance is negative. Adjust your spending immediately.`,
-            iconClass: 'pi pi-info-circle text-accent-red'
+            message: `You are over budget (${formatCurrency(budgetBalance)}). Adjust your spending immediately.`,
+            iconClass: 'pi pi-exclamation-triangle text-accent-red'
         });
     } else if (budgetBalance > 0 && props.metrics.plannedSavings > 0) {
         list.push({
-            message: `You have a positive Budget Balance. You're meeting your planned savings goal!`,
+            message: `You have a positive Budget Balance (${formatCurrency(budgetBalance)}). You're meeting your planned savings goal!`,
             iconClass: 'pi pi-check-circle text-accent-green'
         });
     }
@@ -95,13 +97,13 @@ const insights = computed(() => {
                 
                 if (projectedUtilization >= 100) {
                     list.unshift({
-                        message: `Predictive Insight: At your current rate, you are projected to exceed your budget by end of month (${projectedUtilization}% utilization).`,
-                        iconClass: 'pi pi-chart-line text-accent-red font-bold'
+                        message: `Predictive Insight: At your current rate (${formatCurrency(projectedSpend)} projected), you may exceed your budget by end of month (${projectedUtilization}% utilization).`,
+                        iconClass: 'pi pi-chart-line text-accent-blue'
                     });
                 } else if (projectedUtilization <= 85) {
                     list.unshift({
                         message: `Predictive Insight: Great pacing! You are projected to finish the month well under budget (${projectedUtilization}% utilization).`,
-                        iconClass: 'pi pi-chart-line text-accent-green font-bold'
+                        iconClass: 'pi pi-chart-line text-accent-blue'
                     });
                 }
             }

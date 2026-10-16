@@ -38,9 +38,31 @@
                 </div>
 
                 <div class="flex flex-col gap-2">
-                    <label for="category" class="font-semibold">
-                        Category <span v-if="formType === 'transaction'" class="text-muted font-normal">(Optional)</span>
-                    </label>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <label for="category" class="font-semibold">
+                            Category <span v-if="formType === 'transaction'" class="text-muted font-normal">(Optional)</span>
+                        </label>
+                        <div v-if="isCategoryGuessed" class="flex items-center gap-1">
+                            <Button
+                                icon="pi pi-check"
+                                size="small"
+                                rounded
+                                text
+                                severity="success"
+                                aria-label="Approve suggested category"
+                                @click="approveGuessedCategory"
+                            />
+                            <Button
+                                icon="pi pi-times"
+                                size="small"
+                                rounded
+                                text
+                                severity="danger"
+                                aria-label="Reject suggested category"
+                                @click="rejectGuessedCategory"
+                            />
+                        </div>
+                    </div>
                     <div class="flex gap-2">
                         <Dropdown id="category" v-model="formData.category" :options="categoryOptions"
                             optionLabel="label" optionValue="value" placeholder="Select a category"
@@ -51,11 +73,11 @@
                                     <span>{{ option.label }}</span>
                                     <div class="flex gap-1">
                                         <span v-if="option.isGlobal"
-                                            class="px-1.5 py-0.5 text-xs rounded bg-blue-100 text-blue-700">
+                                            class="px-1.5 py-0.5 text-xs rounded bg-blue-100 dark:bg-blue-950/50 text-accent-blue">
                                             Default
                                         </span>
                                         <span v-else-if="option.isOverride"
-                                            class="px-1.5 py-0.5 text-xs rounded bg-yellow-100 text-yellow-700">
+                                            class="px-1.5 py-0.5 text-xs rounded bg-amber-100 dark:bg-amber-950/50 text-accent-yellow">
                                             Custom
                                         </span>
                                     </div>
@@ -69,7 +91,7 @@
                     </div>
                     <small v-if="errors.category" class="p-error">{{ errors.category }}</small>
                     <small v-if="categoriesStore.isLoading" class="text-muted">Loading categories...</small>
-                    <small v-else-if="categoriesStore.error" class="text-red-500">{{ categoriesStore.error }}</small>
+                    <small v-else-if="categoriesStore.error" class="text-accent-red">{{ categoriesStore.error }}</small>
                 </div>
 
                 <div v-if="formType === 'transaction'" class="flex flex-col gap-2">
@@ -297,6 +319,17 @@ const descriptionFieldLabel = computed(() => props.formType === 'budget' ? 'Desc
 const descriptionFieldPlaceholder = computed(() => props.formType === 'budget' ? 'Brief description...' : 'Additional notes...');
 const submitButtonLabel = computed(() => `${editMode.value ? 'Update' : 'Add'} ${props.formType === 'budget' ? 'Item' : 'Transaction'}`);
 
+const isCategoryGuessed = ref(false);
+
+const approveGuessedCategory = () => {
+    isCategoryGuessed.value = false;
+};
+
+const rejectGuessedCategory = () => {
+    formData.value.category = '';
+    isCategoryGuessed.value = false;
+};
+
 // Rule-based auto-categorization
 watch(() => formData.value.name, (newVal) => {
     if (props.formType === 'transaction' && !editMode.value && newVal) {
@@ -311,6 +344,7 @@ watch(() => formData.value.name, (newVal) => {
         if (matchedCategory) {
             // Only update if no category is selected or it was auto-selected previously
             formData.value.category = matchedCategory._id || matchedCategory.id;
+            isCategoryGuessed.value = true;
         }
     }
 });
@@ -353,6 +387,7 @@ const openDialog = () => {
     if (!editMode.value) {
         formData.value = getInitialFormData();
     }
+    isCategoryGuessed.value = false;
     visible.value = true;
     errors.value = {};
 };

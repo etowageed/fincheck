@@ -1,38 +1,39 @@
 <template>
-  <div class="bg-primary border border-default rounded-2xl p-5 shadow-sm flex flex-col h-[520px]">
+  <div class="bg-primary border border-default rounded-lg p-4 sm:p-6 shadow-sm flex flex-col h-[540px]">
     <!-- Header -->
-    <div class="flex items-center justify-between pb-3 border-b border-default mb-3">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center text-sm font-bold shadow">
+    <div class="flex items-center justify-between gap-2 pb-3 border-b border-default mb-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-full bg-tertiary border border-default text-accent-blue flex items-center justify-center text-sm font-bold">
           <i class="pi pi-comments"></i>
         </div>
         <div>
-          <h3 class="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
-            Ask Plete AI
-          </h3>
-          <p class="text-[11px] text-secondary">Your conversational financial assistant</p>
+            <h3 class="font-bold tracking-tight text-sm text-primary">
+              Ask Plete AI
+            </h3>
+          <p class="text-xs text-secondary">Your conversational financial assistant</p>
         </div>
       </div>
       <AiQuotaBadge :quota="quota" @open-upgrade="aiStore.openUpgradeModal('askPlete')" />
     </div>
 
     <!-- Messages Container -->
-    <div ref="chatContainer" class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
-      <div v-if="aiStore.chatHistory.length === 0" class="text-center py-8 text-secondary space-y-3">
-        <div class="w-12 h-12 bg-blue-50 dark:bg-blue-950/60 rounded-full flex items-center justify-center mx-auto text-accent-blue text-xl">
-          <i class="pi pi-sparkles"></i>
+    <div ref="chatContainer" class="flex-1 overflow-y-auto space-y-3 pr-1 text-sm">
+      <div v-if="aiStore.chatHistory.length === 0" class="text-center py-6 text-secondary space-y-3">
+        <div class="w-12 h-12 bg-tertiary border border-default rounded-full flex items-center justify-center mx-auto text-accent-blue text-xl">
+          <i class="pi pi-lightbulb text-accent-blue"></i>
         </div>
-        <p class="font-medium text-gray-800 dark:text-gray-200">
-          Ask me anything about your income, expenses, budgets, or savings goals!
+        <p class="text-sm font-medium text-primary leading-relaxed">
+          Ask anything about your income, expenses, budgets, or savings goals!
         </p>
 
         <!-- Suggested Prompts -->
-        <div class="flex flex-col gap-1.5 pt-2 max-w-xs mx-auto">
+        <div class="flex flex-col gap-2 pt-2 max-w-xs mx-auto">
           <button
             v-for="prompt in suggestedPrompts"
             :key="prompt"
+            type="button"
             @click="sendSuggested(prompt)"
-            class="p-2 rounded-lg bg-secondary hover:bg-gray-200 dark:hover:bg-gray-800 text-left text-[11px] text-secondary transition-colors"
+            class="p-2.5 rounded-lg bg-secondary text-primary border border-default hover:border-accent-blue text-left text-xs font-medium transition-colors cursor-pointer"
           >
             "{{ prompt }}"
           </button>
@@ -46,11 +47,11 @@
         :class="msg.role === 'user' ? 'justify-end' : 'justify-start'"
       >
         <div
-          class="max-w-[85%] rounded-2xl px-3.5 py-2.5 leading-relaxed whitespace-pre-wrap"
+          class="max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm font-medium leading-relaxed whitespace-pre-wrap"
           :class="[
             msg.role === 'user'
-              ? 'bg-accent-blue text-white rounded-br-none'
-              : 'bg-secondary text-gray-900 dark:text-white border border-default rounded-bl-none',
+              ? 'bg-accent-blue text-white'
+              : 'bg-secondary text-primary border border-default',
           ]"
         >
           {{ msg.content }}
@@ -58,9 +59,13 @@
       </div>
 
       <div v-if="aiStore.isProcessingAskPlete" class="flex justify-start">
-        <div class="bg-secondary text-secondary border border-default rounded-2xl rounded-bl-none px-3.5 py-2.5 flex items-center gap-2">
-          <i class="pi pi-spin pi-spinner text-accent-blue"></i>
-          <span>Ask Plete is analyzing your data...</span>
+        <div class="bg-secondary text-primary border border-default rounded-lg p-3 w-full max-w-[85%] space-y-2">
+          <div class="flex items-center gap-2 text-xs text-secondary font-medium">
+            <i class="pi pi-spinner pi-spin text-accent-blue"></i>
+            <span>Ask Plete is analyzing your data...</span>
+          </div>
+          <Skeleton height="1rem" width="80%" class="rounded" />
+          <Skeleton height="1rem" width="55%" class="rounded" />
         </div>
       </div>
     </div>
@@ -68,19 +73,22 @@
     <!-- Input Footer -->
     <div class="pt-3 border-t border-default mt-2">
       <form @submit.prevent="handleSend" class="flex items-center gap-2">
-        <input
+        <InputText
           v-model="inputMsg"
           type="text"
           placeholder="Ask Plete a question..."
-          class="flex-1 p-2.5 text-xs bg-secondary border border-default rounded-xl focus:ring-2 focus:ring-accent-blue focus:outline-none text-gray-900 dark:text-white"
+          aria-label="Ask Plete a question"
+          class="flex-1 text-sm"
           :disabled="aiStore.isProcessingAskPlete"
         />
         <button
           type="submit"
           :disabled="!inputMsg.trim() || aiStore.isProcessingAskPlete"
-          class="p-2.5 bg-accent-blue hover:bg-blue-600 disabled:opacity-50 text-white rounded-xl shadow transition-colors flex items-center justify-center text-xs"
+          aria-label="Send message"
+          class="btn-cta px-3.5 py-2.5 rounded-lg shadow-sm inline-flex items-center justify-center text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <i class="pi pi-send"></i>
+          <i v-if="aiStore.isProcessingAskPlete" class="pi pi-spinner pi-spin text-accent-blue"></i>
+          <i v-else class="pi pi-sparkles"></i>
         </button>
       </form>
     </div>
@@ -89,10 +97,14 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue';
+import InputText from 'primevue/inputtext';
+import Skeleton from 'primevue/skeleton';
+import { useToast } from 'primevue/usetoast';
 import { useAiStore } from '@/stores/ai';
 import AiQuotaBadge from './AiQuotaBadge.vue';
 
 const aiStore = useAiStore();
+const toast = useToast();
 const inputMsg = ref('');
 const chatContainer = ref(null);
 
@@ -127,7 +139,12 @@ const handleSend = async () => {
   try {
     await aiStore.sendAskPleteMessage(msg);
   } catch (err) {
-    // Handled in store
+    toast.add({
+      severity: 'error',
+      summary: 'Ask Plete Error',
+      detail: err.response?.data?.message || 'Unable to process your question right now.',
+      life: 4000,
+    });
   }
 };
 </script>
