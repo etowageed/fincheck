@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 import { useErrorStore } from "@/stores/error";
+import { useAiStore } from "@/stores/ai";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -29,6 +30,16 @@ api.interceptors.response.use(
       errorMessage === "Not enough data to compare the requested periods."
     ) {
       // Reject the promise without setting a global error
+      return Promise.reject(error);
+    }
+
+    // AI quota exhausted: show the Premium upgrade modal instead of an error toast
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.code === "QUOTA_EXHAUSTED"
+    ) {
+      const aiStore = useAiStore();
+      aiStore.openUpgradeModal(error.response.data.featureKey || null);
       return Promise.reject(error);
     }
 

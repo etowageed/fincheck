@@ -47,6 +47,7 @@ const sendErrorDev = (err, res) => {
     status: err.status,
     error: err,
     message: err.message,
+    ...(err.details || {}),
     stack: err.stack,
   });
 };
@@ -57,6 +58,7 @@ const sendErrorProd = (err, res) => {
     res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
+      ...(err.details || {}),
     });
   } else {
     // Programming or other unknown error: don't leak error details
