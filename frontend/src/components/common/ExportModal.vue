@@ -85,16 +85,9 @@ const props = defineProps({
         default: 'all',
         validator: (value) => ['transactions', 'budget', 'income', 'expense', 'savings', 'all'].includes(value)
     },
-    /**
-     * The label for the button that opens the modal (used by the parent).
-     */
-    buttonLabel: {
-        type: String,
-        default: 'Export Data'
-    }
 });
 
-const emit = defineEmits(['update:visible', 'open-modal']);
+const emit = defineEmits(['update:visible']);
 
 const toast = useToast();
 const authStore = useAuthStore();

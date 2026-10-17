@@ -23,9 +23,7 @@
                             <p class="text-xs text-amber-800 dark:text-amber-300/90 mt-1 font-medium">You are using your 1 free goal. Upgrade to Premium to create unlimited goals!</p>
                         </div>
                     </div>
-                    <RouterLink to="/pricing">
-                        <Button label="Upgrade Now" class="btn-cta" size="small" />
-                    </RouterLink>
+                    <SubscriptionCtaButton action="pricing" label="Upgrade Now" size="small" />
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -94,6 +92,7 @@ import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
 import { deleteGoal as apiDeleteGoal } from '@/services/auth';
+import SubscriptionCtaButton from '@/components/common/SubscriptionCtaButton.vue';
 
 const authStore = useAuthStore();
 const { preferredCurrency: currentCurrency, preferredLocale: currentLocale, formatCurrency } = useCurrencyFormatter();

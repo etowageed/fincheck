@@ -42,26 +42,13 @@
                         <label for="category" class="font-semibold">
                             Category <span v-if="formType === 'transaction'" class="text-muted font-normal">(Optional)</span>
                         </label>
-                        <div v-if="isCategoryGuessed" class="flex items-center gap-1">
-                            <Button
-                                icon="pi pi-check"
-                                size="small"
-                                rounded
-                                text
-                                severity="success"
-                                aria-label="Approve suggested category"
-                                @click="approveGuessedCategory"
-                            />
-                            <Button
-                                icon="pi pi-times"
-                                size="small"
-                                rounded
-                                text
-                                severity="danger"
-                                aria-label="Reject suggested category"
-                                @click="rejectGuessedCategory"
-                            />
-                        </div>
+                        <SuggestionActionButtons
+                            v-if="isCategoryGuessed"
+                            approve-label="Approve suggested category"
+                            reject-label="Reject suggested category"
+                            @approve="approveGuessedCategory"
+                            @reject="rejectGuessedCategory"
+                        />
                     </div>
                     <div class="flex gap-2">
                         <Dropdown id="category" v-model="formData.category" :options="categoryOptions"
@@ -175,8 +162,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoriesStore } from '@/stores/categories';
 import { useBudgetStore } from '@/stores/budget';
-import { FinanceService } from '@/services/financeService';
-import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
+import SuggestionActionButtons from '@/components/common/SuggestionActionButtons.vue';
 
 const props = defineProps({
     formType: {

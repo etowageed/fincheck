@@ -8,85 +8,33 @@
             <!-- Navigation Section -->
             <nav class="flex-1 px-4 py-6 overflow-y-auto">
                 <div class="space-y-2">
-                    <!-- Navigation Links -->
-
-
-                    <RouterLink to="/transactions"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
-                        <i class="pi pi-list mr-3"></i>
-                        Transactions
-                    </RouterLink>
-
-                    <RouterLink to="/dashboard"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
-                        <i class="pi pi-home mr-3"></i>
-                        Dashboard
-                    </RouterLink>
-
-
-
-                    <RouterLink to="/budget"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
-                        <i class="pi pi-wallet mr-3"></i>
-                        Budget
-                    </RouterLink>
-
-                    <RouterLink to="/categories"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
-                        <i class="pi pi-tags mr-3"></i>
-                        Categories
-                    </RouterLink>
-
-                    <RouterLink to="/goals"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
-                        <i class="pi pi-star mr-3"></i>
-                        Goals
-                    </RouterLink>
-
-                    <RouterLink to="/ai-coach"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
-                        <i class="pi pi-sparkles text-accent-blue mr-3"></i>
-                        AI Financial Coach
-                    </RouterLink>
-
-                    <RouterLink v-if="isAdmin" to="/admin"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
-                        <i class="pi pi-users mr-3"></i>
-                        Admin
-                    </RouterLink>
+                    <SidebarNavLink
+                        v-for="item in navItems"
+                        :key="item.to"
+                        :to="item.to"
+                        :icon="item.icon"
+                        :label="item.label"
+                        @click="$emit('close-mobile')"
+                    />
                 </div>
             </nav>
 
             <!-- Bottom Section -->
             <div class="px-4 py-6 border-t border-default">
                 <div class="space-y-2">
-
                     <!-- Dark Mode Toggle -->
-                    <button @click="themeStore.toggle()"
-                        class="flex items-center w-full px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
-                        :aria-label="themeStore.isDark ? 'Switch to light mode' : 'Switch to dark mode'">
-                        <i :class="themeStore.isDark ? 'pi pi-sun' : 'pi pi-moon'" class="mr-3 transition-transform duration-300"></i>
-                        {{ themeStore.isDark ? 'Light Mode' : 'Dark Mode' }}
-                    </button>
+                    <ThemeToggleButton show-label />
 
                     <!-- Settings Link -->
-                    <RouterLink to="/settings"
-                        class="flex items-center px-4 py-3 font-medium text-base text-secondary rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-accent-blue transition-colors"
-                        active-class="bg-blue-50 dark:bg-blue-950/40 text-accent-blue" @click="$emit('close-mobile')">
-                        <i class="pi pi-cog mr-3"></i>
-                        Settings
-                    </RouterLink>
+                    <SidebarNavLink
+                        to="/settings"
+                        icon="pi pi-cog"
+                        label="Settings"
+                        @click="$emit('close-mobile')"
+                    />
 
                     <!-- Logout Button -->
                     <Logout />
-
                 </div>
             </div>
         </div>
@@ -95,15 +43,27 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import { useThemeStore } from '@/stores/theme';
+import SidebarNavLink from './SidebarNavLink.vue';
+import ThemeToggleButton from './ThemeToggleButton.vue';
 
 const authStore = useAuthStore();
-const themeStore = useThemeStore();
 const isAdmin = computed(() => authStore.user?.role === 'admin');
 
-const router = useRouter();
+const navItems = computed(() => {
+    const items = [
+        { to: '/transactions', icon: 'pi pi-list', label: 'Transactions' },
+        { to: '/dashboard', icon: 'pi pi-home', label: 'Dashboard' },
+        { to: '/budget', icon: 'pi pi-wallet', label: 'Budget' },
+        { to: '/categories', icon: 'pi pi-tags', label: 'Categories' },
+        { to: '/goals', icon: 'pi pi-star', label: 'Goals' },
+        { to: '/ai-coach', icon: 'pi pi-sparkles text-accent-blue', label: 'AI Financial Coach' },
+    ];
+    if (isAdmin.value) {
+        items.push({ to: '/admin', icon: 'pi pi-users', label: 'Admin' });
+    }
+    return items;
+});
 
 onMounted(async () => {
     await authStore.checkAuth();

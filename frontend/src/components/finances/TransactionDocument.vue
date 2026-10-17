@@ -3,9 +3,7 @@
         <div class="bg-primary rounded-lg shadow-sm border border-default p-4 sm:p-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-4">
                 <h3 class="text-lg font-semibold text-primary">Transactions Overview</h3>
-                <!-- MODIFIED: Use a dedicated button for export which opens the modal -->
-                <Button label="Export Transactions" icon="pi pi-download" severity="secondary" size="small"
-                    @click="showExportModal = true" />
+                <ExportButton label="Export Transactions" default-type="transactions" />
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
@@ -80,9 +78,6 @@
 
         <ItemForm ref="editTransactionFormRef" formType="transaction" :edit-item="editingTransaction"
             style="display: none;" />
-
-        <!-- NEW: Export Modal for Transactions -->
-        <ExportModal v-model:visible="showExportModal" default-type="transactions" />
     </div>
 </template>
 
@@ -90,24 +85,21 @@
 import { ref, computed } from 'vue';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useCategoriesStore } from '@/stores/categories';
-import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
 import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
-import ExportModal from '../common/ExportModal.vue'; // 👈 NEW: Import ExportModal
+import ExportButton from '../common/ExportButton.vue';
 
 const transactionsStore = useTransactionsStore();
 const categoriesStore = useCategoriesStore();
-const { formatCurrency, formatDate: formatComposedDate } = useCurrencyFormatter(); // 👈 MODIFIED: Destructure function
+const { formatCurrency, formatDate: formatComposedDate } = useCurrencyFormatter();
 
 // Refs
 const deletingTransactionId = ref(null);
 const addTransactionFormRef = ref(null);
 const editTransactionFormRef = ref(null);
 const editingTransaction = ref(null);
-const showExportModal = ref(false); // 👈 NEW: State for the export modal
 
-// Menu configurations
-// REMOVED headerMenuItems because we use a dedicated button now.
 const transactionMenuItems = [
     {
         label: 'Edit',
@@ -125,8 +117,6 @@ const transactionMenuItems = [
     }
 ];
 
-// Utility functions
-
 // Utility function to format date for grouping key
 const formatDateKey = (dateValue) => {
     if (!dateValue) return 'Unknown Date';
@@ -141,7 +131,7 @@ const formatDateHeader = (dateKey) => {
     return formatComposedDate(dateKey, 'long');
 };
 
-// NEW COMPUTED PROPERTY: Groups transactions by day
+// Groups transactions by day
 const groupedTransactions = computed(() => {
     if (!transactionsStore.recentTransactions || transactionsStore.recentTransactions.length === 0) {
         return {};
@@ -170,22 +160,9 @@ const groupedTransactions = computed(() => {
     return sortedGroups;
 });
 
-
 const getCategoryName = (categoryId) => {
     const category = categoriesStore.getCategoryById(categoryId);
     return category?.name || 'Uncategorized';
-};
-
-const formatDate = (dateValue) => {
-    if (!dateValue) return 'No date';
-    try {
-        const date = new Date(dateValue);
-        if (isNaN(date.getTime())) return 'Invalid date';
-        // Display only the time or a very simple format within the group item
-        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    } catch (error) {
-        return 'Invalid date';
-    }
 };
 
 const getTypeClass = (type) => {
@@ -209,15 +186,6 @@ const getAmountClass = (amount, type) => {
             return 'text-accent-blue';
         default:
             return 'text-accent-red'; // expense
-    }
-};
-
-// Action handlers
-const handleHeaderAction = ({ action }) => {
-    if (action === 'export') {
-        // The export button now opens the modal directly, so this action is not strictly needed here
-        // But if we kept the dropdown, this would open the modal:
-        showExportModal.value = true;
     }
 };
 

@@ -61,16 +61,13 @@
             />
 
             <div class="flex justify-end">
-              <button
-                type="button"
+              <AiCtaButton
+                label="Ask Coach"
+                :loading="aiStore.isProcessingCoach"
+                :disabled="!coachQuestion.trim()"
+                class="py-2.5"
                 @click="handleAskCoach"
-                :disabled="!coachQuestion.trim() || aiStore.isProcessingCoach"
-                class="btn-cta px-4 py-2.5 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <i v-if="aiStore.isProcessingCoach" class="pi pi-spinner pi-spin text-accent-blue mr-2"></i>
-                <i v-else class="pi pi-sparkles mr-2"></i>
-                <span>Ask Coach</span>
-              </button>
+              />
             </div>
           </div>
 
@@ -126,15 +123,12 @@
             <p class="text-sm font-medium text-secondary max-w-md mx-auto leading-relaxed">
               Analyze your current spending velocity and recurring items to generate an end-of-month budget forecast.
             </p>
-            <button
-              type="button"
+            <AiCtaButton
+              label="Generate Budget Forecast"
+              :loading="aiStore.isProcessingForecast"
+              class="px-5 py-2.5"
               @click="handleFetchForecast"
-              :disabled="aiStore.isProcessingForecast"
-              class="btn-cta px-5 py-2.5 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50"
-            >
-              <i class="pi pi-sparkles mr-2"></i>
-              <span>Generate Budget Forecast</span>
-            </button>
+            />
           </div>
 
           <div v-else class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-3">
@@ -184,16 +178,13 @@
             />
 
             <div class="flex justify-end">
-              <button
-                type="button"
+              <AiCtaButton
+                label="Run Simulation"
+                :loading="aiStore.isProcessingScenario"
+                :disabled="!scenarioText.trim()"
+                class="py-2.5"
                 @click="handleRunScenario"
-                :disabled="!scenarioText.trim() || aiStore.isProcessingScenario"
-                class="btn-cta px-4 py-2.5 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <i v-if="aiStore.isProcessingScenario" class="pi pi-spinner pi-spin text-accent-blue mr-2"></i>
-                <i v-else class="pi pi-sparkles mr-2"></i>
-                <span>Run Simulation</span>
-              </button>
+              />
             </div>
           </div>
 
@@ -247,15 +238,12 @@
             <p class="text-sm font-medium text-secondary max-w-md mx-auto leading-relaxed">
               Generate an executive AI report compiling income, outflow, budget performance, and strategic tips.
             </p>
-            <button
-              type="button"
+            <AiCtaButton
+              label="Generate Report"
+              :loading="aiStore.isProcessingReport"
+              class="px-5 py-2.5"
               @click="handleFetchReport"
-              :disabled="aiStore.isProcessingReport"
-              class="btn-cta px-5 py-2.5 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50"
-            >
-              <i class="pi pi-sparkles mr-2"></i>
-              <span>Generate Report</span>
-            </button>
+            />
           </div>
 
           <div v-else class="bg-primary rounded-lg shadow-sm border border-default p-4 mb-4 space-y-3">
@@ -306,15 +294,12 @@
           <div v-else-if="aiStore.insights.length === 0" class="text-center py-8 space-y-3 bg-secondary rounded-lg border border-default p-6">
             <i class="pi pi-lightbulb text-2xl text-accent-blue"></i>
             <p class="text-sm font-medium text-secondary">Analyze your records for automated spending insights.</p>
-            <button
-              type="button"
+            <AiCtaButton
+              label="Generate Insights"
+              :loading="aiStore.isProcessingInsights"
+              class="px-5 py-2.5"
               @click="handleFetchInsights"
-              :disabled="aiStore.isProcessingInsights"
-              class="btn-cta px-5 py-2.5 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50"
-            >
-              <i class="pi pi-sparkles mr-2"></i>
-              <span>Generate Insights</span>
-            </button>
+            />
           </div>
 
           <div v-else class="space-y-4">
@@ -360,6 +345,7 @@ import { useToast } from 'primevue/usetoast';
 import { useAiStore } from '@/stores/ai';
 import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
 import AiQuotaBadge from '@/components/ai/AiQuotaBadge.vue';
+import AiCtaButton from '@/components/ai/AiCtaButton.vue';
 import AskPleteWidget from '@/components/ai/AskPleteWidget.vue';
 
 const aiStore = useAiStore();

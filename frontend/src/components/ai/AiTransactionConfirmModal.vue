@@ -64,26 +64,10 @@
               <span class="font-numeric font-bold text-sm text-primary">
                 {{ formatCurrency(item.amount || 0, true) }}
               </span>
-              <div class="flex items-center gap-1">
-                <Button
-                  icon="pi pi-check"
-                  size="small"
-                  rounded
-                  text
-                  severity="success"
-                  aria-label="Approve suggestion"
-                  @click="approveItemConfidence(index)"
-                />
-                <Button
-                  icon="pi pi-times"
-                  size="small"
-                  rounded
-                  text
-                  severity="danger"
-                  aria-label="Reject suggestion"
-                  @click="removeItem(index)"
-                />
-              </div>
+              <SuggestionActionButtons
+                @approve="approveItemConfidence(index)"
+                @reject="removeItem(index)"
+              />
             </div>
           </div>
 
@@ -166,16 +150,14 @@
             @click="handleCancel"
             :disabled="isSaving"
           />
-          <button
-            type="button"
+          <AiCtaButton
+            :loading="isSaving"
+            :disabled="selectedCount === 0"
+            class="font-numeric"
             @click="handleConfirm"
-            :disabled="selectedCount === 0 || isSaving"
-            class="btn-cta px-4 py-2 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <i v-if="isSaving" class="pi pi-spinner pi-spin text-accent-blue mr-2"></i>
-            <i v-else class="pi pi-sparkles mr-2"></i>
-            <span class="font-numeric">Confirm &amp; Save ({{ selectedCount }})</span>
-          </button>
+            Confirm &amp; Save ({{ selectedCount }})
+          </AiCtaButton>
         </div>
       </div>
     </div>
@@ -195,6 +177,8 @@ import { useCategoriesStore } from '@/stores/categories';
 import { useTransactionsStore } from '@/stores/transactions';
 import { useDashboardStore } from '@/stores/dashboard';
 import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
+import SuggestionActionButtons from '@/components/common/SuggestionActionButtons.vue';
+import AiCtaButton from './AiCtaButton.vue';
 
 const aiStore = useAiStore();
 const categoriesStore = useCategoriesStore();

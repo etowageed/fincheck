@@ -4,9 +4,7 @@
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold text-primary">Budget Overview</h3>
                 <div class="flex gap-2">
-                    <!-- NEW: Dedicated Export Button for Budget -->
-                    <Button label="Export Budget" icon="pi pi-download" severity="secondary" size="small"
-                        @click="showExportModal = true" />
+                    <ExportButton label="Export Budget" default-type="budget" />
 
                     <DropdownMenu :items="headerMenuItems" :entity="budget" @action="handleHeaderAction" />
                 </div>
@@ -121,19 +119,16 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <p class="font-semibold text-sm text-muted">{{ formatCurrency(item.amount) }}</p>
-                        <div class="flex gap-1">
-                            <Button icon="pi pi-check" size="small" rounded text severity="success"
-                                @click="handleApproveIndividual(item)" v-tooltip.top="'Add to budget'" />
-                            <Button icon="pi pi-times" size="small" rounded text severity="danger"
-                                @click="handleDismissIndividual(item)" v-tooltip.top="'Dismiss suggestion'" />
-                        </div>
+                        <SuggestionActionButtons
+                            approve-tooltip="Add to budget"
+                            reject-tooltip="Dismiss suggestion"
+                            @approve="handleApproveIndividual(item)"
+                            @reject="handleDismissIndividual(item)"
+                        />
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Optional: Preview of items in a collapsed or separate area if you want, 
-             but the user wanted it like the rollover alert which is more of a prompt -->
 
         <ItemForm ref="editBudgetFormRef" formType="budget" :edit-item="editingItem"
             @budget-item-updated="handleBudgetItemChange" style="display: none;" />
@@ -159,9 +154,6 @@
                 </div>
             </template>
         </Dialog>
-
-        <!-- NEW: Export Modal for Budget -->
-        <ExportModal v-model:visible="showExportModal" default-type="budget" />
     </div>
 </template>
 
@@ -169,10 +161,11 @@
 import { ref } from 'vue';
 import { useBudgetStore } from '@/stores/budget';
 import { useCategoriesStore } from '@/stores/categories';
-import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter'; // 👈 MODIFIED: Import composable
+import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
 import ItemForm from './ItemForm.vue';
 import DropdownMenu from '../common/DropdownMenu.vue';
-import ExportModal from '../common/ExportModal.vue'; // 👈 NEW: Import ExportModal
+import ExportButton from '../common/ExportButton.vue';
+import SuggestionActionButtons from '../common/SuggestionActionButtons.vue';
 
 const props = defineProps({
     budget: {
@@ -183,13 +176,12 @@ const props = defineProps({
 
 const budgetStore = useBudgetStore();
 const categoriesStore = useCategoriesStore();
-const { formatCurrency, preferredCurrency, preferredLocale, formatDate } = useCurrencyFormatter(); // 👈 MODIFIED: Destructure function
+const { formatCurrency, preferredCurrency, preferredLocale, formatDate } = useCurrencyFormatter();
 
 // Form refs
 const addBudgetFormRef = ref(null);
 const editBudgetFormRef = ref(null);
 const editingItem = ref(null);
-const showExportModal = ref(false); // 👈 NEW: State for the export modal
 
 // Edit income dialog refs
 const editIncomeVisible = ref(false);

@@ -3,20 +3,8 @@
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
             <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-primary leading-tight">Transactions</h1>
             <div class="flex items-center gap-2 flex-wrap">
-                <button
-                    type="button"
-                    @click="showQuickLog = true"
-                    class="px-3.5 py-2 text-sm font-semibold rounded-lg bg-secondary text-primary border border-default hover:border-accent-blue transition-colors inline-flex items-center cursor-pointer"
-                >
-                    <i class="pi pi-sparkles text-accent-blue mr-2"></i> Magic Entry
-                </button>
-                <button
-                    type="button"
-                    @click="showReceiptScan = true"
-                    class="btn-cta px-3.5 py-2 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer"
-                >
-                    <i class="pi pi-sparkles mr-2"></i> Scan Receipt
-                </button>
+                <QuickLogButton @click="showQuickLog = true" />
+                <ScanReceiptButton @click="showReceiptScan = true" />
             </div>
         </div>
 
@@ -30,8 +18,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useTransactionsStore } from '@/stores/transactions';
 import UserTransactions from '@/components/finances/UserTransactions.vue';
+import QuickLogButton from '@/components/ai/QuickLogButton.vue';
+import ScanReceiptButton from '@/components/ai/ScanReceiptButton.vue';
 import QuickLogModal from '@/components/ai/QuickLogModal.vue';
 import ReceiptScanModal from '@/components/ai/ReceiptScanModal.vue';
 import AiTransactionConfirmModal from '@/components/ai/AiTransactionConfirmModal.vue';
@@ -42,13 +31,12 @@ import { useAuthStore } from '@/stores/auth';
 const showQuickLog = ref(false);
 const showReceiptScan = ref(false);
 
-const transactionsStore = useTransactionsStore();
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
+const authStore = useAuthStore();
 
 onMounted(() => {
-    const route = useRoute();
-    const router = useRouter();
-    const toast = useToast();
-    const authStore = useAuthStore();
 
     if (route.query.payment === 'success') {
         toast.add({

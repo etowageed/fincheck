@@ -7,20 +7,8 @@
             </div>
 
             <div class="flex items-center gap-2 flex-wrap">
-                <button
-                    type="button"
-                    @click="showQuickLog = true"
-                    class="px-3.5 py-2 text-sm font-semibold rounded-lg bg-secondary text-primary border border-default hover:border-accent-blue transition-colors inline-flex items-center cursor-pointer"
-                >
-                    <i class="pi pi-sparkles text-accent-blue mr-2"></i> AI Quick-Log
-                </button>
-                <button
-                    type="button"
-                    @click="showReceiptScan = true"
-                    class="btn-cta px-3.5 py-2 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer"
-                >
-                    <i class="pi pi-sparkles mr-2"></i> Scan Receipt
-                </button>
+                <QuickLogButton @click="showQuickLog = true" />
+                <ScanReceiptButton @click="showReceiptScan = true" />
                 <TimelineFilter />
             </div>
         </div>
@@ -51,6 +39,8 @@ import CategoryBreakdown from '@/components/finances/CategoryBreakdown.vue';
 import TopTransactions from '@/components/finances/TopTransactions.vue';
 import CategoryTransactionsModal from '@/components/finances/CategoryTransactionsModal.vue';
 import TimelineFilter from '@/components/common/TimelineFilter.vue';
+import QuickLogButton from '@/components/ai/QuickLogButton.vue';
+import ScanReceiptButton from '@/components/ai/ScanReceiptButton.vue';
 import QuickLogModal from '@/components/ai/QuickLogModal.vue';
 import ReceiptScanModal from '@/components/ai/ReceiptScanModal.vue';
 import AiTransactionConfirmModal from '@/components/ai/AiTransactionConfirmModal.vue';

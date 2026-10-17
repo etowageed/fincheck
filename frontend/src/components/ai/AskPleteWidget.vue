@@ -28,15 +28,14 @@
 
         <!-- Suggested Prompts -->
         <div class="flex flex-col gap-2 pt-2 max-w-xs mx-auto">
-          <button
+          <PromptChip
             v-for="prompt in suggestedPrompts"
             :key="prompt"
-            type="button"
+            :label="prompt"
+            quoted
+            class="p-2.5 text-left font-medium"
             @click="sendSuggested(prompt)"
-            class="p-2.5 rounded-lg bg-secondary text-primary border border-default hover:border-accent-blue text-left text-xs font-medium transition-colors cursor-pointer"
-          >
-            "{{ prompt }}"
-          </button>
+          />
         </div>
       </div>
 
@@ -81,15 +80,13 @@
           class="flex-1 text-sm"
           :disabled="aiStore.isProcessingAskPlete"
         />
-        <button
+        <AiCtaButton
           type="submit"
-          :disabled="!inputMsg.trim() || aiStore.isProcessingAskPlete"
+          :loading="aiStore.isProcessingAskPlete"
+          :disabled="!inputMsg.trim()"
           aria-label="Send message"
-          class="btn-cta px-3.5 py-2.5 rounded-lg shadow-sm inline-flex items-center justify-center text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <i v-if="aiStore.isProcessingAskPlete" class="pi pi-spinner pi-spin text-accent-blue"></i>
-          <i v-else class="pi pi-sparkles"></i>
-        </button>
+          class="px-3.5 py-2.5"
+        />
       </form>
     </div>
   </div>
@@ -102,6 +99,8 @@ import Skeleton from 'primevue/skeleton';
 import { useToast } from 'primevue/usetoast';
 import { useAiStore } from '@/stores/ai';
 import AiQuotaBadge from './AiQuotaBadge.vue';
+import AiCtaButton from './AiCtaButton.vue';
+import PromptChip from './PromptChip.vue';
 
 const aiStore = useAiStore();
 const toast = useToast();

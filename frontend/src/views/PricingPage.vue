@@ -43,10 +43,13 @@
                         </ul>
                     </div>
 
-                    <Button :label="authStore.isPremium ? 'Manage Subscription' : 'Upgrade to Premium'" icon="pi pi-sparkles"
-                        size="large" class="w-full btn-cta" :loading="isLoading"
-                        :disabled="!authStore.isAuthenticated || isLoading"
-                        @click="handleUpgrade" />
+                    <SubscriptionCtaButton
+                        action="auto"
+                        icon="pi pi-sparkles"
+                        size="large"
+                        class="w-full"
+                        :disabled="!authStore.isAuthenticated"
+                    />
                 </div>
 
                 <!-- Free Card -->
@@ -91,66 +94,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
-import { useToast } from 'primevue/usetoast';
+import SubscriptionCtaButton from '@/components/common/SubscriptionCtaButton.vue';
 
 const authStore = useAuthStore();
-const toast = useToast();
-const isLoading = ref(false);
-
-const handleUpgrade = async () => {
-    if (authStore.isPremium) {
-        isLoading.value = true;
-        try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_BASE_URL}/payment/portal`,
-                {},
-                { withCredentials: true }
-            );
-            if (response.data?.portalUrl) {
-                window.location.href = response.data.portalUrl;
-            } else {
-                throw new Error("Did not receive a valid portal URL.");
-            }
-        } catch (error) {
-            console.error('Portal error:', error);
-            toast.add({
-                severity: 'error',
-                summary: 'Access Failed',
-                detail: error.response?.data?.message || 'Failed to access subscription portal.',
-                life: 5000,
-            });
-        } finally {
-            isLoading.value = false;
-        }
-        return;
-    }
-
-    isLoading.value = true;
-    try {
-        const response = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL}/payment/checkout`,
-            {},
-            { withCredentials: true }
-        );
-        const sessionUrl = response.data?.sessionUrl;
-        if (sessionUrl) {
-            window.location.href = sessionUrl;
-        } else {
-            throw new Error("Did not receive a valid session URL.");
-        }
-    } catch (error) {
-        console.error('Checkout error:', error);
-        toast.add({
-            severity: 'error',
-            summary: 'Upgrade Failed',
-            detail: error.response?.data?.message || 'Failed to initiate checkout.',
-            life: 5000,
-        });
-    } finally {
-        isLoading.value = false;
-    }
-};
 </script>

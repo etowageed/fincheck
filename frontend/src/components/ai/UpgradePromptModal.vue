@@ -36,16 +36,13 @@
       </div>
 
       <div class="pt-2 flex flex-col gap-2">
-        <button
-          type="button"
-          @click="goToUpgrade"
-          :disabled="isCheckoutLoading"
-          class="btn-cta w-full py-2.5 px-4 text-sm rounded-lg shadow-sm flex items-center justify-center cursor-pointer disabled:opacity-50"
-        >
-          <i v-if="isCheckoutLoading" class="pi pi-spinner pi-spin text-accent-blue mr-2"></i>
-          <i v-else class="pi pi-sparkles mr-2"></i>
-          <span>Upgrade to Premium</span>
-        </button>
+        <SubscriptionCtaButton
+          action="checkout"
+          label="Upgrade to Premium"
+          fallback-to-pricing
+          class="w-full"
+          @completed="visible = false"
+        />
         <Button
           type="button"
           label="Maybe Later"
@@ -61,16 +58,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed } from 'vue';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import { useAiStore } from '@/stores/ai';
-import api from '@/services/api';
+import SubscriptionCtaButton from '@/components/common/SubscriptionCtaButton.vue';
 
 const aiStore = useAiStore();
-const router = useRouter();
-const isCheckoutLoading = ref(false);
 
 const visible = computed({
   get: () => aiStore.showUpgradePromptModal,
@@ -84,21 +78,4 @@ const featureName = computed(() => {
   if (!key) return 'Monthly Quota';
   return aiStore.featuresQuota[key]?.name || 'Feature';
 });
-
-const goToUpgrade = async () => {
-  isCheckoutLoading.value = true;
-  try {
-    const response = await api.post('/payment/checkout');
-    if (response.data?.sessionUrl) {
-      window.location.href = response.data.sessionUrl;
-    } else {
-      router.push('/pricing');
-    }
-  } catch (err) {
-    router.push('/pricing');
-  } finally {
-    isCheckoutLoading.value = false;
-    visible.value = false;
-  }
-};
 </script>

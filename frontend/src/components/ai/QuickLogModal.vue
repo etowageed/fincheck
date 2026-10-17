@@ -50,15 +50,14 @@
       <div>
         <span class="text-xs text-muted block mb-2 font-semibold uppercase tracking-wider">Try an example:</span>
         <div class="flex flex-wrap gap-2">
-          <button
+          <PromptChip
             v-for="example in examples"
             :key="example"
-            type="button"
+            :label="example"
+            quoted
+            class="font-numeric"
             @click="inputText = example"
-            class="text-xs px-3 py-1.5 rounded-lg bg-secondary text-primary border border-default hover:border-accent-blue transition-colors cursor-pointer font-numeric"
-          >
-            "{{ example }}"
-          </button>
+          />
         </div>
       </div>
 
@@ -73,16 +72,12 @@
           @click="visible = false"
           :disabled="aiStore.isProcessingQuickLog"
         />
-        <button
-          type="button"
+        <AiCtaButton
+          label="Parse Expense"
+          :loading="aiStore.isProcessingQuickLog"
+          :disabled="!inputText.trim()"
           @click="handleSubmit"
-          :disabled="!inputText.trim() || aiStore.isProcessingQuickLog"
-          class="btn-cta px-4 py-2 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <i v-if="aiStore.isProcessingQuickLog" class="pi pi-spinner pi-spin text-accent-blue mr-2"></i>
-          <i v-else class="pi pi-sparkles mr-2"></i>
-          <span>Parse Expense</span>
-        </button>
+        />
       </div>
     </div>
   </Dialog>
@@ -98,6 +93,8 @@ import { useToast } from 'primevue/usetoast';
 import { useAiStore } from '@/stores/ai';
 import { useCurrencyFormatter } from '@/composables/useCurrencyFormatter';
 import AiQuotaBadge from './AiQuotaBadge.vue';
+import AiCtaButton from './AiCtaButton.vue';
+import PromptChip from './PromptChip.vue';
 
 const props = defineProps({
   modelValue: {

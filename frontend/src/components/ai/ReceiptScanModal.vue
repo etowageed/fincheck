@@ -108,16 +108,12 @@
           @click="visible = false"
           :disabled="aiStore.isProcessingReceipt"
         />
-        <button
-          type="button"
+        <AiCtaButton
+          label="Scan & Extract"
+          :loading="aiStore.isProcessingReceipt"
+          :disabled="!selectedFile"
           @click="handleSubmit"
-          :disabled="!selectedFile || aiStore.isProcessingReceipt"
-          class="btn-cta px-4 py-2 text-sm rounded-lg shadow-sm inline-flex items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <i v-if="aiStore.isProcessingReceipt" class="pi pi-spinner pi-spin text-accent-blue mr-2"></i>
-          <i v-else class="pi pi-sparkles mr-2"></i>
-          <span>Scan &amp; Extract</span>
-        </button>
+        />
       </div>
     </div>
   </Dialog>
@@ -131,6 +127,7 @@ import Skeleton from 'primevue/skeleton';
 import { useToast } from 'primevue/usetoast';
 import { useAiStore } from '@/stores/ai';
 import AiQuotaBadge from './AiQuotaBadge.vue';
+import AiCtaButton from './AiCtaButton.vue';
 
 const props = defineProps({
   modelValue: {

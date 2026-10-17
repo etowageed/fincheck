@@ -133,15 +133,13 @@
           <!-- Quick Preset Chips -->
           <div class="flex flex-wrap items-center gap-2 pt-1">
             <span class="text-xs font-semibold text-muted mr-1">Quick fill:</span>
-            <button
+            <PromptChip
               v-for="preset in incomePresets"
               :key="preset"
-              type="button"
+              :label="formatSampleAmount(preset)"
+              class="py-1 font-bold bg-primary font-numeric"
               @click="monthlyIncome = preset"
-              class="px-3 py-1 rounded-lg text-xs font-bold bg-primary text-primary border border-default hover:border-accent-blue transition-colors cursor-pointer font-numeric"
-            >
-              {{ formatSampleAmount(preset) }}
-            </button>
+            />
           </div>
         </div>
 
@@ -203,14 +201,11 @@
                 Type expenses in plain English like <em>"{{ formatSampleAmount(15) }} lunch yesterday"</em>. AI extracts the merchant, date, and category for your confirmation.
               </p>
             </div>
-            <button
-              type="button"
+            <QuickLogButton
+              label="Try Magic Quick-Log Now"
+              class="w-full justify-center"
               @click="openQuickLogDemo"
-              class="w-full py-2 px-3 rounded-lg bg-primary border border-default hover:border-accent-blue text-xs font-bold text-primary inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <i class="pi pi-sparkles text-accent-blue"></i>
-              <span>Try Magic Quick-Log Now</span>
-            </button>
+            />
           </div>
 
           <!-- Card 2: Smart Receipt OCR -->
@@ -229,14 +224,11 @@
                 Upload a photo of a paper receipt or handwritten note. Vision AI extracts the total, merchant, and date in seconds.
               </p>
             </div>
-            <button
-              type="button"
+            <ScanReceiptButton
+              label="Try Receipt Scanner"
+              class="w-full justify-center"
               @click="openReceiptScanDemo"
-              class="w-full py-2 px-3 rounded-lg bg-primary border border-default hover:border-accent-blue text-xs font-bold text-primary inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <i class="pi pi-camera text-accent-blue"></i>
-              <span>Try Receipt Scanner</span>
-            </button>
+            />
           </div>
 
           <!-- Card 3: AI Financial Coach & Simulator -->
@@ -431,6 +423,9 @@ import { useToast } from 'primevue/usetoast';
 import ProgressBar from 'primevue/progressbar';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
+import QuickLogButton from '@/components/ai/QuickLogButton.vue';
+import ScanReceiptButton from '@/components/ai/ScanReceiptButton.vue';
+import PromptChip from '@/components/ai/PromptChip.vue';
 import QuickLogModal from '@/components/ai/QuickLogModal.vue';
 import ReceiptScanModal from '@/components/ai/ReceiptScanModal.vue';
 import AiTransactionConfirmModal from '@/components/ai/AiTransactionConfirmModal.vue';
