@@ -10,9 +10,9 @@ const routes = [
       hideSidebar: true,
       hideHeader: true,
       title:
-        "Plete Finance — Track Spending, Set Budgets & Hit Your Savings Goals",
+        "Plete Finance — AI-Powered Expense Tracker, Receipt OCR & Financial Coach",
       description:
-        "Plete Finance helps you track spending, set budgets, and reach your savings goals — all in one simple, visual dashboard. Free to start.",
+        "Track spending, log expenses in plain English, scan receipts with AI, simulate savings scenarios, and master your budget in one visual dashboard. Free to start.",
     },
   },
   {
@@ -34,7 +34,7 @@ const routes = [
       hideSidebar: true,
       title: "Sign Up — Plete Finance",
       description:
-        "Create your free Plete Finance account and start tracking your income, expenses, and savings goals today.",
+        "Create your free Plete Finance account and start tracking your income, expenses, and savings goals with AI intelligence today.",
     },
   },
   {
@@ -44,9 +44,9 @@ const routes = [
     meta: {
       requiresAuth: true,
       hideSidebar: true,
-      title: "Get Started — Plete Finance",
+      title: "Welcome & Account Setup — Plete Finance",
       description:
-        "Set up your Plete Finance account with your preferences and categories.",
+        "Configure your currency, monthly budget baseline, and explore your Plete AI Financial Co-Pilot.",
     },
   },
   {
