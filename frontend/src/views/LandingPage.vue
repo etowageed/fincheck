@@ -7,20 +7,18 @@
         class="max-w-7xl mx-auto bg-white/80 backdrop-blur-xl border border-ink-100/80 rounded-full px-5 sm:px-6 py-3 flex justify-between items-center shadow-lg shadow-ink-900/5">
         <div class="flex items-center gap-3 cursor-pointer">
           <BrandLogo :size="24" variant="on-light" />
-          <span
-            class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-ink-900 text-white tracking-wide">
-            <i class="pi pi-sparkles text-[10px]" style="color: #D1FF4F"></i>
-            AI-Powered
-          </span>
+
         </div>
 
         <div class="flex items-center gap-3 sm:gap-6 md:gap-8 font-medium text-sm text-ink-800">
-          <a href="#ai-suite" class="hidden md:inline-flex items-center gap-1.5 hover:text-pop-purple transition-colors font-semibold">
+          <a href="#ai-suite"
+            class="hidden md:inline-flex items-center gap-1.5 hover:text-pop-purple transition-colors font-semibold">
             <i class="pi pi-sparkles text-pop-purple text-xs"></i>
             Plete AI
           </a>
           <a href="#features" class="hidden md:inline-block hover:text-pop-purple transition-colors">Features</a>
-          <a href="#how-it-works" class="hidden lg:inline-block hover:text-pop-purple transition-colors">How It Works</a>
+          <a href="#how-it-works" class="hidden lg:inline-block hover:text-pop-purple transition-colors">How It
+            Works</a>
           <a href="#pricing" class="hidden md:inline-block hover:text-pop-purple transition-colors">Pricing</a>
           <router-link to="/login"
             class="hover:text-pop-purple transition-colors text-xs md:text-sm font-bold md:font-semibold">
@@ -38,27 +36,34 @@
 
     <!-- Hero Section -->
     <section class="pt-36 md:pt-44 pb-24 px-4 relative overflow-hidden">
-      <div class="absolute top-16 left-10 w-80 h-80 bg-pop-purple/15 rounded-full blur-[110px] pointer-events-none"></div>
-      <div class="absolute top-40 right-10 w-96 h-96 bg-pop-lime/20 rounded-full blur-[120px] pointer-events-none"></div>
+      <div class="absolute top-16 left-10 w-80 h-80 bg-pop-purple/15 rounded-full blur-[110px] pointer-events-none">
+      </div>
+      <div class="absolute top-40 right-10 w-96 h-96 bg-pop-lime/20 rounded-full blur-[120px] pointer-events-none">
+      </div>
 
       <div class="max-w-7xl mx-auto text-center relative z-10">
         <!-- Announcement Pill -->
-        <a
-          href="#ai-suite"
+        <a href="#ai-suite"
           class="inline-flex items-center gap-2 mb-7 px-4 py-1.5 rounded-full bg-ink-900 text-white border border-ink-800 font-semibold text-xs tracking-wide shadow-md hover:border-pop-purple transition-colors">
-          <span class="px-2 py-0.5 rounded-full bg-pop-purple text-white font-extrabold text-[10px] uppercase">New</span>
-          <span>Introducing Plete AI — Magic Entry, Receipt OCR &amp; Personal Financial Coach</span>
+          <span>Your Personal</span>
+          <span class="px-2 py-0.5 rounded-full bg-pop-purple text-white font-extrabold text-[10px] uppercase">AI
+            Powered</span>
+          <span>Financial Coach</span>
           <i class="pi pi-arrow-right text-[10px]" style="color: #D1FF4F"></i>
         </a>
 
-        <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[1.06] mb-6 text-ink-900 max-w-5xl mx-auto">
-          Know where your money goes.<br class="hidden sm:inline" />
-          Let <span class="text-transparent bg-clip-text bg-gradient-to-r from-pop-purple via-pop-pink to-amber-500">AI show you</span> where it grows.
-        </h1>
+        <h1
+          class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[1.06] mb-6 text-ink-900 max-w-5xl mx-auto">
+          Know where your money<span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-pop-purple via-pop-pink to-amber-500">
+            goes</span> and let AI help it <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-pop-purple via-pop-pink to-amber-500">
+            grow</span>
+        </h1><br>
 
         <p class="text-lg sm:text-xl md:text-2xl text-ink-800/75 max-w-3xl mx-auto mb-10 font-medium leading-relaxed">
-          Log expenses in plain English, scan crumpled receipts in seconds, simulate
-          <span class="text-ink-900 font-bold">"what-if"</span> savings scenarios, and get personalized coaching grounded in your real financial records.
+          Log transactions in natural language, scan crumpled receipts in seconds, run "what-if" financial simulations,
+          and get custom coaching based on your spending/earning habits.
         </p>
 
         <!-- Dual CTAs -->
@@ -66,12 +71,11 @@
           <router-link to="/signup">
             <button
               class="btn-cta px-8 py-4 bg-pop-lime text-ink-900 rounded-2xl font-black text-base sm:text-lg shadow-[0_12px_40px_-10px_rgba(132,204,22,0.55)] hover:-translate-y-0.5 transition-all inline-flex items-center gap-2.5 cursor-pointer">
-              <i class="pi pi-sparkles text-ink-900"></i>
-              <span>Start Free — With Monthly AI Credits</span>
+
+              <span>Get Started for Free</span>
             </button>
           </router-link>
-          <a
-            href="#ai-suite"
+          <a href="#ai-suite"
             class="px-7 py-4 bg-white text-ink-900 border border-ink-100 hover:border-pop-purple/40 rounded-2xl font-bold text-base sm:text-lg shadow-sm hover:shadow-md transition-all inline-flex items-center gap-2">
             <span>See Plete AI in Action</span>
             <i class="pi pi-arrow-down text-xs text-pop-purple"></i>
@@ -79,7 +83,8 @@
         </div>
 
         <!-- Trust Micro-Copy -->
-        <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs sm:text-sm font-semibold text-ink-800/60 mb-16">
+        <div
+          class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs sm:text-sm font-semibold text-ink-800/60 mb-16">
           <span class="inline-flex items-center gap-1.5">
             <i class="pi pi-check-circle text-emerald-600"></i> No credit card required
           </span>
@@ -87,10 +92,10 @@
             <i class="pi pi-shield text-pop-purple"></i> Human-confirmed AI entries
           </span>
           <span class="inline-flex items-center gap-1.5">
-            <i class="pi pi-bolt text-amber-500"></i> 15 Free AI Quick-Logs / mo
+            <i class="pi pi-bolt text-amber-500"></i> Free Magic Entries
           </span>
           <span class="inline-flex items-center gap-1.5">
-            <i class="pi pi-globe text-pop-cyan"></i> Multi-currency (USD, EUR, GBP, NGN, JPY)
+            <i class="pi pi-globe text-pop-cyan"></i> Multi-currency Support
           </span>
         </div>
 
@@ -102,7 +107,8 @@
             <!-- Top Window Bar -->
             <div class="flex flex-wrap justify-between items-center gap-4 pb-6 mb-6 border-b border-ink-100">
               <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-ink-900 text-white flex items-center justify-center font-extrabold text-sm">
+                <div
+                  class="w-11 h-11 rounded-2xl bg-ink-900 text-white flex items-center justify-center font-extrabold text-sm">
                   PF
                 </div>
                 <div>
@@ -112,11 +118,13 @@
                       AI Co-Pilot Active
                     </span>
                   </div>
-                  <p class="text-xs text-ink-400 font-medium">Real-time budget velocity, OCR &amp; predictive forecasting</p>
+                  <p class="text-xs text-ink-400 font-medium">Real-time budget velocity, OCR &amp; predictive
+                    forecasting</p>
                 </div>
               </div>
               <div class="flex items-center gap-2">
-                <span class="px-3 py-1.5 bg-ink-900 text-white rounded-xl font-bold text-xs inline-flex items-center gap-1.5">
+                <span
+                  class="px-3 py-1.5 bg-ink-900 text-white rounded-xl font-bold text-xs inline-flex items-center gap-1.5">
                   <i class="pi pi-sparkles text-[11px]" style="color: #D1FF4F"></i>
                   Ask Plete AI
                 </span>
@@ -126,21 +134,24 @@
             <!-- KPI Summary Row -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 font-numeric">
               <div class="p-4 rounded-2xl bg-cream-50 border border-ink-100/70">
-                <span class="text-xs font-semibold text-ink-400 uppercase tracking-wider block mb-1">Monthly Budget Remaining</span>
+                <span class="text-xs font-semibold text-ink-400 uppercase tracking-wider block mb-1">Monthly Budget
+                  Remaining</span>
                 <div class="text-2xl font-black text-ink-900">$2,480.00</div>
                 <span class="text-xs font-bold text-emerald-700 inline-flex items-center gap-1 mt-1">
                   <i class="pi pi-arrow-up-right text-[10px]"></i> 62% of $4,000 baseline left
                 </span>
               </div>
               <div class="p-4 rounded-2xl bg-cream-50 border border-ink-100/70">
-                <span class="text-xs font-semibold text-ink-400 uppercase tracking-wider block mb-1">AI Month-End Forecast</span>
+                <span class="text-xs font-semibold text-ink-400 uppercase tracking-wider block mb-1">AI Month-End
+                  Forecast</span>
                 <div class="text-2xl font-black text-pop-purple">+$640.00</div>
                 <span class="text-xs font-bold text-pop-purple inline-flex items-center gap-1 mt-1">
                   <i class="pi pi-sparkles text-[10px]"></i> Projected surplus on Oct 31
                 </span>
               </div>
               <div class="p-4 rounded-2xl bg-ink-900 text-white">
-                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Emergency Fund Goal</span>
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-1">Emergency Fund
+                  Goal</span>
                 <div class="text-2xl font-black" style="color: #D1FF4F">$8,500 / $10k</div>
                 <span class="text-xs font-semibold text-gray-300 inline-flex items-center gap-1 mt-1">
                   85% complete · 3 wks ahead
@@ -150,9 +161,11 @@
 
             <!-- Visual Spending Breakdown + AI Insight Banner -->
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 items-stretch">
-              <div class="lg:col-span-3 p-5 rounded-2xl bg-gradient-to-b from-pop-purple/5 to-cream-50/60 border border-pop-purple/15 flex flex-col justify-between">
+              <div
+                class="lg:col-span-3 p-5 rounded-2xl bg-gradient-to-b from-pop-purple/5 to-cream-50/60 border border-pop-purple/15 flex flex-col justify-between">
                 <div class="flex justify-between items-center mb-4">
-                  <span class="text-xs font-extrabold uppercase tracking-wider text-ink-800">Category Velocity (Oct)</span>
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-ink-800">Category Velocity
+                    (Oct)</span>
                   <span class="text-xs font-bold text-pop-purple font-numeric">-14% vs last month</span>
                 </div>
                 <div class="h-36 flex items-end justify-between gap-3 px-2 pt-4 border-b border-pop-purple/15">
@@ -190,13 +203,17 @@
               <div class="lg:col-span-2 p-5 rounded-2xl bg-ink-900 text-white flex flex-col justify-between">
                 <div>
                   <div class="flex items-center justify-between mb-3">
-                    <span class="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider" style="color: #D1FF4F">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider"
+                      style="color: #D1FF4F">
                       <i class="pi pi-lightbulb"></i> AI Coach Insight
                     </span>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-gray-300 font-semibold">Just now</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-gray-300 font-semibold">Just
+                      now</span>
                   </div>
                   <p class="text-xs sm:text-sm text-gray-200 leading-relaxed font-medium">
-                    "Your dining spend is <strong class="text-white">$65 lower</strong> than September's pace. Moving that difference to your <strong style="color: #D1FF4F">Emergency Fund</strong> hits your target 19 days early."
+                    "Your dining spend is <strong class="text-white">$65 lower</strong> than September's pace. Moving
+                    that difference to your <strong style="color: #D1FF4F">Emergency Fund</strong> hits your target 19
+                    days early."
                   </p>
                 </div>
                 <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
@@ -210,13 +227,16 @@
           <!-- Floating Card Left: Magic Quick-Log -->
           <div
             class="hidden md:flex absolute -top-2 -left-2 lg:-left-6 bg-white p-4 rounded-2xl shadow-xl border border-ink-100 animate-float z-30 items-start gap-3.5 max-w-xs text-left -rotate-2">
-            <div class="w-10 h-10 rounded-xl bg-pop-purple/10 text-pop-purple flex items-center justify-center shrink-0 mt-0.5">
+            <div
+              class="w-10 h-10 rounded-xl bg-pop-purple/10 text-pop-purple flex items-center justify-center shrink-0 mt-0.5">
               <i class="pi pi-sparkles text-base"></i>
             </div>
             <div>
               <div class="flex items-center gap-1.5 mb-0.5">
-                <span class="text-[10px] font-extrabold uppercase tracking-wider text-pop-purple">AI Magic Quick-Log</span>
-                <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">Parsed ✓</span>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-pop-purple">AI Magic
+                  Quick-Log</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">Parsed
+                  ✓</span>
               </div>
               <p class="text-xs text-ink-800 font-semibold italic mb-1">"$14.20 coffee &amp; lunch yesterday"</p>
               <p class="text-[11px] font-bold text-ink-400 font-numeric">Food &amp; Dining · -$14.20 · Oct 16</p>
@@ -226,12 +246,14 @@
           <!-- Floating Card Right: Receipt OCR -->
           <div
             class="hidden md:flex absolute -bottom-2 -right-2 lg:-right-6 bg-ink-900 text-white p-4 rounded-2xl shadow-xl border border-ink-800 animate-float-delayed z-30 items-center gap-3.5 max-w-xs text-left rotate-2">
-            <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0" style="color: #D1FF4F">
+            <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0"
+              style="color: #D1FF4F">
               <i class="pi pi-camera text-base"></i>
             </div>
             <div>
               <div class="flex items-center gap-1.5 mb-0.5">
-                <span class="text-[10px] font-extrabold uppercase tracking-wider" style="color: #D1FF4F">Receipt &amp; Note OCR</span>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider" style="color: #D1FF4F">Receipt &amp;
+                  Note OCR</span>
               </div>
               <p class="text-xs font-bold text-white">Trader Joe's Receipt Scanned</p>
               <p class="text-[11px] font-semibold text-gray-400 font-numeric">$84.20 · Groceries · High Confidence</p>
@@ -243,12 +265,16 @@
 
     <!-- NEW SECTION: Interactive Plete AI Suite Spotlight -->
     <section id="ai-suite" class="py-24 px-4 bg-ink-900 text-white relative overflow-hidden">
-      <div class="absolute top-0 right-1/4 w-96 h-96 bg-pop-purple/20 rounded-full blur-[130px] pointer-events-none"></div>
-      <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-pop-lime/10 rounded-full blur-[130px] pointer-events-none"></div>
+      <div class="absolute top-0 right-1/4 w-96 h-96 bg-pop-purple/20 rounded-full blur-[130px] pointer-events-none">
+      </div>
+      <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-pop-lime/10 rounded-full blur-[130px] pointer-events-none">
+      </div>
 
       <div class="max-w-7xl mx-auto relative z-10">
         <div class="text-center max-w-3xl mx-auto mb-14">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-bold uppercase tracking-wider mb-4" style="color: #D1FF4F">
+          <div
+            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-bold uppercase tracking-wider mb-4"
+            style="color: #D1FF4F">
             <i class="pi pi-sparkles"></i>
             <span>Plete AI Financial Intelligence</span>
           </div>
@@ -256,26 +282,21 @@
             Stop typing spreadsheets.<br />Start talking to your money.
           </h2>
           <p class="text-gray-300 text-lg font-medium leading-relaxed">
-            Built with ground-truth financial safeguards: Plete AI extracts, forecasts, and simulates using your real records—and always lets you confirm before saving a single cent.
+            Built with financial intelligence: Plete AI extracts, forecasts, and simulates using your real
+            records and always lets you confirm before saving a record.
           </p>
         </div>
 
         <!-- Interactive Tab Selector -->
         <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-10" role="tablist" aria-label="Plete AI Features">
-          <button
-            v-for="tab in aiShowcaseTabs"
-            :key="tab.id"
-            type="button"
-            role="tab"
-            :aria-selected="activeAiTab === tab.id"
-            @click="activeAiTab = tab.id"
+          <button v-for="tab in aiShowcaseTabs" :key="tab.id" type="button" role="tab"
+            :aria-selected="activeAiTab === tab.id" @click="activeAiTab = tab.id"
             class="px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2.5 cursor-pointer"
             :class="[
               activeAiTab === tab.id
                 ? 'bg-pop-lime text-ink-900 shadow-lg shadow-pop-lime/20 scale-[1.02]'
                 : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10 hover:text-white'
-            ]"
-          >
+            ]">
             <i :class="tab.icon"></i>
             <span>{{ tab.label }}</span>
           </button>
@@ -286,32 +307,32 @@
           <!-- TAB 1: Magic Quick-Log -->
           <div v-if="activeAiTab === 'quicklog'" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div class="lg:col-span-5 space-y-5">
-              <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-pop-purple bg-pop-purple/15 px-3 py-1 rounded-full">
+              <div
+                class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-pop-purple bg-pop-purple/15 px-3 py-1 rounded-full">
                 <i class="pi pi-bolt"></i> Natural Language Expense Entry
               </div>
               <h3 class="text-3xl font-extrabold text-white leading-tight">
                 Type a sentence. Log multiple transactions at once.
               </h3>
               <p class="text-gray-300 text-base leading-relaxed">
-                Whether you're logging one coffee or three errands from last Tuesday, just type naturally. Plete AI parses the merchant, amount, date, and matches your custom categories automatically.
+                Whether you're logging one coffee or three errands from last Tuesday, just type naturally. Plete AI
+                parses the merchant, amount, date, and matches your custom categories automatically.
               </p>
               <div class="space-y-2 pt-2">
-                <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block">Click a prompt to preview live parsing:</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block">Click a prompt to preview
+                  live parsing:</span>
                 <div class="flex flex-col gap-2">
-                  <button
-                    v-for="(sample, idx) in quickLogSamples"
-                    :key="idx"
-                    type="button"
+                  <button v-for="(sample, idx) in quickLogSamples" :key="idx" type="button"
                     @click="selectedQuickLogIdx = idx"
                     class="text-left px-4 py-3 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer flex items-center justify-between"
                     :class="[
                       selectedQuickLogIdx === idx
                         ? 'bg-pop-purple/20 border-pop-purple text-white'
                         : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
-                    ]"
-                  >
+                    ]">
                     <span class="font-numeric">"{{ sample.prompt }}"</span>
-                    <i class="pi pi-arrow-right text-xs" :class="selectedQuickLogIdx === idx ? 'text-pop-lime' : 'text-gray-500'"></i>
+                    <i class="pi pi-arrow-right text-xs"
+                      :class="selectedQuickLogIdx === idx ? 'text-pop-lime' : 'text-gray-500'"></i>
                   </button>
                 </div>
               </div>
@@ -330,15 +351,13 @@
               </div>
 
               <div class="space-y-3">
-                <div
-                  v-for="(item, i) in currentQuickLogSample.items"
-                  :key="i"
-                  class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                >
+                <div v-for="(item, i) in currentQuickLogSample.items" :key="i"
+                  class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div class="space-y-1">
                     <div class="flex items-center gap-2">
                       <span class="font-bold text-white text-sm">{{ item.merchant }}</span>
-                      <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+                      <span
+                        class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
                         <i class="pi pi-check-circle text-[10px]"></i> High Confidence
                       </span>
                     </div>
@@ -365,31 +384,38 @@
           <!-- TAB 2: Smart Receipt & Note OCR -->
           <div v-else-if="activeAiTab === 'ocr'" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div class="lg:col-span-5 space-y-5">
-              <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-pop-cyan bg-pop-cyan/15 px-3 py-1 rounded-full">
+              <div
+                class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-pop-cyan bg-pop-cyan/15 px-3 py-1 rounded-full">
                 <i class="pi pi-camera"></i> Vision OCR Extraction
               </div>
               <h3 class="text-3xl font-extrabold text-white leading-tight">
                 Snap a paper receipt or handwritten note. Done.
               </h3>
               <p class="text-gray-300 text-base leading-relaxed">
-                Don't let paper receipts pile up in your wallet. Upload any JPG, PNG, WebP, or HEIC photo—even a scribbled sticky note—and Plete AI extracts the merchant, total, date, and category in seconds.
+                Don't let paper receipts pile up in your wallet. Upload any JPG, PNG, WebP, or HEIC photo even a
+                scribbled sticky note and Plete AI extracts the merchant, total, date, and category in seconds.
               </p>
               <ul class="space-y-2.5 text-sm text-gray-200 font-medium">
                 <li class="flex items-center gap-2.5">
-                  <i class="pi pi-check-circle" style="color: #D1FF4F"></i> Works on supermarket receipts, restaurant bills &amp; handwritten notes
+                  <i class="pi pi-check-circle" style="color: #D1FF4F"></i> Works on supermarket receipts, restaurant
+                  bills &amp; handwritten notes
                 </li>
                 <li class="flex items-center gap-2.5">
-                  <i class="pi pi-check-circle" style="color: #D1FF4F"></i> Flags low-confidence fields automatically for your review
+                  <i class="pi pi-check-circle" style="color: #D1FF4F"></i> Flags low-confidence fields automatically
+                  for your review
                 </li>
                 <li class="flex items-center gap-2.5">
-                  <i class="pi pi-check-circle" style="color: #D1FF4F"></i> 3 free scans/month on Starter · Unlimited on Pro
+                  <i class="pi pi-check-circle" style="color: #D1FF4F"></i> 3 free scans/month on Starter · Unlimited on
+                  Pro
                 </li>
               </ul>
             </div>
 
-            <div class="lg:col-span-7 bg-ink-900 rounded-2xl border border-white/10 p-6 grid grid-cols-1 sm:grid-cols-2 gap-5 items-center">
+            <div
+              class="lg:col-span-7 bg-ink-900 rounded-2xl border border-white/10 p-6 grid grid-cols-1 sm:grid-cols-2 gap-5 items-center">
               <!-- Simulated Receipt Card -->
-              <div class="bg-cream-50 text-ink-900 p-5 rounded-xl font-mono text-xs space-y-2 shadow-inner border border-ink-100">
+              <div
+                class="bg-cream-50 text-ink-900 p-5 rounded-xl font-mono text-xs space-y-2 shadow-inner border border-ink-100">
                 <div class="text-center border-b border-dashed border-ink-400 pb-2">
                   <p class="font-extrabold text-sm">WHOLE FOODS MARKET</p>
                   <p class="text-[10px] text-ink-400">10/17/2026 · 14:22</p>
@@ -400,7 +426,8 @@
                   <div class="flex justify-between"><span>WILD SALMON</span><span>$18.90</span></div>
                   <div class="flex justify-between"><span>SOURDOUGH</span><span>$6.50</span></div>
                 </div>
-                <div class="border-t border-dashed border-ink-400 pt-2 flex justify-between font-extrabold text-sm font-numeric">
+                <div
+                  class="border-t border-dashed border-ink-400 pt-2 flex justify-between font-extrabold text-sm font-numeric">
                   <span>TOTAL</span>
                   <span>$35.88</span>
                 </div>
@@ -439,31 +466,31 @@
           <!-- TAB 3: Forecast & What-If Simulator -->
           <div v-else-if="activeAiTab === 'simulator'" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div class="lg:col-span-5 space-y-5">
-              <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-300 bg-amber-400/15 px-3 py-1 rounded-full">
+              <div
+                class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-300 bg-amber-400/15 px-3 py-1 rounded-full">
                 <i class="pi pi-chart-line"></i> Predictive Modeling &amp; Simulator
               </div>
               <h3 class="text-3xl font-extrabold text-white leading-tight">
                 Test "What-If" decisions before you spend a dime.
               </h3>
               <p class="text-gray-300 text-base leading-relaxed">
-                Curious how cutting takeout by $60/month or landing a freelance bonus affects your goals? Run risk-free simulations without modifying your real financial records.
+                Curious how cutting takeout by $60/month or landing a freelance bonus affects your goals? Run risk-free
+                simulations without modifying your real financial records.
               </p>
               <div class="space-y-2">
-                <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block">Select a scenario to simulate:</span>
-                <button
-                  v-for="(scen, sIdx) in scenarioSamples"
-                  :key="sIdx"
-                  type="button"
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block">Select a scenario to
+                  simulate:</span>
+                <button v-for="(scen, sIdx) in scenarioSamples" :key="sIdx" type="button"
                   @click="selectedScenarioIdx = sIdx"
                   class="w-full text-left px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer flex items-center justify-between"
                   :class="[
                     selectedScenarioIdx === sIdx
                       ? 'bg-amber-400/15 border-amber-300 text-white'
                       : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
-                  ]"
-                >
+                  ]">
                   <span>"{{ scen.question }}"</span>
-                  <i class="pi pi-calculator text-xs" :class="selectedScenarioIdx === sIdx ? 'text-amber-300' : 'text-gray-500'"></i>
+                  <i class="pi pi-calculator text-xs"
+                    :class="selectedScenarioIdx === sIdx ? 'text-amber-300' : 'text-gray-500'"></i>
                 </button>
               </div>
             </div>
@@ -495,14 +522,17 @@
           <!-- TAB 4: AI Coach & Executive Reports -->
           <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div class="lg:col-span-5 space-y-5">
-              <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-pop-pink bg-pop-pink/15 px-3 py-1 rounded-full">
-                <i class="pi pi-comments"></i> Ask Plete &amp; Executive Reports
+              <div
+                class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-pop-pink bg-pop-pink/15 px-3 py-1 rounded-full">
+                <i class="pi pi-comments"></i> Ask Plete AI &amp; Executive Reports
               </div>
               <h3 class="text-3xl font-extrabold text-white leading-tight">
                 A 24/7 financial advisor that actually knows your numbers.
               </h3>
               <p class="text-gray-300 text-base leading-relaxed">
-                Chat with <strong class="text-white">Ask Plete</strong> for instant answers about your spending spikes, or generate a comprehensive <strong class="text-white">Monthly Executive Report</strong> summarizing inflow, outflow, budget adherence, and strategic action items.
+                Chat with <strong class="text-white">Ask Plete</strong> for instant answers about your spending spikes,
+                or generate a comprehensive <strong class="text-white">Monthly Executive Report</strong> summarizing
+                inflow, outflow, budget adherence, and strategic action items.
               </p>
               <router-link to="/signup" class="inline-flex items-center gap-2 font-bold text-sm" style="color: #D1FF4F">
                 <span>Ask your first question free</span>
@@ -512,17 +542,22 @@
 
             <div class="lg:col-span-7 bg-ink-900 rounded-2xl border border-white/10 p-6 space-y-4">
               <div class="flex justify-end">
-                <div class="bg-pop-purple text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-2xl rounded-br-sm max-w-md">
+                <div
+                  class="bg-pop-purple text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-2xl rounded-br-sm max-w-md">
                   "Where did I spend the most this month, and am I on track for my budget?"
                 </div>
               </div>
               <div class="flex justify-start">
-                <div class="bg-white/5 border border-white/10 text-gray-200 text-xs sm:text-sm font-medium p-4 rounded-2xl rounded-bl-sm max-w-xl space-y-2 leading-relaxed font-numeric">
+                <div
+                  class="bg-white/5 border border-white/10 text-gray-200 text-xs sm:text-sm font-medium p-4 rounded-2xl rounded-bl-sm max-w-xl space-y-2 leading-relaxed font-numeric">
                   <div class="text-xs font-bold flex items-center gap-1.5" style="color: #D1FF4F">
                     <i class="pi pi-sparkles"></i> Ask Plete AI
                   </div>
                   <p>
-                    Your top category in October is <strong class="text-white">Housing &amp; Utilities ($1,200)</strong>, followed by <strong class="text-white">Groceries ($410)</strong>. You've used <strong class="text-white">54%</strong> of your monthly budget with 14 days remaining—putting you on pace for a <strong style="color: #D1FF4F">$640 surplus</strong>.
+                    Your top category in October is <strong class="text-white">Housing &amp; Utilities
+                      ($1,200)</strong>, followed by <strong class="text-white">Groceries ($410)</strong>. You've used
+                    <strong class="text-white">54%</strong> of your monthly budget with 14 days remaining putting you on
+                    pace for a <strong style="color: #D1FF4F">$640 surplus</strong>.
                   </p>
                 </div>
               </div>
@@ -536,7 +571,8 @@
     <section id="how-it-works" class="py-20 px-4 bg-cream-50 border-b border-ink-100">
       <div class="max-w-7xl mx-auto">
         <div class="text-center mb-14">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-pop-purple block mb-2">Effortless Workflow</span>
+          <span class="text-xs font-extrabold uppercase tracking-widest text-pop-purple block mb-2">Effortless
+            Workflow</span>
           <h2 class="text-3xl md:text-5xl font-black text-ink-900">
             From signup to clarity in 60 seconds.
           </h2>
@@ -544,24 +580,30 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div class="bg-white p-8 rounded-3xl border border-ink-100 shadow-sm relative">
-            <span class="text-xs font-black px-3 py-1 rounded-full bg-pop-lime text-ink-900 inline-block mb-4">STEP 01</span>
+            <span class="text-xs font-black px-3 py-1 rounded-full bg-pop-lime text-ink-900 inline-block mb-4">STEP
+              01</span>
             <h3 class="text-xl font-bold text-ink-900 mb-2">Set Your Baseline</h3>
             <p class="text-ink-800/70 text-sm font-medium leading-relaxed">
-              Choose your preferred currency and enter your expected monthly income during onboarding to establish your smart budget foundation.
+              Choose your preferred currency and enter your expected monthly income during onboarding to establish your
+              smart budget foundation.
             </p>
           </div>
           <div class="bg-white p-8 rounded-3xl border border-ink-100 shadow-sm relative">
-            <span class="text-xs font-black px-3 py-1 rounded-full bg-pop-purple text-white inline-block mb-4">STEP 02</span>
+            <span class="text-xs font-black px-3 py-1 rounded-full bg-pop-purple text-white inline-block mb-4">STEP
+              02</span>
             <h3 class="text-xl font-bold text-ink-900 mb-2">Log with AI or Manually</h3>
             <p class="text-ink-800/70 text-sm font-medium leading-relaxed">
-              Use AI Quick-Log to type expenses in plain English, upload receipt photos for instant OCR extraction, or import recurring monthly bills.
+              Use Magic Entry to type expenses in plain language, upload receipt photos for instant OCR extraction, or
+              import recurring monthly bills.
             </p>
           </div>
           <div class="bg-white p-8 rounded-3xl border border-ink-100 shadow-sm relative">
-            <span class="text-xs font-black px-3 py-1 rounded-full bg-ink-900 text-white inline-block mb-4">STEP 03</span>
+            <span class="text-xs font-black px-3 py-1 rounded-full bg-ink-900 text-white inline-block mb-4">STEP
+              03</span>
             <h3 class="text-xl font-bold text-ink-900 mb-2">Forecast, Simulate &amp; Grow</h3>
             <p class="text-ink-800/70 text-sm font-medium leading-relaxed">
-              Let your AI Financial Coach detect spending anomalies, project your month-end balance, and guide you to your savings targets faster.
+              Let your AI Financial Coach detect spending anomalies, project your month-end balance, and guide you to
+              your savings targets faster.
             </p>
           </div>
         </div>
@@ -572,12 +614,13 @@
     <section id="features" class="py-24 px-4 bg-white">
       <div class="max-w-7xl mx-auto">
         <div class="text-center mb-16">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-pop-purple block mb-2">Complete Financial Toolkit</span>
+          <span class="text-xs font-extrabold uppercase tracking-widest text-pop-purple block mb-2">Complete Financial
+            Toolkit</span>
           <h2 class="text-4xl md:text-5xl font-black mb-5 text-ink-900">
             Everything you need to stay in command.
           </h2>
           <p class="text-ink-800/70 text-lg max-w-2xl mx-auto font-medium">
-            Daily expense tracking meets executive-grade analytics—without the spreadsheet headaches.
+            Daily expense tracking meets executive-grade analytics without the spreadsheet headaches.
           </p>
         </div>
 
@@ -586,20 +629,26 @@
           <div
             class="md:col-span-2 bg-cream-50 rounded-[2.5rem] p-8 sm:p-10 relative overflow-hidden group hover:shadow-xl transition-all duration-500 border border-ink-100 hover:border-pop-purple/30 flex flex-col justify-between">
             <div class="relative z-10">
-              <div class="w-14 h-14 bg-ink-900 text-white rounded-2xl flex items-center justify-center text-xl mb-6 shadow-sm">
+              <div
+                class="w-14 h-14 bg-ink-900 text-white rounded-2xl flex items-center justify-center text-xl mb-6 shadow-sm">
                 <i class="pi pi-chart-bar" style="color: #D1FF4F"></i>
               </div>
               <h3 class="text-2xl sm:text-3xl font-bold mb-3 text-ink-900">
                 Visual Spending &amp; Trend Analytics
               </h3>
               <p class="text-ink-800/70 max-w-md font-medium leading-relaxed">
-                Drill down into interactive category breakdowns, top transactions, and multi-month trend charts—paired with AI-detected spending spikes and positive habit streaks.
+                Drill down into interactive category breakdowns, top transactions, and multi-month trend charts paired
+                with AI-detected spending spikes and positive habit streaks.
               </p>
             </div>
             <div class="relative z-10 mt-6 flex flex-wrap gap-2">
-              <span class="px-3 py-1 rounded-full bg-white border border-ink-100 text-xs font-bold text-ink-800">Category Drill-Downs</span>
-              <span class="px-3 py-1 rounded-full bg-white border border-ink-100 text-xs font-bold text-ink-800">Anomaly Detection</span>
-              <span class="px-3 py-1 rounded-full bg-white border border-ink-100 text-xs font-bold text-ink-800">10+ Year History</span>
+              <span
+                class="px-3 py-1 rounded-full bg-white border border-ink-100 text-xs font-bold text-ink-800">Category
+                Drill-Downs</span>
+              <span class="px-3 py-1 rounded-full bg-white border border-ink-100 text-xs font-bold text-ink-800">Anomaly
+                Detection</span>
+              <span class="px-3 py-1 rounded-full bg-white border border-ink-100 text-xs font-bold text-ink-800">10+
+                Year History</span>
             </div>
             <div
               class="absolute -right-10 -bottom-10 w-64 h-64 bg-pop-purple/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700 pointer-events-none">
@@ -616,7 +665,8 @@
               </div>
               <h3 class="text-2xl sm:text-3xl font-bold mb-3">Smart Monthly Budgets &amp; Recurring Bills</h3>
               <p class="text-gray-300 font-medium leading-relaxed text-sm sm:text-base">
-                Set your expected monthly income and allocate category caps. Import recurring bills with one click so subscriptions and rent never catch you off guard.
+                Set your expected monthly income and allocate category caps. Import recurring bills with one click so
+                subscriptions and rent never catch you off guard.
               </p>
             </div>
 
@@ -655,7 +705,8 @@
                 AI + Custom Categories
               </h3>
               <p class="text-ink-800/75 text-sm font-medium leading-relaxed">
-                Create custom income and expense categories. Plete AI automatically maps your natural-language logs and receipts to your exact taxonomy.
+                Create custom income and expense categories. Plete AI automatically maps your natural-language logs and
+                receipts to your exact taxonomy.
               </p>
             </div>
           </div>
@@ -670,7 +721,8 @@
               </div>
               <h3 class="text-2xl font-bold mb-2 text-ink-900">Savings Goals &amp; Simulations</h3>
               <p class="text-ink-800/75 text-sm font-medium leading-relaxed">
-                Set target amounts and deadlines, track live completion percentages, and use the AI Scenario Simulator to reach milestones faster.
+                Set target amounts and deadlines, track live completion percentages, and use the AI Scenario Simulator
+                to reach milestones faster.
               </p>
             </div>
           </div>
@@ -684,13 +736,16 @@
                 <i class="pi pi-download"></i>
               </div>
               <div>
-                <h3 class="text-2xl font-bold mb-1 text-ink-900">Instant PDF &amp; Excel Financial Exports + Multi-Currency</h3>
+                <h3 class="text-2xl font-bold mb-1 text-ink-900">Instant PDF &amp; Excel Financial Exports +
+                  Multi-Currency</h3>
                 <p class="text-ink-800/75 text-sm sm:text-base font-medium">
-                  Format your entire workspace in USD ($), EUR (€), GBP (£), NGN (₦), or JPY (¥) and download clean PDF or Excel reports anytime.
+                  Format your entire workspace in USD ($), EUR (€), GBP (£) etc. and download clean PDF
+                  or Excel reports anytime.
                 </p>
               </div>
             </div>
-            <router-link to="/signup" class="shrink-0 px-5 py-3 rounded-xl bg-ink-900 text-white text-xs sm:text-sm font-bold hover:bg-ink-800 transition-colors">
+            <router-link to="/signup"
+              class="shrink-0 px-5 py-3 rounded-xl bg-ink-900 text-white text-xs sm:text-sm font-bold hover:bg-ink-800 transition-colors">
               Create Free Account &rarr;
             </router-link>
           </div>
@@ -701,12 +756,14 @@
     <!-- Synced Pricing Section -->
     <section id="pricing" class="py-24 px-4 bg-cream-50">
       <div class="max-w-5xl mx-auto text-center">
-        <span class="text-xs font-extrabold uppercase tracking-widest text-pop-purple block mb-2">Transparent Plans</span>
+        <span class="text-xs font-extrabold uppercase tracking-widest text-pop-purple block mb-2">Transparent
+          Plans</span>
         <h2 class="text-4xl md:text-5xl font-black mb-4 text-ink-900">
           Simple, honest pricing.
         </h2>
         <p class="text-ink-800/70 text-lg max-w-2xl mx-auto mb-14 font-medium">
-          Start free with generous monthly AI allowances renewed automatically, or upgrade to Pro for unlimited AI financial intelligence.
+          Start free with generous monthly AI allowances renewed automatically, or upgrade to Pro for unlimited AI
+          financial intelligence.
         </p>
 
         <div class="grid md:grid-cols-2 gap-8 items-stretch text-left">
@@ -715,7 +772,7 @@
             class="bg-white p-8 sm:p-10 rounded-[2rem] border border-ink-100 shadow-lg flex flex-col justify-between hover:border-ink-400/50 transition-colors">
             <div>
               <div class="flex items-center justify-between mb-2">
-                <h3 class="text-2xl font-bold text-ink-900">The Starter</h3>
+                <h3 class="text-2xl font-bold text-ink-900">Starter</h3>
                 <span class="text-xs font-bold px-3 py-1 rounded-full bg-cream-100 text-ink-800">Always Free</span>
               </div>
               <div class="text-5xl font-black mb-2 text-ink-900 font-numeric">
@@ -731,7 +788,7 @@
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="pi pi-check-circle text-emerald-600 font-bold"></i>
-                  <span><strong>15 AI Magic Quick-Logs</strong> / month</span>
+                  <span><strong>15 AI Magic Entries</strong> / month</span>
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="pi pi-check-circle text-emerald-600 font-bold"></i>
@@ -739,7 +796,7 @@
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="pi pi-check-circle text-emerald-600 font-bold"></i>
-                  <span><strong>5 Ask Plete Chats &amp; 3 Coach Q&amp;As</strong> / month</span>
+                  <span><strong>5 Ask Plete AI Chats &amp; 3 Coach Q&amp;As</strong> / month</span>
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="pi pi-check-circle text-emerald-600 font-bold"></i>
@@ -765,7 +822,7 @@
               UNLIMITED AI · BEST VALUE
             </div>
             <div>
-              <h3 class="text-2xl font-bold mb-2" style="color: #D1FF4F">The Pro</h3>
+              <h3 class="text-2xl font-bold mb-2" style="color: #D1FF4F">Premium</h3>
               <div class="text-5xl font-black mb-2 font-numeric">
                 $3.99<span class="text-lg text-gray-400 font-medium">/mo</span>
               </div>
@@ -801,7 +858,7 @@
             </div>
             <router-link to="/signup"
               class="btn-cta w-full py-3.5 rounded-xl font-black transition-all shadow-lg block text-center text-sm">
-              Get Started &amp; Unlock Pro
+              Get Started &amp; Unlock Premium
             </router-link>
           </div>
         </div>
@@ -810,19 +867,25 @@
 
     <!-- Final Conversion Banner -->
     <section class="py-16 px-4 bg-white">
-      <div class="max-w-6xl mx-auto bg-ink-900 rounded-[2.5rem] p-10 sm:p-16 text-center text-white relative overflow-hidden shadow-2xl">
-        <div class="absolute -top-24 -left-24 w-72 h-72 bg-pop-purple/25 rounded-full blur-[100px] pointer-events-none"></div>
-        <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-pop-lime/20 rounded-full blur-[100px] pointer-events-none"></div>
+      <div
+        class="max-w-6xl mx-auto bg-ink-900 rounded-[2.5rem] p-10 sm:p-16 text-center text-white relative overflow-hidden shadow-2xl">
+        <div class="absolute -top-24 -left-24 w-72 h-72 bg-pop-purple/25 rounded-full blur-[100px] pointer-events-none">
+        </div>
+        <div
+          class="absolute -bottom-24 -right-24 w-72 h-72 bg-pop-lime/20 rounded-full blur-[100px] pointer-events-none">
+        </div>
 
         <div class="relative z-10 max-w-2xl mx-auto space-y-6">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-bold" style="color: #D1FF4F">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-xs font-bold"
+            style="color: #D1FF4F">
             <i class="pi pi-sparkles"></i> Built for Financial Clarity
           </span>
           <h2 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
             Ready to upgrade from spreadsheets to AI clarity?
           </h2>
           <p class="text-gray-300 text-base sm:text-lg font-medium">
-            Join Plete Finance for free today and get your monthly AI Quick-Logs, Receipt Scans, and Financial Coaching credits immediately.
+            Join Plete Finance for free today and get your free monthly AI credits for Magic Entry, Receipt Scans, and
+            Financial Coaching immediately.
           </p>
           <div class="pt-2">
             <router-link to="/signup">
@@ -846,7 +909,8 @@
           <a href="#pricing" class="hover:text-ink-900">Pricing</a>
           <router-link to="/privacy" class="hover:text-ink-900">Privacy</router-link>
           <router-link to="/terms" class="hover:text-ink-900">Terms</router-link>
-          <a href="https://twitter.com/pletefinance" target="_blank" rel="noopener noreferrer" class="hover:text-ink-900">Twitter</a>
+          <a href="https://twitter.com/pletefinance" target="_blank" rel="noopener noreferrer"
+            class="hover:text-ink-900">Twitter</a>
         </div>
         <div class="text-ink-400 text-sm font-medium">
           © 2026 Plete Finance Inc.
@@ -863,10 +927,10 @@ import BrandLogo from '@/components/BrandLogo.vue'
 const activeAiTab = ref('quicklog')
 
 const aiShowcaseTabs = [
-  { id: 'quicklog', label: 'Magic Quick-Log', icon: 'pi pi-bolt' },
+  { id: 'quicklog', label: 'Magic Entry', icon: 'pi pi-bolt' },
   { id: 'ocr', label: 'Receipt & Note OCR', icon: 'pi pi-camera' },
   { id: 'simulator', label: 'Forecast & Simulator', icon: 'pi pi-chart-line' },
-  { id: 'coach', label: 'Ask Plete & Reports', icon: 'pi pi-comments' }
+  { id: 'coach', label: 'Ask Plete AI & Reports', icon: 'pi pi-comments' }
 ]
 
 const selectedQuickLogIdx = ref(0)
