@@ -20,6 +20,7 @@
           <a href="#how-it-works" class="hidden lg:inline-block hover:text-pop-purple transition-colors">How It
             Works</a>
           <a href="#pricing" class="hidden md:inline-block hover:text-pop-purple transition-colors">Pricing</a>
+          <a href="#faq" class="hidden lg:inline-block hover:text-pop-purple transition-colors">FAQ</a>
           <router-link to="/login"
             class="hover:text-pop-purple transition-colors text-xs md:text-sm font-bold md:font-semibold">
             Log in
@@ -45,16 +46,17 @@
         <!-- Announcement Pill -->
         <a href="#ai-suite"
           class="inline-flex items-center gap-2 mb-7 px-4 py-1.5 rounded-full bg-ink-900 text-white border border-ink-800 font-semibold text-xs tracking-wide shadow-md hover:border-pop-purple transition-colors">
-          <span>Your Personal</span>
           <span class="px-2 py-0.5 rounded-full bg-pop-purple text-white font-extrabold text-[10px] uppercase">AI
             Powered</span>
-          <span>Financial Coach</span>
+          <span>Finance Tracker, Receipt OCR Scanner &amp; Financial Coach</span>
           <i class="pi pi-arrow-right text-[10px]" style="color: #D1FF4F"></i>
         </a>
 
         <h1
           class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[1.06] mb-6 text-ink-900 max-w-5xl mx-auto">
-          Know where your money<span
+          <span class="sr-only">Plete Finance — AI Personal Finance Tracker, Receipt Scanner, Expense Tracker &amp;
+            Budget App:
+          </span>Know where your money<span
             class="text-transparent bg-clip-text bg-gradient-to-r from-pop-purple via-pop-pink to-amber-500">
             goes</span> and let AI help it <span
             class="text-transparent bg-clip-text bg-gradient-to-r from-pop-purple via-pop-pink to-amber-500">
@@ -233,8 +235,7 @@
             </div>
             <div>
               <div class="flex items-center gap-1.5 mb-0.5">
-                <span class="text-[10px] font-extrabold uppercase tracking-wider text-pop-purple">AI Magic
-                  Quick-Log</span>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-pop-purple">AI Magic Entry</span>
                 <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">Parsed
                   ✓</span>
               </div>
@@ -305,7 +306,8 @@
         <!-- Tab Content Stage -->
         <div class="bg-ink-800/90 border border-white/10 rounded-[2rem] p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
           <!-- TAB 1: Magic Quick-Log -->
-          <div v-if="activeAiTab === 'quicklog'" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div v-show="activeAiTab === 'quicklog'" role="tabpanel"
+            class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div class="lg:col-span-5 space-y-5">
               <div
                 class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-pop-purple bg-pop-purple/15 px-3 py-1 rounded-full">
@@ -382,7 +384,8 @@
           </div>
 
           <!-- TAB 2: Smart Receipt & Note OCR -->
-          <div v-else-if="activeAiTab === 'ocr'" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div v-show="activeAiTab === 'ocr'" role="tabpanel"
+            class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div class="lg:col-span-5 space-y-5">
               <div
                 class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-pop-cyan bg-pop-cyan/15 px-3 py-1 rounded-full">
@@ -464,7 +467,8 @@
           </div>
 
           <!-- TAB 3: Forecast & What-If Simulator -->
-          <div v-else-if="activeAiTab === 'simulator'" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div v-show="activeAiTab === 'simulator'" role="tabpanel"
+            class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div class="lg:col-span-5 space-y-5">
               <div
                 class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-300 bg-amber-400/15 px-3 py-1 rounded-full">
@@ -520,7 +524,8 @@
           </div>
 
           <!-- TAB 4: AI Coach & Executive Reports -->
-          <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div v-show="activeAiTab === 'coach'" role="tabpanel"
+            class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div class="lg:col-span-5 space-y-5">
               <div
                 class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-pop-pink bg-pop-pink/15 px-3 py-1 rounded-full">
@@ -832,7 +837,7 @@
               <ul class="space-y-3.5 mb-8 text-sm font-medium">
                 <li class="flex items-center gap-3">
                   <i class="pi pi-sparkles font-bold" style="color: #D1FF4F"></i>
-                  <span><strong>Unlimited</strong> AI Magic Quick-Log Entries</span>
+                  <span><strong>Unlimited</strong> AI Magic Entries</span>
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="pi pi-sparkles font-bold" style="color: #D1FF4F"></i>
@@ -860,6 +865,94 @@
               class="btn-cta w-full py-3.5 rounded-xl font-black transition-all shadow-lg block text-center text-sm">
               Get Started &amp; Unlock Premium
             </router-link>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison Section: Why Plete vs. Spreadsheets & Bank-Sync Apps -->
+    <section class="py-20 px-4 bg-white border-t border-ink-100">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-14">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-pop-purple block mb-2">Smarter By
+            Design</span>
+          <h2 class="text-3xl md:text-5xl font-black text-ink-900 mb-4">
+            Why switch from spreadsheets &amp; bank-linked budget apps?
+          </h2>
+          <p class="text-ink-800/70 text-base sm:text-lg font-medium">
+            Get the speed of AI automation with the privacy and intentionality of human-confirmed expense tracking.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-7 rounded-3xl bg-cream-50 border border-ink-100 space-y-3">
+            <div class="w-11 h-11 rounded-xl bg-ink-900 text-white flex items-center justify-center text-base">
+              <i class="pi pi-shield" style="color: #D1FF4F"></i>
+            </div>
+            <h3 class="text-xl font-bold text-ink-900">100% Private, No Bank Login Required</h3>
+            <p class="text-sm text-ink-800/75 font-medium leading-relaxed">
+              Unlike legacy budget apps that demand your bank credentials and suffer broken sync connections, Plete
+              Finance keeps you in control. Log expenses via natural language or receipt OCR with zero bank-link risk.
+            </p>
+          </div>
+
+          <div class="p-7 rounded-3xl bg-cream-50 border border-ink-100 space-y-3">
+            <div class="w-11 h-11 rounded-xl bg-ink-900 text-white flex items-center justify-center text-base">
+              <i class="pi pi-bolt" style="color: #D1FF4F"></i>
+            </div>
+            <h3 class="text-xl font-bold text-ink-900">10x Faster Than Excel &amp; Notion Templates</h3>
+            <p class="text-sm text-ink-800/75 font-medium leading-relaxed">
+              Stop maintaining brittle spreadsheet formulas. Just type <em>"$45 groceries and $12 lunch"</em> or snap a
+              photo of a crumpled receipt. Plete AI categorizes, dates, and charts your spending automatically.
+            </p>
+          </div>
+
+          <div class="p-7 rounded-3xl bg-cream-50 border border-ink-100 space-y-3">
+            <div class="w-11 h-11 rounded-xl bg-ink-900 text-white flex items-center justify-center text-base">
+              <i class="pi pi-sparkles" style="color: #D1FF4F"></i>
+            </div>
+            <h3 class="text-xl font-bold text-ink-900">Ground-Truth AI Coaching at 1/3 the Cost</h3>
+            <p class="text-sm text-ink-800/75 font-medium leading-relaxed">
+              Most personal finance apps charge $14.99/month just to show past transactions. Plete Finance gives you a
+              generous free tier and full Pro AI forecasting, simulations, and exports for just $3.99/month.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEO FAQ Section -->
+    <section id="faq" class="py-20 px-4 bg-cream-50 border-t border-ink-100">
+      <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-pop-purple block mb-2">Frequently Asked
+            Questions</span>
+          <h2 class="text-3xl md:text-5xl font-black text-ink-900 mb-3">
+            Everything you need to know about Plete Finance
+          </h2>
+          <p class="text-ink-800/70 text-base font-medium">
+            Learn how our AI expense tracker, receipt OCR scanner, and financial coach work.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <div v-for="(faq, idx) in faqItems" :key="idx"
+            class="bg-white rounded-2xl border border-ink-100 shadow-sm overflow-hidden transition-colors hover:border-pop-purple/40">
+            <button type="button" @click="toggleFaq(idx)" :aria-expanded="openFaqIdx === idx"
+              class="w-full px-6 py-5 text-left flex items-center justify-between gap-4 cursor-pointer">
+              <h3 class="text-base sm:text-lg font-bold text-ink-900">
+                {{ faq.question }}
+              </h3>
+              <span
+                class="w-8 h-8 rounded-full bg-cream-50 border border-ink-100 flex items-center justify-center shrink-0 text-ink-900 transition-transform"
+                :class="{ 'rotate-180 bg-pop-lime border-pop-lime': openFaqIdx === idx }">
+                <i class="pi pi-chevron-down text-xs"></i>
+              </span>
+            </button>
+            <div v-show="openFaqIdx === idx"
+              class="px-6 pb-6 text-sm sm:text-base text-ink-800/75 font-medium leading-relaxed border-t border-ink-100/60 pt-4">
+              {{ faq.answer }}
+            </div>
           </div>
         </div>
       </div>
@@ -904,9 +997,11 @@
         <div class="flex items-center gap-2">
           <BrandLogo :size="20" variant="on-light" />
         </div>
-        <div class="flex gap-6 text-sm font-bold text-ink-400">
+        <div class="flex flex-wrap justify-center gap-6 text-sm font-bold text-ink-400">
           <a href="#ai-suite" class="hover:text-ink-900">Plete AI</a>
+          <a href="#features" class="hover:text-ink-900">Features</a>
           <a href="#pricing" class="hover:text-ink-900">Pricing</a>
+          <a href="#faq" class="hover:text-ink-900">FAQ</a>
           <router-link to="/privacy" class="hover:text-ink-900">Privacy</router-link>
           <router-link to="/terms" class="hover:text-ink-900">Terms</router-link>
           <a href="https://twitter.com/pletefinance" target="_blank" rel="noopener noreferrer"
@@ -983,6 +1078,38 @@ const scenarioSamples = [
 ]
 
 const currentScenarioSample = computed(() => scenarioSamples[selectedScenarioIdx.value])
+
+const openFaqIdx = ref(0)
+const toggleFaq = (idx) => {
+  openFaqIdx.value = openFaqIdx.value === idx ? -1 : idx
+}
+
+const faqItems = [
+  {
+    question: 'How does Plete Finance’s Magic Entry work?',
+    answer: 'With Magic Entry, you can type your income, expenses or general transactions in plain language such as "$14.50 coffee and lunch yesterday and $58 groceries on Friday." Plete AI automatically extracts each transaction’s merchant, amount, date, and matches it to your custom budget categories. Nothing is written to your records until you review and confirm it.'
+  },
+  {
+    question: 'Can I scan paper receipts and handwritten notes into my budget?',
+    answer: 'Yes! Plete Finance includes Vision OCR extraction for JPG, PNG, WebP, and HEIC images. You can snap a photo of a supermarket receipt, restaurant bill, or even a handwritten sticky note, and Plete AI extracts the merchant, date, total amount, and category in seconds while flagging any low-confidence fields for your review.'
+  },
+  {
+    question: 'Do I need to link my bank account to use Plete Finance?',
+    answer: 'No. Plete Finance is designed for privacy-first financial clarity without requiring bank logins or third-party credential sharing. You get the speed of AI natural-language logging, receipt scanning, and one-click recurring bill imports while keeping 100% control over your financial data.'
+  },
+  {
+    question: 'What are Predictive Budget Forecasts and the What-If Savings Simulator?',
+    answer: 'Predictive Budget Forecasts analyze your current month’s spending velocity and recurring bills to project your end-of-month surplus or category risk. The What-If Savings Scenario Simulator lets you test financial decisions like cutting dining out by $80/month or adding freelance income to see 6-month and 12-month goal impacts without altering your real ledger.'
+  },
+  {
+    question: 'Is Plete Finance free to use, and what does the Premium plan include?',
+    answer: 'Plete Finance offers a Free Forever Starter plan that includes unlimited manual transactions, budgets, and savings goals, plus recurring monthly AI credits (15 Magic Entries, 3 Receipt OCR scans, 5 Ask Plete AI chats, 3 Coach Q&As, 1 Forecast, and 2 Simulations every month). Upgrading to Premium ($3.99/month) unlocks unlimited AI features, 10+ years of historical trend analytics, and instant PDF & Excel data exports.'
+  },
+  {
+    question: 'Does Plete Finance support multiple currencies and PDF/Excel exports?',
+    answer: 'Yes. You can configure your workspace in major global currencies including USD ($), EUR (€), GBP (£), NGN (₦), CAD, and AUD during onboarding or in Settings, and export audit-ready PDF or Excel financial reports anytime on the Premium plan.'
+  }
+]
 </script>
 
 <style scoped></style>

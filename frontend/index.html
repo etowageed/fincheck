@@ -11,10 +11,10 @@
       name="description"
       content="Track spending, log expenses in plain English, scan receipts with AI, simulate savings scenarios, and master your budget in one visual dashboard. Free to start."
     />
-    <meta name="keywords" content="AI personal finance tracker, AI budget app, receipt OCR scanner, natural language expense tracker, AI financial coach, savings simulator, spending insights" />
+    <meta name="keywords" content="AI personal finance tracker, AI budget app, receipt OCR scanner, natural language expense tracker, AI financial coach, what-if savings simulator, budget app without linking bank account, AI alternative to Excel budget spreadsheet, multi-currency expense tracker, spending insights" />
     <meta name="author" content="Plete Finance Inc." />
     <meta name="theme-color" content="#0F172A" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <!-- Preconnect to Google Fonts for faster loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -59,6 +59,9 @@
       "url": "https://pletefinance.com",
       "logo": "https://pletefinance.com/favicon.svg",
       "description": "Plete Finance combines visual budget and goal tracking with ground-truth AI financial intelligence.",
+      "sameAs": [
+        "https://twitter.com/pletefinance"
+      ],
       "contactPoint": {
         "@type": "ContactPoint",
         "email": "support@pletefinance.com",
@@ -75,19 +78,28 @@
       "name": "Plete Finance",
       "url": "https://pletefinance.com",
       "applicationCategory": "FinanceApplication",
-      "operatingSystem": "Web",
+      "operatingSystem": "Web, iOS, Android, macOS, Windows",
       "description": "AI-powered personal finance tracker with natural-language Magic Quick-Log, Receipt OCR, predictive budget forecasts, what-if savings simulations, and personalized coaching.",
+      "featureList": [
+        "AI Magic Quick-Log Natural Language Expense Entry",
+        "Smart Receipt & Handwritten Note Vision OCR Scanner",
+        "Predictive End-of-Month Budget Forecasting",
+        "What-If Savings Scenario Simulator",
+        "24/7 Ask Plete AI Financial Coach & Monthly Executive Reports",
+        "Privacy-First Tracking Without Mandatory Bank Account Linking",
+        "Multi-Currency Support & Instant PDF/Excel Financial Exports"
+      ],
       "offers": [
         {
           "@type": "Offer",
-          "name": "The Starter",
+          "name": "The Starter (Free Forever)",
           "price": "0",
           "priceCurrency": "USD",
           "description": "Unlimited manual transactions, basic budgeting, 15 AI Quick-Logs/mo, 3 Receipt Scans/mo, Ask Plete AI, and current month dashboard."
         },
         {
           "@type": "Offer",
-          "name": "The Pro",
+          "name": "Premium Pro",
           "price": "3.99",
           "priceCurrency": "USD",
           "priceSpecification": {
@@ -103,9 +115,87 @@
       }
     }
     </script>
+
+    <!-- Structured Data: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does Plete Finance’s AI Magic Quick-Log expense tracker work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "With Magic Quick-Log, you can type your income or expenses in plain English—such as '$14.50 coffee and lunch yesterday and $58 groceries on Friday.' Plete AI automatically extracts each transaction’s merchant, amount, date, and matches it to your custom budget categories. Nothing is written to your ledger until you review and confirm the proposal."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I scan paper receipts and handwritten notes into my budget?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Plete Finance includes Vision OCR extraction for JPG, PNG, WebP, and HEIC images. You can snap a photo of a supermarket receipt, restaurant bill, or even a handwritten sticky note, and Plete AI extracts the merchant, date, total amount, and category in seconds while flagging any low-confidence fields for your review."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need to link my bank account to use Plete Finance?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Plete Finance is designed for privacy-first financial clarity without requiring bank logins or third-party credential sharing. You get the speed of AI natural-language logging, receipt scanning, and one-click recurring bill imports while keeping 100% control over your financial data."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are Predictive Budget Forecasts and the What-If Savings Simulator?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Predictive Budget Forecasts analyze your current month’s spending velocity and recurring bills to project your end-of-month surplus or category risk. The What-If Savings Scenario Simulator lets you test financial decisions—like cutting dining out by $80/month or adding freelance income—to see 6-month and 12-month goal impacts without altering your real ledger."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Plete Finance free to use, and what does the Premium plan include?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Plete Finance offers a Free Forever Starter plan that includes unlimited manual transactions, budgets, and savings goals, plus recurring monthly AI credits (15 Magic Entries, 3 Receipt OCR scans, 5 Ask Plete AI chats, 3 Coach Q&As, 1 Forecast, and 2 Simulations every month). Upgrading to Premium ($3.99/month) unlocks unlimited AI features, 10+ years of historical trend analytics, and instant PDF & Excel data exports."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Plete Finance support multiple currencies and PDF/Excel exports?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. You can configure your workspace in major global currencies including USD ($), EUR (€), GBP (£), NGN (₦), CAD, and AUD during onboarding or in Settings, and export audit-ready PDF or Excel financial reports anytime on the Premium plan."
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!-- Static Semantic Fallback for Search Engine & AI Crawlers (Replaced on Vue Mount) -->
+      <main class="sr-only">
+        <h1>Plete Finance — AI Personal Finance Tracker, Receipt OCR Scanner &amp; Budget App: Know where your money goes and let AI help it grow</h1>
+        <p>Log transactions in natural language, scan crumpled receipts in seconds, run what-if financial simulations, and get custom coaching based on your spending and earning habits.</p>
+        <h2>Plete AI Financial Intelligence Suite</h2>
+        <ul>
+          <li><strong>AI Magic Quick-Log (Natural Language Expense Entry):</strong> Type a sentence to log multiple transactions at once with human-confirmed category matching.</li>
+          <li><strong>Smart Receipt &amp; Handwritten Note Vision OCR:</strong> Upload JPG, PNG, WebP, or HEIC receipt photos and sticky notes for instant extraction.</li>
+          <li><strong>Predictive Budget Forecast &amp; What-If Savings Simulator:</strong> Test financial scenarios and forecast end-of-month budget surpluses without modifying real records.</li>
+          <li><strong>Ask Plete AI &amp; Monthly Executive Reports:</strong> Chat 24/7 with an AI financial coach grounded in your real transactions.</li>
+          <li><strong>100% Private, No Bank Login Required:</strong> Track in USD, EUR, GBP, NGN, CAD, or AUD and export clean PDF and Excel financial reports.</li>
+        </ul>
+        <nav aria-label="Public Links">
+          <a href="https://pletefinance.com/signup">Sign Up Free</a>
+          <a href="https://pletefinance.com/login">Log In</a>
+          <a href="https://pletefinance.com/privacy">Privacy Policy</a>
+          <a href="https://pletefinance.com/terms">Terms of Service</a>
+        </nav>
+      </main>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

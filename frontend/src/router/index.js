@@ -221,9 +221,10 @@ router.beforeEach(async (to, from, next) => {
   const isProductionMain =
     hostname === "pletefinance.com" || hostname === "www.pletefinance.com";
   const isProductionApp = hostname === "app.pletefinance.com";
+  const publicMarketingPaths = ["/", "/privacy", "/terms"];
 
-  // 1. Force Application logic to the App subdomain
-  if (isProductionMain && to.path !== "/") {
+  // 1. Force Application logic to the App subdomain (keep public marketing/legal routes on main domain)
+  if (isProductionMain && !publicMarketingPaths.includes(to.path)) {
     window.location.href = `https://app.pletefinance.com${to.fullPath}`;
     return; // Stop router execution
   }
@@ -235,23 +236,51 @@ router.beforeEach(async (to, from, next) => {
 
   const authStore = useAuthStore();
 
-  // ── Update document title & meta description for EVERY route ──
-  if (to.meta.title) {
-    document.title = to.meta.title;
-  } else {
-    document.title = "Plete Finance";
-  }
+  // ── Update document title & SEO meta tags for EVERY route ──
+  const pageTitle = to.meta.title || "Plete Finance — AI-Powered Expense Tracker, Receipt OCR & Financial Coach";
+  document.title = pageTitle;
 
-  const descriptionTag = document.querySelector('meta[name="description"]');
-  if (descriptionTag && to.meta.description) {
-    descriptionTag.setAttribute("content", to.meta.description);
-  }
+  const setMetaContent = (selector, content) => {
+    const el = document.querySelector(selector);
+    if (el && content) {
+      el.setAttribute("content", content);
+    }
+  };
 
-  // Update canonical URL
-  let canonicalTag = document.querySelector('link[rel="canonical"]');
+  if (to.meta.description) {
+    setMetaContent('meta[name="description"]', to.meta.description);
+    setMetaContent('meta[property="og:description"]', to.meta.description);
+    setMetaContent('meta[name="twitter:description"]', to.meta.description);
+  }
+  setMetaContent('meta[property="og:title"]', pageTitle);
+  setMetaContent('meta[name="twitter:title"]', pageTitle);
+
+  // Set robots directive: index public marketing/auth entry pages, noindex private app & utility pages
+  const isNoIndexRoute =
+    Boolean(to.meta.requiresAuth) ||
+    to.name === "NotFound" ||
+    to.path.startsWith("/forgot-password") ||
+    to.path.startsWith("/reset-password");
+
+  setMetaContent(
+    'meta[name="robots"]',
+    isNoIndexRoute
+      ? "noindex, nofollow"
+      : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+  );
+
+  // Update canonical & OpenGraph URL
+  const canonicalBase = publicMarketingPaths.includes(to.path)
+    ? "https://pletefinance.com"
+    : "https://app.pletefinance.com";
+  const canonicalUrl = `${canonicalBase}${to.path === "/" ? "/" : to.path}`;
+
+  const canonicalTag = document.querySelector('link[rel="canonical"]');
   if (canonicalTag) {
-    canonicalTag.setAttribute("href", `https://pletefinance.com${to.path}`);
+    canonicalTag.setAttribute("href", canonicalUrl);
   }
+  setMetaContent('meta[property="og:url"]', canonicalUrl);
+  setMetaContent('meta[name="twitter:url"]', canonicalUrl);
 
   // ── Auth: Guest-only routes ──
   const guestOnlyRoutes = [

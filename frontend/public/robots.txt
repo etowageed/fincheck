@@ -8,9 +8,12 @@ Disallow: /transactions
 Disallow: /budget
 Disallow: /categories
 Disallow: /goals
+Disallow: /ai-coach
 Disallow: /settings
 Disallow: /pricing
 Disallow: /admin
 Disallow: /onboarding
+Disallow: /forgot-password
+Disallow: /reset-password
 
 Sitemap: https://pletefinance.com/sitemap.xml
