@@ -6,154 +6,203 @@ html
     title= subject
     link(rel='preconnect' href='https://fonts.googleapis.com')
     link(rel='preconnect' href='https://fonts.gstatic.com' crossorigin)
-    link(href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap' rel='stylesheet')
+    link(href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap' rel='stylesheet')
     style.
       @media only screen and (max-width: 620px) {
-        .container { width: 100% !important; padding: 10px !important; }
-        .main { border-radius: 12px !important; }
-        .wrapper { padding: 24px !important; }
-        .footer { padding: 20px 10px !important; }
-        h1 { font-size: 28px !important; }
+        .container { width: 100% !important; padding: 24px 16px !important; }
+        h1 { font-size: 22px !important; }
       }
       body {
-        background-color: #0F172A;
+        background-color: #FFFFFF;
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
-        font-size: 16px;
+        font-size: 15px;
         line-height: 1.6;
         margin: 0;
         padding: 0;
         -ms-text-size-adjust: 100%;
         -webkit-text-size-adjust: 100%;
-        color: #E2E8F0;
+        color: #1E293B;
       }
       .body {
         width: 100%;
-        background-color: #0F172A;
+        background-color: #FFFFFF;
       }
       .container {
         display: block;
         margin: 0 auto !important;
-        max-width: 600px;
-        padding: 40px 20px;
-        width: 600px;
+        max-width: 560px;
+        padding: 40px 24px;
+        width: 100%;
+        box-sizing: border-box;
       }
       .content {
         box-sizing: border-box;
         display: block;
         margin: 0 auto;
-        max-width: 600px;
+        max-width: 560px;
+      }
+      .header {
+        padding-bottom: 24px;
+        margin-bottom: 32px;
+        border-bottom: 1px solid #F1F5F9;
+        text-align: left;
+      }
+      .brand {
+        font-size: 22px;
+        font-weight: 800;
+        color: #0F172A;
+        letter-spacing: -0.8px;
+        text-decoration: none;
       }
       .main {
-        background: #1E293B;
-        border-radius: 24px;
+        background: #FFFFFF;
         width: 100%;
-        overflow: hidden;
-        border: 1px solid #334155;
       }
       .wrapper {
         box-sizing: border-box;
-        padding: 48px;
-      }
-      .header {
-        padding: 20px 0;
-        text-align: center;
-      }
-      .footer {
-        clear: both;
-        padding-top: 24px;
-        text-align: center;
-        width: 100%;
-      }
-      .footer td, .footer p, .footer span, .footer a {
-        color: #94A3B8;
-        font-size: 13px;
-        text-align: center;
+        padding: 0;
       }
       h1 {
-        color: #F8FAFC;
-        font-size: 32px;
+        color: #0F172A;
+        font-size: 26px;
         font-weight: 700;
+        letter-spacing: -0.4px;
         margin: 0 0 24px;
-        line-height: 1.2;
+        line-height: 1.25;
       }
       p {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 400;
-        margin: 0 0 20px;
-        color: #94A3B8;
+        margin: 0 0 16px;
+        color: #334155;
       }
       .highlight {
-        color: #D1FF4F;
+        color: #0F172A;
         font-weight: 600;
+      }
+      .details-box {
+        background-color: #F8FAFC;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin: 24px 0;
+      }
+      .section-label {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #64748B;
+        margin: 0 0 14px;
+      }
+      .detail-item {
+        margin-bottom: 16px;
+      }
+      .detail-item:last-child {
+        margin-bottom: 0;
+      }
+      .detail-label {
+        font-size: 13px;
+        color: #64748B;
+        margin: 0 0 2px;
+      }
+      .detail-value {
+        font-size: 15px;
+        font-weight: 600;
+        color: #0F172A;
+        margin: 0;
       }
       .btn {
         box-sizing: border-box;
         width: 100%;
+        margin: 24px 0;
       }
       .btn table {
         width: auto;
       }
       .btn table td {
         background-color: #D1FF4F;
-        border-radius: 12px;
+        border-radius: 8px;
         text-align: center;
       }
       .btn a {
         background-color: #D1FF4F;
         border: solid 1px #D1FF4F;
-        border-radius: 12px;
+        border-radius: 8px;
         box-sizing: border-box;
         color: #0F172A;
         cursor: pointer;
         display: inline-block;
-        font-size: 16px;
-        font-weight: 700;
+        font-size: 15px;
+        font-weight: 600;
         margin: 0;
-        padding: 16px 32px;
+        padding: 12px 24px;
         text-decoration: none;
-        transition: transform 0.2s ease;
       }
       .btn a:hover {
         background-color: #C0EE3E !important;
         border-color: #C0EE3E !important;
       }
-      .brand {
-        font-size: 24px;
+      .signoff {
+        margin-top: 24px;
+        color: #0F172A;
+        font-weight: 500;
+      }
+      .footer {
+        clear: both;
+        margin-top: 40px;
+        padding-top: 24px;
+        border-top: 1px solid #F1F5F9;
+        text-align: left;
+        width: 100%;
+      }
+      .footer td, .footer p, .footer span {
+        color: #64748B;
+        font-size: 12px;
+        line-height: 1.6;
+        text-align: left;
+      }
+      .footer a {
+        color: #64748B;
+        font-size: 12px;
+        text-decoration: underline;
+      }
+      .footer-brand {
+        display: inline-block;
+        margin-top: 20px;
+        font-size: 18px;
         font-weight: 800;
-        color: #D1FF4F;
-        letter-spacing: -1px;
+        color: #CBD5E1;
+        letter-spacing: -0.6px;
       }
 
   body
     table.body(role='presentation', border='0', cellpadding='0', cellspacing='0')
       tr
-        td &nbsp;
         td.container
           .content
             // LOGO / HEADER
             .header
-              span.brand PLETE.
-            
-            // MAIN CONTENT CARD
-            table.main(role='presentation')
+              span.brand Plete.
+
+            // MAIN CONTENT
+            table.main(role='presentation', border='0', cellpadding='0', cellspacing='0')
               tr
                 td.wrapper
-                  table(role='presentation', border='0', cellpadding='0', cellspacing='0')
-                    tr
-                      td
-                        block content
-            
+                  block content
+
             // FOOTER
             .footer
-              table(role='presentation', border='0', cellpadding='0', cellspacing='0')
+              table(role='presentation', border='0', cellpadding='0', cellspacing='0', width='100%')
                 tr
                   td.content-block
-                    span Plete Finance Inc. &bull; 123 Digital Nomad Way &bull; Cloud City
-                    br
-                    | You received this email because you're a Plete user. 
-                    a(href='#') Unsubscribe
-                    |  &bull; 
-                    a(href='#') View in Browser
-        td &nbsp;
+                    p(style='margin: 0 0 8px;')
+                      | Plete Finance Inc., 123 Digital Nomad Way, Cloud City.
+                    p(style='margin: 0;')
+                      | You received this email because you have an account with Plete. 
+                      a(href='#') Unsubscribe
+                      |  &bull; 
+                      a(href='#') View in browser
+                    span.footer-brand Plete.
+
 

@@ -106,13 +106,13 @@ class EmailService {
   }
 
   async sendWelcome() {
-    await this.send('welcome', 'Welcome to the Plete Finance Family! 🎉');
+    await this.send('welcome', 'Welcome to Plete Finance');
   }
 
   async sendPasswordReset() {
     await this.send(
       'passwordReset',
-      'Your password reset token (valid for only 10 minutes)',
+      'Reset your Plete password (valid for 10 minutes)',
     );
   }
 
@@ -142,10 +142,10 @@ class EmailService {
 
     const friendlyComment =
       percentUsed <= 100
-        ? "🎉 Awesome! You're doing great and staying within your budget. Keep it up!"
-        : "😬 You've spent more than your monthly budget. Review your categories.";
+        ? "You're staying within your monthly budget so far. Keep up the steady progress."
+        : "You've exceeded your monthly budget target. You may want to review your spending categories in your dashboard.";
 
-    await this.send('weeklySummary', 'Your Weekly Plete Finance Summary 🌟', {
+    await this.send('weeklySummary', 'Your weekly Plete financial summary', {
       startOfWeek: startOfWeek.toDateString(),
       endOfWeek: endOfWeek.toDateString(),
       incomeFormatted,
@@ -158,7 +158,7 @@ class EmailService {
   }
 
   async sendPremiumWelcome() {
-    await this.send('premiumWelcome', 'Welcome to Plete Finance Premium! 🌟');
+    await this.send('premiumWelcome', 'Welcome to Plete Finance Premium');
   }
 }
 
