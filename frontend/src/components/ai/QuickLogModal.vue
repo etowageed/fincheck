@@ -1,39 +1,26 @@
 <template>
-  <Dialog
-    v-model:visible="visible"
-    modal
-    header="AI Quick-Log Expense"
-    :style="{ width: '34rem' }"
-    :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
-    :dismissableMask="true"
-  >
+  <Dialog v-model:visible="visible" modal header="AI Magic Entry" :style="{ width: '34rem' }"
+    :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" :dismissableMask="true">
     <div class="bg-primary rounded-lg border border-default p-4 sm:p-6 shadow-sm space-y-4">
       <!-- AI Quota Counter Banner -->
-      <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-secondary border border-default rounded-lg text-xs">
+      <div
+        class="flex flex-wrap items-center justify-between gap-2 p-3 bg-secondary border border-default rounded-lg text-xs">
         <div class="flex items-center gap-2 text-primary font-semibold">
           <i class="pi pi-sparkles text-accent-blue"></i>
-          <span>AI Quick-Log Usage</span>
+          <span>AI Magic Entries Usage</span>
         </div>
-        <AiQuotaBadge
-          :quota="quota"
-          :loading="aiStore.isLoadingQuota"
-          @open-upgrade="aiStore.openUpgradeModal('quickLog')"
-        />
+        <AiQuotaBadge :quota="quota" :loading="aiStore.isLoadingQuota"
+          @open-upgrade="aiStore.openUpgradeModal('quickLog')" />
       </div>
 
       <div class="flex flex-col gap-2">
+        <br>
         <label for="quickLogInput" class="text-sm font-medium text-secondary">
-          Type or paste natural language expense text:
+          Type or paste natural language text describing an entry:
         </label>
-        <Textarea
-          id="quickLogInput"
-          v-model="inputText"
-          rows="3"
-          :placeholder="placeholderText"
+        <Textarea id="quickLogInput" v-model="inputText" rows="3" :placeholder="placeholderText"
           class="w-full text-sm bg-secondary border border-default rounded-lg text-primary"
-          :disabled="aiStore.isProcessingQuickLog"
-          @keydown.enter.prevent="handleKeydown"
-        />
+          :disabled="aiStore.isProcessingQuickLog" @keydown.enter.prevent="handleKeydown" />
       </div>
 
       <!-- Parsing Skeleton State -->
@@ -45,39 +32,23 @@
         <Skeleton height="1.25rem" width="70%" class="rounded" />
         <Skeleton height="1.25rem" width="45%" class="rounded" />
       </div>
+      <br>
 
       <!-- Quick example chips -->
       <div>
         <span class="text-xs text-muted block mb-2 font-semibold uppercase tracking-wider">Try an example:</span>
         <div class="flex flex-wrap gap-2">
-          <PromptChip
-            v-for="example in examples"
-            :key="example"
-            :label="example"
-            quoted
-            class="font-numeric"
-            @click="inputText = example"
-          />
+          <PromptChip v-for="example in examples" :key="example" :label="example" quoted class="font-numeric"
+            @click="inputText = example" />
         </div>
       </div>
 
       <!-- Footer action -->
       <div class="pt-2 flex justify-end gap-2">
-        <Button
-          type="button"
-          label="Cancel"
-          severity="secondary"
-          outlined
-          size="small"
-          @click="visible = false"
-          :disabled="aiStore.isProcessingQuickLog"
-        />
-        <AiCtaButton
-          label="Parse Expense"
-          :loading="aiStore.isProcessingQuickLog"
-          :disabled="!inputText.trim()"
-          @click="handleSubmit"
-        />
+        <Button type="button" label="Cancel" severity="secondary" outlined size="small" @click="visible = false"
+          :disabled="aiStore.isProcessingQuickLog" />
+        <AiCtaButton label="Parse Expense" :loading="aiStore.isProcessingQuickLog" :disabled="!inputText.trim()"
+          @click="handleSubmit" />
       </div>
     </div>
   </Dialog>
