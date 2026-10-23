@@ -5,12 +5,14 @@ const STORAGE_KEY = 'plete-theme';
 
 export const useThemeStore = defineStore('theme', () => {
   const isDark = ref(false);
+  const isForceLightRoute = ref(false);
 
   /**
    * Initialize theme from localStorage or OS preference.
-   * Must be called after Pinia is installed but before app.mount().
+   * Must be called after Pinia is installed.
    */
-  function initTheme() {
+  function initTheme(forceLight = false) {
+    isForceLightRoute.value = Boolean(forceLight);
     const stored = localStorage.getItem(STORAGE_KEY);
 
     if (stored === 'dark' || stored === 'light') {
@@ -29,6 +31,14 @@ export const useThemeStore = defineStore('theme', () => {
         applyClass();
       }
     });
+  }
+
+  /**
+   * Sync whether the active route forces light mode (e.g. public LandingPage).
+   */
+  function setForceLightRoute(forceLight) {
+    isForceLightRoute.value = Boolean(forceLight);
+    applyClass();
   }
 
   /**
@@ -53,12 +63,12 @@ export const useThemeStore = defineStore('theme', () => {
    * Apply or remove the .dark class on <html>.
    */
   function applyClass() {
-    if (isDark.value) {
+    if (isDark.value && !isForceLightRoute.value) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
   }
 
-  return { isDark, initTheme, toggle, setTheme };
+  return { isDark, initTheme, setForceLightRoute, toggle, setTheme };
 });

@@ -1,14 +1,17 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import LandingPage from "@/views/LandingPage.vue";
 
 const routes = [
   {
     path: "/",
-    component: () => import("@/views/LandingPage.vue"),
+    name: "Landing",
+    component: LandingPage,
     meta: {
       hideSidebar: true,
       hideHeader: true,
+      forceLight: true,
       title:
         "Plete Finance — AI-Powered Expense Tracker, Receipt OCR & Financial Coach",
       description:
@@ -21,6 +24,7 @@ const routes = [
     component: () => import("@/views/auth/Login.vue"),
     meta: {
       hideSidebar: true,
+      hideHeader: true,
       title: "Log In — Plete Finance",
       description:
         "Log in to your Plete Finance account to track your spending, budgets, and savings goals.",
@@ -32,6 +36,7 @@ const routes = [
     component: () => import("@/views/auth/Signup.vue"),
     meta: {
       hideSidebar: true,
+      hideHeader: true,
       title: "Sign Up — Plete Finance",
       description:
         "Create your free Plete Finance account and start tracking your income, expenses, and savings goals with AI intelligence today.",
@@ -141,6 +146,7 @@ const routes = [
     component: () => import("@/views/auth/ForgotPassword.vue"),
     meta: {
       hideSidebar: true,
+      hideHeader: true,
       title: "Forgot Password — Plete Finance",
       description: "Reset your Plete Finance account password.",
     },
@@ -151,6 +157,7 @@ const routes = [
     component: () => import("@/views/auth/ResetPassword.vue"),
     meta: {
       hideSidebar: true,
+      hideHeader: true,
       title: "Reset Password — Plete Finance",
       description: "Create a new password for your Plete Finance account.",
     },
@@ -161,6 +168,7 @@ const routes = [
     component: () => import("@/views/legal/TermsOfService.vue"),
     meta: {
       hideSidebar: true,
+      hideHeader: true,
       title: "Terms of Service — Plete Finance",
       description:
         "Read the terms and conditions governing your use of Plete Finance.",
@@ -172,6 +180,7 @@ const routes = [
     component: () => import("@/views/legal/PrivacyPolicy.vue"),
     meta: {
       hideSidebar: true,
+      hideHeader: true,
       title: "Privacy Policy — Plete Finance",
       description:
         "Learn how Plete Finance collects, uses, and protects your personal data.",

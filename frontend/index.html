@@ -173,6 +173,52 @@
       ]
     }
     </script>
+    <!-- Critical inline styles & theme bootstrap to prevent FOUC and dark-to-light flash -->
+    <style>
+      body {
+        margin: 0;
+        background-color: #fdfbf7;
+      }
+      html.dark body {
+        background-color: rgb(27, 25, 33);
+        color: rgb(240, 240, 245);
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
+    </style>
+    <script>
+      (function () {
+        try {
+          var isLandingPage =
+            window.location.pathname === "/" &&
+            window.location.hostname !== "app.pletefinance.com";
+          if (isLandingPage) {
+            document.documentElement.classList.remove("dark");
+            return;
+          }
+          var stored = localStorage.getItem("plete-theme");
+          var isDark =
+            stored === "dark" ||
+            (!stored &&
+              window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (isDark) {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="app">

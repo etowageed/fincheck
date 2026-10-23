@@ -3,20 +3,34 @@
   <div id="app">
     <GlobalErrorToast />
 
-    <Header v-if="!route.meta.hideHeader" @toggle-sidebar="toggleMobileSidebar" />
+    <!-- Only render Header if user is authenticated and route does not hide it -->
+    <Header
+      v-if="showShell && !route.meta.hideHeader"
+      @toggle-sidebar="toggleMobileSidebar"
+    />
 
-    <Sidebar v-if="showSidebar" :is-mobile-open="isMobileSidebarOpen" @close-mobile="isMobileSidebarOpen = false" />
+    <!-- Only render Sidebar if user is authenticated and route does not hide it -->
+    <Sidebar
+      v-if="showSidebar"
+      :is-mobile-open="isMobileSidebarOpen"
+      @close-mobile="isMobileSidebarOpen = false"
+    />
 
     <!-- Overlay for mobile sidebar -->
-    <div v-if="showSidebar && isMobileSidebarOpen" class="fixed inset-0 bg-black/50 z-20 lg:hidden"
-      @click="isMobileSidebarOpen = false"></div>
+    <div
+      v-if="showSidebar && isMobileSidebarOpen"
+      class="fixed inset-0 bg-black/50 z-20 lg:hidden"
+      @click="isMobileSidebarOpen = false"
+    ></div>
 
-    <main :class="{
-      'lg:ml-64 pt-20': showSidebar,
-      'pt-20': !showSidebar && !route.meta.hideHeader,
-      'pt-0': !showSidebar && route.meta.hideHeader
-    }">
-      <div :class="{ 'p-6': !route.meta.hideHeader }">
+    <main
+      :class="{
+        'lg:ml-64 pt-20': showSidebar,
+        'pt-20': !showSidebar && showShell && !route.meta.hideHeader,
+        'pt-0': !showSidebar && (!showShell || route.meta.hideHeader)
+      }"
+    >
+      <div :class="{ 'p-6': showShell && !route.meta.hideHeader }">
         <router-view />
       </div>
     </main>
@@ -27,7 +41,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { Analytics } from "@vercel/analytics/vue"
+import { Analytics } from "@vercel/analytics/vue";
 import { useRoute } from 'vue-router';
 import { useCategoriesStore } from '@/stores/categories';
 import { useAuthStore } from '@/stores/auth';
@@ -42,9 +56,14 @@ const categoriesStore = useCategoriesStore();
 
 const isMobileSidebarOpen = ref(false);
 
-// Show sidebar on all routes except login/register
+// FIX: Determine if the authenticated shell (header/sidebar) should be eligible to display
+const showShell = computed(() => {
+  return authStore.isAuthenticated && route.meta.requiresAuth;
+});
+
+// FIX: The sidebar requires authentication AND must not be hidden by the route
 const showSidebar = computed(() => {
-  return !route.meta.hideSidebar;
+  return showShell.value && !route.meta.hideSidebar;
 });
 
 const toggleMobileSidebar = () => {

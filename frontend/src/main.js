@@ -7,10 +7,9 @@ import { definePreset } from "@primeuix/themes";
 import { createPinia } from "pinia";
 import router from "./router";
 
-import { useAuthStore } from "./stores/auth";
 import ToastService from "primevue/toastservice";
-
 import App from "./App.vue";
+import { useThemeStore } from "./stores/theme";
 
 const MyPreset = definePreset(Aura, {
   semantic: {
@@ -105,9 +104,15 @@ app.use(PrimeVue, {
 });
 app.use(ToastService);
 
-// Initialize theme before mounting to prevent flash
-import { useThemeStore } from './stores/theme';
 const themeStore = useThemeStore();
-themeStore.initTheme();
 
-app.mount("#app");
+// Keep <html> .dark class synced with routes that force light mode (e.g., "/")
+router.afterEach((to) => {
+  themeStore.setForceLightRoute(Boolean(to.meta.forceLight));
+});
+
+// FIX: Wait for router to resolve initial route before applying route-aware theme and mounting DOM
+router.isReady().then(() => {
+  themeStore.initTheme(Boolean(router.currentRoute.value.meta.forceLight));
+  app.mount("#app");
+});
